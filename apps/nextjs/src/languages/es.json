@@ -1,0 +1,55 @@
+{
+  "common": {
+    "save": "Guardar cambios",
+    "saving": "Guardando...",
+    "create": "Crear",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "update": "Actualizar",
+    "loading": "Cargando...",
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "darkMode": "Modo oscuro"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcome": "Bienvenido a Example App",
+    "description": "Esta es una plantilla de inicio con autenticación ya configurada."
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": "Perfil",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "account": "Cuenta",
+    "signOut": "Cerrar sesión"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "signInBelow": "Inicia sesión en tu cuenta a continuación",
+    "signingIn": "Iniciando sesión...",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "or": "o",
+    "continueWith": "Continuar con",
+    "orContinueWithEmail": "o continúa con correo electrónico",
+    "google": "Google",
+    "apple": "Apple",
+    "checkYourEmail": "Revisa tu correo",
+    "emailSentDescription": "Te hemos enviado un enlace mágico para iniciar sesión. Revisa tu bandeja de entrada y haz clic en el enlace para continuar.",
+    "enterEmailAddress": "Ingresa tu correo electrónico",
+    "sendingLink": "Enviando enlace...",
+    "sendSignInLink": "Enviar enlace de inicio de sesión",
+    "providerNotConfigured": "Este método de inicio de sesión no está configurado"
+  }
+}

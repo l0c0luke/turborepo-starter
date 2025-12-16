@@ -1,0 +1,165 @@
+import type { BetterAuthOptions } from "better-auth";
+import { expo } from "@better-auth/expo";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { emailOTP, magicLink } from "better-auth/plugins";
+
+import { db } from "@example-app/db/client";
+import * as schema from "@example-app/db";
+import { EmailSender, MagicLinkService, OTPService } from "@example-app/email";
+
+export function initAuth(options: {
+  baseUrl: string;
+  productionUrl: string;
+  secret: string | undefined;
+
+  googleClientId: string;
+  googleClientSecret: string;
+
+  // Apple Sign In configuration
+  appleClientId?: string;
+  appleClientSecret?: string;
+  appleAppBundleId?: string;
+  appleEnabled?: boolean;
+
+  // Email configuration for magic links
+  emailFrom: string;
+  emailApiKey?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPassword?: string;
+}) {
+  // Initialize email service if SMTP is configured
+  let magicLinkService: MagicLinkService | null = null;
+  let otpService: OTPService | null = null;
+
+  if (options.smtpHost && options.smtpPort && options.emailFrom) {
+    const emailSender = new EmailSender({
+      smtpHost: options.smtpHost,
+      smtpPort: Number(options.smtpPort),
+      smtpUser: options.smtpUser,
+      smtpPassword: options.smtpPassword,
+      emailFrom: options.emailFrom,
+    });
+
+    magicLinkService = new MagicLinkService(emailSender);
+    otpService = new OTPService(emailSender);
+  }
+
+  const config = {
+    database: drizzleAdapter(db, {
+      provider: "pg",
+      schema,
+    }),
+    baseURL: options.baseUrl,
+    secret: options.secret,
+    user: {
+      additionalFields: {
+        yearOfBirth: {
+          type: "number",
+          required: false,
+        },
+        isAdmin: {
+          type: "boolean",
+          required: false,
+          defaultValue: false,
+          input: false, // Users cannot set this themselves
+        },
+      },
+    },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      },
+    },
+    plugins: [
+      magicLink({
+        sendMagicLink: async ({ email, url }) => {
+          try {
+            if (magicLinkService) {
+              await magicLinkService.sendMagicLink({
+                email,
+                url,
+                productName: "Example App",
+              });
+              console.log(`Magic link sent to ${email}`);
+            } else {
+              // Fallback for development or missing email config
+              console.log(`Magic link for ${email}: ${url}`);
+              console.warn(
+                "Email service not configured. Using console fallback.",
+              );
+            }
+          } catch (error) {
+            console.error("Failed to send magic link:", error);
+            throw error;
+          }
+        },
+      }),
+      emailOTP({
+        async sendVerificationOTP({ email, otp, type }) {
+          console.log(`🔥 sendVerificationOTP called with:`, {
+            email,
+            otp,
+            type,
+          });
+
+          try {
+            if (otpService) {
+              console.log(`📧 Using email service to send OTP`);
+              await otpService.sendOTP({
+                email,
+                otp,
+                productName: "Example App",
+              });
+              console.log(`✅ OTP sent to ${email}`);
+            } else {
+              // Fallback for development or missing email config
+              console.log(`📝 OTP for ${email}: ${otp}`);
+              console.warn(
+                "⚠️ Email service not configured. Using console fallback.",
+              );
+            }
+          } catch (error) {
+            console.error("❌ Failed to send OTP:", error);
+            throw error;
+          }
+        },
+        // Enable OTP storage and validation to prevent accepting any OTP
+        storeOTP: "hashed",
+        // Set reasonable limits
+        expiresIn: 300, // 5 minutes
+        allowedAttempts: 3, // Max 3 attempts per OTP
+        otpLength: 6, // 6-digit OTP
+      }),
+      expo(),
+    ],
+    socialProviders: {
+      google: {
+        clientId: options.googleClientId,
+        clientSecret: options.googleClientSecret,
+      },
+      ...(options.appleEnabled &&
+        options.appleClientId &&
+        options.appleClientSecret && {
+          apple: {
+            clientId: options.appleClientId,
+            clientSecret: options.appleClientSecret,
+            redirectURI: `${options.baseUrl}/api/auth/callback/apple`,
+            // Required for native iOS apps
+            ...(options.appleAppBundleId && {
+              appBundleIdentifier: options.appleAppBundleId,
+            }),
+          },
+        }),
+    },
+    trustedOrigins: ["example-app://", "example-app://*", "https://appleid.apple.com"],
+  } satisfies BetterAuthOptions;
+
+  return betterAuth(config);
+}
+
+export type Auth = ReturnType<typeof initAuth>;
+export type Session = Auth["$Infer"]["Session"];

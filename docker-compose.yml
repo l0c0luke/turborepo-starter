@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: example-app-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: example
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: example
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5832:5432"
+    networks:
+      - example-app
+
+  mailhog:
+    container_name: example-app-mailhog
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - example-app
+
+volumes:
+  postgres_data:
+
+networks:
+  example-app:
+    driver: bridge

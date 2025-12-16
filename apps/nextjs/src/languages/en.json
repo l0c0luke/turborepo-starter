@@ -1,0 +1,55 @@
+{
+  "common": {
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "create": "Create",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "loading": "Loading...",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Sign Out"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "darkMode": "Dark Mode"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Example App",
+    "description": "This is a starter template with authentication already set up."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "account": "Account",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "signInBelow": "Sign in to your account below",
+    "signingIn": "Signing in...",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "or": "or",
+    "continueWith": "Continue with",
+    "orContinueWithEmail": "or continue with email",
+    "google": "Google",
+    "apple": "Apple",
+    "checkYourEmail": "Check your email",
+    "emailSentDescription": "We've sent you a magic link to sign in. Check your inbox and click the link to continue.",
+    "enterEmailAddress": "Enter your email address",
+    "sendingLink": "Sending link...",
+    "sendSignInLink": "Send sign-in link",
+    "providerNotConfigured": "This sign-in method is not configured"
+  }
+}
