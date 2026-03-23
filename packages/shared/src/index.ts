@@ -4,5 +4,6 @@
  * Shared types, constants, and utilities for the Example App web and mobile apps.
  */
 
-// Add shared utilities and types here
-export {};
+export { parseError } from "./parse-error";
+export { log } from "./log";
+export type { Logger } from "./log";

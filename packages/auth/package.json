@@ -33,7 +33,7 @@
     "@example-app/eslint-config": "workspace:*",
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
-    "@types/jsonwebtoken": "^9.0.10",
+    "@types/jsonwebtoken": "catalog:",
     "@types/react": "catalog:react19",
     "eslint": "catalog:",
     "prettier": "catalog:",

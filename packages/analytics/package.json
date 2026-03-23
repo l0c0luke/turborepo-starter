@@ -1,0 +1,51 @@
+{
+  "name": "@example-app/analytics",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./provider": {
+      "types": "./dist/provider.d.ts",
+      "default": "./src/provider.tsx"
+    },
+    "./keys": {
+      "types": "./dist/keys.d.ts",
+      "default": "./src/keys.ts"
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc --watch",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@next/third-parties": "catalog:",
+    "@t3-oss/env-nextjs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@example-app/eslint-config": "workspace:*",
+    "@example-app/prettier-config": "workspace:*",
+    "@example-app/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react19",
+    "eslint": "catalog:",
+    "next": "catalog:",
+    "prettier": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "next": ">=16",
+    "react": ">=19"
+  },
+  "prettier": "@example-app/prettier-config"
+}

@@ -1,17 +1,21 @@
 # Example App - Copilot Instructions
 
+## Getting Started
+
+This repo is a **starter template**. To initialize it for a new app idea, use the **project-init agent** (`@project-init`). It will walk you through renaming the `@example-app/` scope, scaffolding features, setting up database schema, and configuring auth providers.
+
 ## Overview
 
 This is a Turborepo monorepo containing a full-stack application with a React Native mobile app (Expo) and a Next.js web application. Both apps share authentication, database, and API packages.
 
 ## Tech Stack
 
-- **Mobile**: React Native with Expo SDK 53, React 19
-- **Web**: Next.js 15 with React 19
+- **Mobile**: React Native 0.84 with Expo SDK 55, React 19
+- **Web**: Next.js 16 with React 19
 - **Authentication**: Better-Auth with OTP, Google, and Apple Sign In
 - **Database**: Drizzle ORM with PostgreSQL
 - **API**: tRPC for type-safe APIs
-- **Styling**: Tailwind CSS (web), NativeWind (mobile)
+- **Styling**: Tailwind CSS 4 (web), Uniwind (mobile)
 - **Monorepo**: Turborepo with PNPM 10.26.0
 - **Node**: >= 22.11.0
 
@@ -20,20 +24,28 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 ## Project Structure Guidelines
 
 ### Package Naming Convention
+
 All packages use the `@example-app/` scope:
+
+- `@example-app/analytics` - Google Analytics provider and env validation
 - `@example-app/api` - tRPC router and procedures
 - `@example-app/auth` - Better-Auth configuration
 - `@example-app/db` - Drizzle ORM database client and schema
 - `@example-app/email` - Email templates and sender
-- `@example-app/shared` - Shared utilities
+- `@example-app/seo` - SEO metadata helpers and JSON-LD
+- `@example-app/shared` - Shared utilities (parseError, log)
 - `@example-app/validators` - Zod validation schemas
 
 ### Import Patterns
+
 ```typescript
 // Correct import patterns from packages
-import { db } from "@example-app/db/client";
-import { auth } from "@example-app/auth";
+import { AnalyticsProvider } from "@example-app/analytics/provider";
 import { api } from "@example-app/api";
+import { auth } from "@example-app/auth";
+import { db } from "@example-app/db/client";
+import { createMetadata, JsonLd } from "@example-app/seo";
+import { log, parseError } from "@example-app/shared";
 ```
 
 ---
@@ -41,26 +53,33 @@ import { api } from "@example-app/api";
 ## Expo App Guidelines
 
 ### Styling
-- **ALWAYS** use the global design system from `src/styles/` when styling components and pages
+
+- The Expo app uses **Uniwind** (Tailwind CSS for React Native) — use `className` on components
+- Use the global design system from `src/styles/` for design tokens (colors, spacing, typography)
 - Import styles from the centralized export: `import { colors, spacing, typography, commonStyles } from "@/styles"`
-- Never use inline hardcoded colors or spacing values - use design tokens
+- Never use inline hardcoded colors or spacing values - use design tokens or Tailwind classes
+- Global CSS is in `src/global.css` (imported in root layout)
 - Available style modules: `colors`, `typography`, `spacing`, `layout`, `components`, `accessibleLayouts`
 
 ### Navigation
+
 - **DO NOT** use the default Expo navigation bar
 - All screens must implement their own custom `NavigationBar` component from `src/components/NavigationBar`
 - Maintain consistent navigation patterns across all screens
 
 ### Component Organization
+
 - Place reusable components in `src/components/`
 - UI primitives go in `src/components/ui/`
 - Export all components from `src/components/index.ts`
 
 ### Hooks
+
 - Custom hooks go in `src/hooks/`
 - Export all hooks from `src/hooks/index.ts`
 
 ### File Structure Pattern
+
 ```
 src/
   app/           # Expo Router pages
@@ -80,21 +99,25 @@ src/
 ## Next.js App Guidelines
 
 ### Styling
+
 - Use **Tailwind CSS** for all styling
 - Use **shadcn/ui** components from `src/_components/ui/`
 - Follow the shadcn/ui patterns for new components
 
 ### Component Organization
+
 - Shared components go in `src/_components/`
 - Page-specific components can be colocated with pages
 - UI primitives from shadcn/ui are in `src/_components/ui/`
 
 ### Internationalization
+
 - All user-facing strings must use `next-intl`
 - Translation files are in `src/languages/`
 - Use the `useTranslations` hook for translations
 
 ### File Structure Pattern
+
 ```
 src/
   _components/   # Shared components
@@ -115,12 +138,14 @@ src/
 ## Database Guidelines
 
 ### Schema Changes
+
 - Database schema is in `packages/db/src/schema.ts`
 - Auth-related tables are in `packages/db/src/auth-schema.ts`
 - After schema changes, run `pnpm db:push` to sync with database
 - Use `pnpm db:studio` to inspect the database
 
 ### Drizzle ORM Patterns
+
 ```typescript
 // Always import db client correctly
 import { db } from "@example-app/db/client";
@@ -134,15 +159,18 @@ const users = await db.select().from(usersTable).where(eq(usersTable.id, id));
 ## API Guidelines (tRPC)
 
 ### Router Structure
+
 - Routers are in `packages/api/src/router/`
 - Main router is in `packages/api/src/root.ts`
 - Use `publicProcedure` for unauthenticated endpoints
 - Use `protectedProcedure` for authenticated endpoints
 
 ### Adding New Procedures
+
 ```typescript
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod/v4";
+
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const exampleRouter = createTRPCRouter({
   // Public endpoint
@@ -153,10 +181,9 @@ export const exampleRouter = createTRPCRouter({
     }),
 
   // Protected endpoint (requires auth)
-  getSecretData: protectedProcedure
-    .query(({ ctx }) => {
-      return { userId: ctx.session?.user?.id };
-    }),
+  getSecretData: protectedProcedure.query(({ ctx }) => {
+    return { userId: ctx.session?.user?.id };
+  }),
 });
 ```
 
@@ -165,6 +192,7 @@ export const exampleRouter = createTRPCRouter({
 ## Validation Guidelines
 
 ### Zod Schemas
+
 - Shared validation schemas go in `packages/validators/src/`
 - Import Zod from `zod/v4` (not `zod`)
 - Export validators from the package index
@@ -183,16 +211,19 @@ export const userSchema = z.object({
 ## Code Quality Standards
 
 ### TypeScript
+
 - Strict TypeScript is enabled across all packages
 - Never use `any` type - use proper typing or `unknown` with type guards
 - All functions should have explicit return types for public APIs
 
 ### Linting & Formatting
+
 - Run `pnpm lint` before committing
 - Run `pnpm format:fix` to auto-format code
 - Run `pnpm typecheck` to verify types
 
 ### Testing
+
 - Write tests for critical business logic
 - Test files should be colocated with source files or in `__tests__/` directories
 

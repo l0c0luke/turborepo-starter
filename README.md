@@ -2,6 +2,8 @@
 
 A production-ready monorepo template for building full-stack applications with a React Native mobile app (Expo) and a Next.js web application. Both apps share authentication, database, and type-safe APIs.
 
+> **New Project?** Use the `@project-init` agent to transform this template into your app. It handles renaming, scaffolding, and configuration automatically.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -18,28 +20,29 @@ A production-ready monorepo template for building full-stack applications with a
 - [API Development](#api-development)
 - [Code Quality](#code-quality)
 - [Deployment](#deployment)
+- [Launch Checklist](#launch-checklist)
 - [Contributing](#contributing)
 
 ## Overview
 
 This monorepo contains everything you need to start building a full-stack application:
 
-- **Mobile App**: React Native with Expo SDK 53
-- **Web App**: Next.js 15 with React 19
+- **Mobile App**: React Native 0.84 with Expo SDK 55
+- **Web App**: Next.js 16 with React 19
 - **Shared Packages**: Database, API, Authentication, Validation, and more
 
 ### Key Technologies
 
-| Category | Technology |
-|----------|------------|
-| **Mobile** | React Native, Expo SDK 53, React 19, NativeWind |
-| **Web** | Next.js 15, React 19, Tailwind CSS, shadcn/ui |
-| **Authentication** | Better-Auth (OTP, Google, Apple Sign In) |
-| **Database** | Drizzle ORM, PostgreSQL |
-| **API** | tRPC (end-to-end type safety) |
-| **Validation** | Zod v4 |
-| **Monorepo** | Turborepo, PNPM 10.26.0 |
-| **Runtime** | Node.js >= 22.11.0 |
+| Category           | Technology                                        |
+| ------------------ | ------------------------------------------------- |
+| **Mobile**         | React Native 0.84, Expo SDK 55, React 19, Uniwind |
+| **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui   |
+| **Authentication** | Better-Auth (OTP, Google, Apple Sign In)          |
+| **Database**       | Drizzle ORM, PostgreSQL                           |
+| **API**            | tRPC (end-to-end type safety)                     |
+| **Validation**     | Zod v4                                            |
+| **Monorepo**       | Turborepo, PNPM 10.26.0                           |
+| **Runtime**        | Node.js >= 22.11.0                                |
 
 ## Features
 
@@ -132,6 +135,7 @@ pnpm dev
 Create `.env` files in both apps:
 
 **apps/nextjs/.env:**
+
 ```env
 DATABASE_URL="postgresql://example:example@localhost:5832/example"
 BETTER_AUTH_SECRET="your-secret-key"
@@ -139,6 +143,7 @@ BETTER_AUTH_URL="http://localhost:3000"
 ```
 
 **apps/expo/.env:**
+
 ```env
 EXPO_PUBLIC_API_URL="http://localhost:3000"
 ```
@@ -173,14 +178,14 @@ pnpm build            # Build all packages and apps
 
 All packages use the `@example-app/` scope and are located in `packages/`:
 
-| Package | Description | Usage |
-|---------|-------------|-------|
-| `@example-app/api` | tRPC router and procedures | `import { appRouter } from "@example-app/api"` |
-| `@example-app/auth` | Better-Auth configuration | `import { auth } from "@example-app/auth"` |
-| `@example-app/db` | Drizzle ORM client and schema | `import { db } from "@example-app/db/client"` |
-| `@example-app/email` | Email templates and sender | `import { sendEmail } from "@example-app/email"` |
-| `@example-app/shared` | Shared utilities | `import { utils } from "@example-app/shared"` |
-| `@example-app/validators` | Zod validation schemas | `import { schemas } from "@example-app/validators"` |
+| Package                   | Description                   | Usage                                               |
+| ------------------------- | ----------------------------- | --------------------------------------------------- |
+| `@example-app/api`        | tRPC router and procedures    | `import { appRouter } from "@example-app/api"`      |
+| `@example-app/auth`       | Better-Auth configuration     | `import { auth } from "@example-app/auth"`          |
+| `@example-app/db`         | Drizzle ORM client and schema | `import { db } from "@example-app/db/client"`       |
+| `@example-app/email`      | Email templates and sender    | `import { sendEmail } from "@example-app/email"`    |
+| `@example-app/shared`     | Shared utilities              | `import { utils } from "@example-app/shared"`       |
+| `@example-app/validators` | Zod validation schemas        | `import { schemas } from "@example-app/validators"` |
 
 ## Mobile Development
 
@@ -200,13 +205,21 @@ npx expo run:android
 
 ### Expo Styling Guidelines
 
-The Expo app uses a centralized design system located in `apps/expo/src/styles/`:
+The Expo app uses **Uniwind** (Tailwind CSS for React Native). Use `className` on components:
 
-```typescript
-import { colors, spacing, typography, commonStyles } from "@/styles";
+```tsx
+<View className="bg-background flex-1 p-4">
+  <Text className="text-foreground text-lg font-bold">Title</Text>
+</View>
 ```
 
-**Important**: Always use design tokens instead of hardcoded values for colors, spacing, and typography.
+Design tokens are also available in `apps/expo/src/styles/` for programmatic access:
+
+```typescript
+import { colors, commonStyles, spacing, typography } from "@/styles";
+```
+
+**Important**: Prefer Tailwind classes via `className`. Use design tokens for dynamic styles only.
 
 ## Web Development
 
@@ -250,9 +263,10 @@ The app uses [Better-Auth](https://better-auth.js.org/) for authentication with 
 ### Drizzle ORM Usage
 
 ```typescript
-import { db } from "@example-app/db/client";
-import { usersTable } from "@example-app/db";
 import { eq } from "drizzle-orm";
+
+import { usersTable } from "@example-app/db";
+import { db } from "@example-app/db/client";
 
 const user = await db.select().from(usersTable).where(eq(usersTable.id, id));
 ```
@@ -264,8 +278,9 @@ const user = await db.select().from(usersTable).where(eq(usersTable.id, id));
 Routers are in `packages/api/src/router/`. Use the appropriate procedure type:
 
 ```typescript
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod/v4";
+
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const exampleRouter = createTRPCRouter({
   // Public - no auth required
@@ -274,8 +289,9 @@ export const exampleRouter = createTRPCRouter({
     .query(({ input }) => ({ greeting: `Hello ${input.name}` })),
 
   // Protected - requires authentication
-  getProfile: protectedProcedure
-    .query(({ ctx }) => ({ userId: ctx.session?.user?.id })),
+  getProfile: protectedProcedure.query(({ ctx }) => ({
+    userId: ctx.session?.user?.id,
+  })),
 });
 ```
 
@@ -300,10 +316,9 @@ pnpm typecheck     # Verify types
 
 ### Web (Next.js)
 
-Deploy to Vercel, Railway, or any platform that supports Next.js:
+Deploy to any platform that supports Node.js (Railway, Fly.io, AWS, etc.):
 
 ```bash
-cd apps/nextjs
 pnpm build
 ```
 
@@ -316,6 +331,10 @@ cd apps/expo
 eas build --platform ios
 eas build --platform android
 ```
+
+## Launch Checklist
+
+See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for a comprehensive pre-launch checklist covering environment variables, OAuth, database, email, app store submissions, and monitoring.
 
 ## Contributing
 

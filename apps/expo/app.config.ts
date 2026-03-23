@@ -17,7 +17,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   updates: {
     fallbackToCacheTimeout: 0,
   },
-  newArchEnabled: true,
   assetBundlePatterns: ["**/*"],
   ios: {
     bundleIdentifier: "com.example.app",
@@ -32,7 +31,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: "./assets/adaptive-icon.svg",
       backgroundColor: "#3B82F6",
     },
-    edgeToEdgeEnabled: true,
   },
   extra: {
     eas: {
