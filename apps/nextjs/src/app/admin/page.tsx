@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
 import { AdminContent } from "~/_components/admin/AdminContent";
 import { AdminSkeleton } from "~/_components/admin/AdminSkeleton";

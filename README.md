@@ -11,7 +11,7 @@ A production-ready monorepo template for building full-stack applications with a
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [Development Setup](#development-setup)
-- [Environment Configuration](#environment-configuration)
+- [Environment Variables](#environment-variables)
 - [Package Architecture](#package-architecture)
 - [Mobile Development](#mobile-development)
 - [Web Development](#web-development)
@@ -27,22 +27,22 @@ A production-ready monorepo template for building full-stack applications with a
 
 This monorepo contains everything you need to start building a full-stack application:
 
-- **Mobile App**: React Native 0.84 with Expo SDK 55
+- **Mobile App**: Expo SDK 55 with SDK-aligned React Native and React 19
 - **Web App**: Next.js 16 with React 19
 - **Shared Packages**: Database, API, Authentication, Validation, and more
 
 ### Key Technologies
 
-| Category           | Technology                                        |
-| ------------------ | ------------------------------------------------- |
-| **Mobile**         | React Native 0.84, Expo SDK 55, React 19, Uniwind |
-| **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui   |
-| **Authentication** | Better-Auth (OTP, Google, Apple Sign In)          |
-| **Database**       | Drizzle ORM, PostgreSQL                           |
-| **API**            | tRPC (end-to-end type safety)                     |
-| **Validation**     | Zod v4                                            |
-| **Monorepo**       | Turborepo, PNPM 10.26.0                           |
-| **Runtime**        | Node.js >= 22.11.0                                |
+| Category           | Technology                                      |
+| ------------------ | ----------------------------------------------- |
+| **Mobile**         | Expo SDK 55, React Native, React 19, Uniwind    |
+| **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui |
+| **Authentication** | Better-Auth (OTP, Google, Apple Sign In)        |
+| **Database**       | Drizzle ORM, PostgreSQL                         |
+| **API**            | tRPC (end-to-end type safety)                   |
+| **Validation**     | Zod v4                                          |
+| **Monorepo**       | Turborepo, PNPM 11                              |
+| **Runtime**        | Node.js >= 22.13.0                              |
 
 ## Features
 
@@ -64,8 +64,8 @@ This monorepo contains everything you need to start building a full-stack applic
 
 ### Prerequisites
 
-- Node.js >= 22.11.0
-- PNPM 10.26.0+ (`npm install -g pnpm`)
+- Node.js >= 22.13.0
+- PNPM 11 (`corepack enable`)
 - Docker (for PostgreSQL and MailHog)
 
 ### Installation
@@ -77,6 +77,9 @@ cd example-app
 
 # Install dependencies
 pnpm install
+
+# Copy local environment defaults
+cp .env.example .env
 
 # Start Docker services (PostgreSQL + MailHog)
 docker-compose up -d
@@ -90,13 +93,13 @@ pnpm dev
 
 ### Quick Access
 
-- **Web App**: http://localhost:3000
-- **MailHog** (email testing): http://localhost:8025
+- **Web App**: <http://localhost:3000>
+- **MailHog** (email testing): <http://localhost:8025>
 - **Drizzle Studio**: `pnpm db:studio`
 
 ## Project Structure
 
-```
+```text
 ├── apps/
 │   ├── expo/                 # React Native mobile app
 │   │   └── src/
@@ -116,9 +119,11 @@ pnpm dev
 │
 ├── packages/
 │   ├── api/                  # tRPC API router
+│   ├── analytics/            # Google Analytics provider
 │   ├── auth/                 # Better-Auth configuration
 │   ├── db/                   # Drizzle ORM + PostgreSQL
 │   ├── email/                # Email templates + sending
+│   ├── seo/                  # Metadata and JSON-LD helpers
 │   ├── shared/               # Shared utilities
 │   └── validators/           # Zod validation schemas
 │
@@ -132,21 +137,16 @@ pnpm dev
 
 ### Environment Variables
 
-Create `.env` files in both apps:
-
-**apps/nextjs/.env:**
+Copy `.env.example` to a root `.env` file. The defaults work with the included Docker services:
 
 ```env
-DATABASE_URL="postgresql://example:example@localhost:5832/example"
-BETTER_AUTH_SECRET="your-secret-key"
-BETTER_AUTH_URL="http://localhost:3000"
+POSTGRES_URL="postgresql://example:example@localhost:5832/example"
+AUTH_SECRET="supersecret"
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+EXPO_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-**apps/expo/.env:**
-
-```env
-EXPO_PUBLIC_API_URL="http://localhost:3000"
-```
+Optional provider flags and credentials are also documented in `.env.example` for Google Sign In, Apple Sign In, SMTP, and Google Analytics.
 
 ### Available Scripts
 
@@ -178,14 +178,16 @@ pnpm build            # Build all packages and apps
 
 All packages use the `@example-app/` scope and are located in `packages/`:
 
-| Package                   | Description                   | Usage                                               |
-| ------------------------- | ----------------------------- | --------------------------------------------------- |
-| `@example-app/api`        | tRPC router and procedures    | `import { appRouter } from "@example-app/api"`      |
-| `@example-app/auth`       | Better-Auth configuration     | `import { auth } from "@example-app/auth"`          |
-| `@example-app/db`         | Drizzle ORM client and schema | `import { db } from "@example-app/db/client"`       |
-| `@example-app/email`      | Email templates and sender    | `import { sendEmail } from "@example-app/email"`    |
-| `@example-app/shared`     | Shared utilities              | `import { utils } from "@example-app/shared"`       |
-| `@example-app/validators` | Zod validation schemas        | `import { schemas } from "@example-app/validators"` |
+| Package                   | Description                   | Usage                                                                 |
+| ------------------------- | ----------------------------- | --------------------------------------------------------------------- |
+| `@example-app/analytics`  | Google Analytics provider     | `import { AnalyticsProvider } from "@example-app/analytics/provider"` |
+| `@example-app/api`        | tRPC router and procedures    | `import { appRouter } from "@example-app/api"`                        |
+| `@example-app/auth`       | Better-Auth configuration     | `import { auth } from "@example-app/auth"`                            |
+| `@example-app/db`         | Drizzle ORM client and schema | `import { db } from "@example-app/db/client"`                         |
+| `@example-app/email`      | Email templates and sender    | `import { sendEmail } from "@example-app/email"`                      |
+| `@example-app/seo`        | Metadata and JSON-LD helpers  | `import { createMetadata } from "@example-app/seo"`                   |
+| `@example-app/shared`     | Shared utilities              | `import { log, parseError } from "@example-app/shared"`               |
+| `@example-app/validators` | Zod validation schemas        | `import { schemas } from "@example-app/validators"`                   |
 
 ## Mobile Development
 

@@ -7,6 +7,7 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Generate a strong `AUTH_SECRET` (`openssl rand -base64 32`)
 - [ ] Set `NEXT_PUBLIC_BASE_URL` to production domain
 - [ ] Set `EXPO_PUBLIC_BASE_URL` to production API domain
+- [ ] Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` if Google Analytics is enabled
 - [ ] Configure production `POSTGRES_URL` (use connection pooling)
 - [ ] Configure production SMTP settings (`EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`)
 - [ ] Set `EMAIL_FROM` to a verified sender address

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { Alert, AlertDescription, AlertTitle } from "~/_components/ui/alert";
 import { Button } from "~/_components/ui/button";
@@ -29,6 +29,7 @@ import { Input } from "~/_components/ui/input";
 import { LanguageSelector } from "~/_components/ui/language-selector";
 import { SeparatorWithLabel } from "~/_components/ui/separator";
 import { authClient } from "~/auth/client";
+import { env } from "~/env";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -76,8 +77,8 @@ const AppleIcon = () => (
 );
 
 // Check if social providers are enabled via environment variables
-const isGoogleEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
-const isAppleEnabled = process.env.NEXT_PUBLIC_APPLE_AUTH_ENABLED === "true";
+const isGoogleEnabled = env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED;
+const isAppleEnabled = env.NEXT_PUBLIC_APPLE_AUTH_ENABLED;
 
 export default function LoginPage() {
   const t = useTranslations();
@@ -162,7 +163,9 @@ export default function LoginPage() {
                 variant="outline"
                 onClick={handleGoogleSignIn}
                 disabled={isAnyLoading || !isGoogleEnabled}
-                title={!isGoogleEnabled ? t("auth.providerNotConfigured") : undefined}
+                title={
+                  !isGoogleEnabled ? t("auth.providerNotConfigured") : undefined
+                }
               >
                 {isGoogleLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -177,7 +180,9 @@ export default function LoginPage() {
                 variant="outline"
                 onClick={handleAppleSignIn}
                 disabled={isAnyLoading || !isAppleEnabled}
-                title={!isAppleEnabled ? t("auth.providerNotConfigured") : undefined}
+                title={
+                  !isAppleEnabled ? t("auth.providerNotConfigured") : undefined
+                }
               >
                 {isAppleLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -10,14 +10,14 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 
 ## Tech Stack
 
-- **Mobile**: React Native 0.84 with Expo SDK 55, React 19
+- **Mobile**: Expo SDK 55 with SDK-aligned React Native, React 19
 - **Web**: Next.js 16 with React 19
 - **Authentication**: Better-Auth with OTP, Google, and Apple Sign In
 - **Database**: Drizzle ORM with PostgreSQL
 - **API**: tRPC for type-safe APIs
 - **Styling**: Tailwind CSS 4 (web), Uniwind (mobile)
-- **Monorepo**: Turborepo with PNPM 10.26.0
-- **Node**: >= 22.11.0
+- **Monorepo**: Turborepo with PNPM 11
+- **Node**: >= 22.13.0
 
 ---
 

@@ -123,11 +123,11 @@ export const buttonText = {
 
   small: {
     ...typography.buttonSmall,
-  } as TextStyle,
+  },
 
   large: {
     ...typography.buttonLarge,
-  } as TextStyle,
+  },
 } as const;
 
 // Input styles

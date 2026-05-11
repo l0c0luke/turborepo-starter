@@ -14,10 +14,9 @@ export interface Logger {
   debug: LogFn;
 }
 
-/* eslint-disable no-restricted-globals */
 declare const console: Logger | undefined;
 
-const noop: LogFn = () => {};
+const noop: LogFn = () => undefined;
 const c: Logger =
   typeof console !== "undefined"
     ? console

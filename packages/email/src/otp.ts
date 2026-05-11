@@ -1,4 +1,4 @@
-import { render } from "@react-email/render";
+import { render } from "react-email";
 
 import type { EmailSender } from "./sender";
 import OTPEmail from "./templates/otp";

@@ -1,15 +1,15 @@
 import * as React from "react";
 import {
-  Html,
-  Head,
-  Preview,
   Body,
+  Button,
   Container,
+  Head,
+  Hr,
+  Html,
+  Preview,
   Section,
   Text,
-  Button,
-  Hr,
-} from "@react-email/components";
+} from "react-email";
 
 export interface MagicLinkEmailProps {
   email: string;

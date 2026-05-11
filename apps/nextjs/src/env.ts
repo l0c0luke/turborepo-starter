@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const env = createEnv({
   /**
@@ -39,11 +39,11 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: z
       .string()
       .transform((v) => v === "true")
-      .default("false"),
+      .default(false),
     NEXT_PUBLIC_APPLE_AUTH_ENABLED: z
       .string()
       .transform((v) => v === "true")
-      .default("false"),
+      .default(false),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().startsWith("G-").optional(),
   },
 

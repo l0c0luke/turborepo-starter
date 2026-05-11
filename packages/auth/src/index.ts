@@ -4,8 +4,8 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, magicLink } from "better-auth/plugins";
 
-import { db } from "@example-app/db/client";
 import * as schema from "@example-app/db";
+import { db } from "@example-app/db/client";
 import { EmailSender, MagicLinkService, OTPService } from "@example-app/email";
 
 export function initAuth(options: {
@@ -155,7 +155,11 @@ export function initAuth(options: {
           },
         }),
     },
-    trustedOrigins: ["example-app://", "example-app://*", "https://appleid.apple.com"],
+    trustedOrigins: [
+      "example-app://",
+      "example-app://*",
+      "https://appleid.apple.com",
+    ],
   } satisfies BetterAuthOptions;
 
   return betterAuth(config);

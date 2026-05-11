@@ -114,7 +114,7 @@ export function Navbar() {
         <Link href="/dashboard" className="text-lg font-bold tracking-tight">
           <span className="sr-only">Example App</span>
           {/* App title */}
-          <div className="relative h-8 flex items-center">
+          <div className="relative flex h-8 items-center">
             <span className="text-xl font-bold">Example App</span>
           </div>
         </Link>

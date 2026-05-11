@@ -3,7 +3,6 @@
     "@example-app/tsconfig/base.json"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "~/*": [
         "./src/*"

@@ -76,11 +76,7 @@ export function HelpModal({ visible, onClose }: HelpModalProps) {
                 marginBottom: spacing[3],
               }}
             >
-              <Ionicons
-                name="rocket"
-                size={24}
-                color={colors.success[500]}
-              />
+              <Ionicons name="rocket" size={24} color={colors.success[500]} />
               <Text style={[typography.h3, { marginLeft: spacing[2] }]}>
                 Getting Started
               </Text>
@@ -118,7 +114,9 @@ export function HelpModal({ visible, onClose }: HelpModalProps) {
         {/* Close Button */}
         <View style={{ padding: spacing[4] }}>
           <Pressable style={buttons.primary} onPress={onClose}>
-            <Text style={{ color: "white", fontWeight: "600", textAlign: "center" }}>
+            <Text
+              style={{ color: "white", fontWeight: "600", textAlign: "center" }}
+            >
               Got it!
             </Text>
           </Pressable>

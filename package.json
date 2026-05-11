@@ -2,9 +2,9 @@
   "name": "example-app",
   "private": true,
   "engines": {
-    "node": ">=22.11.0"
+    "node": ">=22.13.0"
   },
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@11.0.9",
   "scripts": {
     "build": "turbo run build",
     "clean": "git clean -xdf node_modules",

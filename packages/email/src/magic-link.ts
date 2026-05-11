@@ -1,4 +1,4 @@
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import type { EmailSender } from "./sender";
 import type { MagicLinkEmailOptions } from "./types";
 import { MagicLinkEmailSchema } from "./types";

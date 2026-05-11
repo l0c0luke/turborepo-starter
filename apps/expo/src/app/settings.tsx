@@ -43,6 +43,10 @@ export default function SettingsPage() {
     enabled: !!session?.user,
   });
 
+  useEffect(() => {
+    setName(userProfile?.name ?? session?.user.name ?? "");
+  }, [session?.user.name, userProfile?.name]);
+
   const updateProfileMutation = useMutation({
     mutationFn: async (data: { name: string }) => {
       return trpc.auth.update.mutate(data);
@@ -70,9 +74,10 @@ export default function SettingsPage() {
       {
         text: "Sign Out",
         style: "destructive",
-        onPress: async () => {
-          await authClient.signOut();
-          router.replace("/");
+        onPress: () => {
+          void authClient.signOut().then(() => {
+            router.replace("/");
+          });
         },
       },
     ]);
@@ -131,7 +136,10 @@ export default function SettingsPage() {
           <Pressable
             onPress={handleSaveProfile}
             disabled={updateProfileMutation.isPending}
-            style={[buttons.primary, { opacity: updateProfileMutation.isPending ? 0.6 : 1 }]}
+            style={[
+              buttons.primary,
+              { opacity: updateProfileMutation.isPending ? 0.6 : 1 },
+            ]}
           >
             {updateProfileMutation.isPending ? (
               <ActivityIndicator color="white" />

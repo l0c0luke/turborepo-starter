@@ -14,9 +14,9 @@ export function parseError(error: unknown): string {
     error &&
     typeof error === "object" &&
     "message" in error &&
-    typeof (error as { message: unknown }).message === "string"
+    typeof error.message === "string"
   ) {
-    return (error as { message: string }).message;
+    return error.message;
   }
 
   return "An unknown error occurred";

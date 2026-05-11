@@ -23,7 +23,6 @@
     "@example-app/db": "workspace:*",
     "@example-app/email": "workspace:*",
     "@example-app/validators": "workspace:*",
-    "@react-email/components": "catalog:",
     "@trpc/server": "catalog:",
     "expo-server-sdk": "catalog:",
     "minimatch": "catalog:",

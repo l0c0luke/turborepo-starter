@@ -10,19 +10,16 @@ import {
 } from "~/_components/ui/card";
 
 export function DashboardContent() {
-  const t = useTranslations();
+  const t = useTranslations("dashboard");
 
   return (
     <div className="flex flex-col gap-8">
       <Card className="w-full rounded-lg shadow">
         <CardHeader>
-          <CardTitle>Welcome to Example App</CardTitle>
+          <CardTitle>{t("welcome")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            This is a starter template with authentication already set up. You
-            can start building your app from here!
-          </p>
+          <p className="text-muted-foreground">{t("description")}</p>
         </CardContent>
       </Card>
 
@@ -35,13 +32,10 @@ export function DashboardContent() {
             <li>Update the database schema in packages/db/src/schema.ts</li>
             <li>Add new API routes in packages/api/src/router/</li>
             <li>Build your UI components in apps/nextjs/src/_components/</li>
-            <li>
-              Check out the Expo app in apps/expo/ for mobile development
-            </li>
+            <li>Check out the Expo app in apps/expo/ for mobile development</li>
           </ul>
         </CardContent>
       </Card>
     </div>
   );
 }
-

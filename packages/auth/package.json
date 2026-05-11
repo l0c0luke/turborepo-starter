@@ -14,7 +14,7 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
-    "generate": "dotenv -e ../../.env -- pnpx @better-auth/cli generate --output ../db/src/auth-schema.ts",
+    "generate": "dotenv -e ../../.env -- pnpm dlx @better-auth/cli@1.4.21 generate --output ../db/src/auth-schema.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -23,13 +23,13 @@
     "@example-app/email": "workspace:*",
     "@t3-oss/env-nextjs": "catalog:",
     "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@better-auth/cli": "catalog:",
     "@example-app/eslint-config": "workspace:*",
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",

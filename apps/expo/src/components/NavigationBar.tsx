@@ -54,7 +54,7 @@ export function NavigationBar({
 
   const handleSettings = () => {
     setShowMenuModal(false);
-    router.push("./settings" as "/settings"); // Fixed typing for settings route
+    router.push("/settings");
   };
 
   return (
