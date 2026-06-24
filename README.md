@@ -1,8 +1,10 @@
 # Example App - Full Stack Starter Template
 
-A production-ready monorepo template for building full-stack applications with a React Native mobile app (Expo) and a Next.js web application. Both apps share authentication, database, and type-safe APIs.
+A production-ready monorepo **skeleton** for building full-stack applications with a React Native mobile app (Expo) and a Next.js web application. Both apps share authentication, database, and type-safe APIs. It ships the wiring and one reference feature (a users admin) — you add your app on top, rather than deleting demo content.
 
-> **New Project?** Use the `@project-init` agent to transform this template into your app. It handles renaming, scaffolding, and configuration automatically.
+> **New Project?** Use the `@project-init` agent to transform this skeleton into your app. It handles renaming, scaffolding, and configuration automatically.
+>
+> **AI agents:** canonical conventions live in [`AGENTS.md`](AGENTS.md).
 
 ## Table of Contents
 
@@ -35,7 +37,7 @@ This monorepo contains everything you need to start building a full-stack applic
 
 | Category           | Technology                                      |
 | ------------------ | ----------------------------------------------- |
-| **Mobile**         | Expo SDK 55, React Native, React 19, Uniwind    |
+| **Mobile**         | Expo SDK 55, React Native, React 19, NativeWind |
 | **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui |
 | **Authentication** | Better-Auth (OTP, Google, Apple Sign In)        |
 | **Database**       | Drizzle ORM, PostgreSQL                         |
@@ -78,18 +80,20 @@ cd example-app
 # Install dependencies
 pnpm install
 
-# Copy local environment defaults
-cp .env.example .env
-
-# Start Docker services (PostgreSQL + MailHog)
-docker-compose up -d
-
-# Push database schema
-pnpm db:push
+# One-command bootstrap:
+#   creates .env, starts Postgres + MailHog, pushes the schema, seeds a dev admin
+pnpm setup
 
 # Start development servers
 pnpm dev
 ```
+
+Then open <http://localhost:3000> and sign in as **admin@example.com** — the
+magic-link / OTP email lands in MailHog at <http://localhost:8025>, and the
+seeded admin can reach the users admin at `/admin`.
+
+> Prefer to do it by hand? `cp .env.example .env`, `docker compose up -d`,
+> `pnpm db:push`, then `pnpm -F @example-app/db seed`.
 
 ### Quick Access
 
@@ -151,6 +155,9 @@ Optional provider flags and credentials are also documented in `.env.example` fo
 ### Available Scripts
 
 ```bash
+# Setup
+pnpm setup            # .env + Docker + db push + seed (one-time bootstrap)
+
 # Development
 pnpm dev              # Start all development servers
 pnpm dev:next         # Start Next.js development server only
@@ -158,13 +165,14 @@ pnpm dev:next         # Start Next.js development server only
 # Database
 pnpm db:push          # Push schema changes to database
 pnpm db:studio        # Open Drizzle Studio
+pnpm -F @example-app/db seed   # Re-seed dev data
 
 # Code Quality
 pnpm lint             # Run ESLint
 pnpm lint:fix         # Fix ESLint issues automatically
-pnpm format           # Check Prettier formatting
 pnpm format:fix       # Fix Prettier formatting
 pnpm typecheck        # Run TypeScript type checking
+pnpm test             # Run Vitest
 
 # Mobile
 pnpm ios              # Run iOS app
@@ -186,8 +194,8 @@ All packages use the `@example-app/` scope and are located in `packages/`:
 | `@example-app/db`         | Drizzle ORM client and schema | `import { db } from "@example-app/db/client"`                         |
 | `@example-app/email`      | Email templates and sender    | `import { sendEmail } from "@example-app/email"`                      |
 | `@example-app/seo`        | Metadata and JSON-LD helpers  | `import { createMetadata } from "@example-app/seo"`                   |
-| `@example-app/shared`     | Shared utilities              | `import { log, parseError } from "@example-app/shared"`               |
-| `@example-app/validators` | Zod validation schemas        | `import { schemas } from "@example-app/validators"`                   |
+| `@example-app/shared`     | Framework-agnostic utilities  | `import { log, captureException } from "@example-app/shared"`         |
+| `@example-app/validators` | Zod validation schemas        | `import { setUserAdminSchema } from "@example-app/validators"`        |
 
 ## Mobile Development
 
@@ -207,15 +215,19 @@ npx expo run:android
 
 ### Expo Styling Guidelines
 
-The Expo app uses **Uniwind** (Tailwind CSS for React Native). Use `className` on components:
+The Expo app uses **NativeWind 5** (Tailwind 4 for React Native — CSS-first; the
+theme lives in `apps/expo/src/global.css` and is wired via `apps/expo/metro.config.js`,
+so there's no `tailwind.config.js`). Use `className` on components (see
+`apps/expo/src/app/home.tsx`):
 
 ```tsx
-<View className="bg-background flex-1 p-4">
-  <Text className="text-foreground text-lg font-bold">Title</Text>
+<View className="flex-1 p-4">
+  <Text className="text-lg font-bold text-gray-900">Title</Text>
 </View>
 ```
 
-Design tokens are also available in `apps/expo/src/styles/` for programmatic access:
+Design tokens are also available in `apps/expo/src/styles/` for programmatic access
+(both approaches coexist):
 
 ```typescript
 import { colors, commonStyles, spacing, typography } from "@/styles";
@@ -306,32 +318,45 @@ export const exampleRouter = createTRPCRouter({
 - **Formatting**: Prettier with shared config in `tooling/prettier/`
 - **Validation**: Use Zod v4 (`import { z } from "zod/v4"`)
 
-### Pre-commit Checklist
+### Tests & pre-commit
+
+Tests run with **Vitest** (`pnpm test`) — colocate `*.test.ts` next to the source
+(see `packages/shared/src/parse-error.test.ts`). Git hooks (lefthook) format
+staged files on commit and run typecheck + lint on push. To check manually:
 
 ```bash
 pnpm lint:fix      # Fix linting issues
 pnpm format:fix    # Fix formatting
 pnpm typecheck     # Verify types
+pnpm test          # Run tests
 ```
 
 ## Deployment
 
+See [DEPLOY.md](DEPLOY.md) for full details. In short:
+
 ### Web (Next.js)
 
-Deploy to any platform that supports Node.js (Railway, Fly.io, AWS, etc.):
+Builds to a self-contained server via `output: "standalone"`. Deploy with the
+included `apps/nextjs/Dockerfile` (build from the repo root) or any Node host
+(Vercel, Railway, Fly.io, AWS, …):
 
 ```bash
-pnpm build
+docker build -f apps/nextjs/Dockerfile -t example-app-web .
+docker run -p 3000:3000 --env-file .env example-app-web
 ```
+
+Health probe: `GET /api/health`. Error tracking via Sentry is wired but inert
+until you set a DSN (`NEXT_PUBLIC_SENTRY_DSN` / `EXPO_PUBLIC_SENTRY_DSN`).
+`renovate.json` keeps dependencies current.
 
 ### Mobile (Expo)
 
 Use EAS Build for production builds:
 
 ```bash
-cd apps/expo
-eas build --platform ios
-eas build --platform android
+pnpm --filter @example-app/expo exec eas build --platform ios
+pnpm --filter @example-app/expo exec eas build --platform android
 ```
 
 ## Launch Checklist

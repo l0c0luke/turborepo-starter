@@ -11,6 +11,7 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Configure production `POSTGRES_URL` (use connection pooling)
 - [ ] Configure production SMTP settings (`EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`)
 - [ ] Set `EMAIL_FROM` to a verified sender address
+- [ ] Set Sentry DSNs to enable error tracking (`NEXT_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_SENTRY_DSN`)
 - [ ] Ensure no development secrets are in production env
 
 ## Authentication
@@ -27,7 +28,7 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Verify schema matches expected state
 - [ ] Set up database backups and point-in-time recovery
 - [ ] Configure connection pooling (PgBouncer or provider-managed)
-- [ ] Run `pnpm db:seed` if seed data is needed
+- [ ] Run `pnpm -F @example-app/db seed` if seed data is needed (do NOT seed production with the dev admin)
 
 ## Mobile (Expo / EAS)
 
@@ -45,6 +46,8 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Set up SSL/TLS certificate
 - [ ] Verify `next.config.js` security headers
 - [ ] Test all pages render correctly in production build (`pnpm build`)
+- [ ] Build/run the Docker image (`apps/nextjs/Dockerfile`) or configure your host — see `DEPLOY.md`
+- [ ] Wire the `GET /api/health` endpoint into your platform's health probe
 - [ ] Verify i18n translations are complete
 
 ## Email
@@ -56,8 +59,8 @@ Use this checklist before deploying to production. Each section covers a critica
 
 ## Monitoring & Observability
 
-- [ ] Set up error tracking (Sentry, BugSnag, etc.)
-- [ ] Configure uptime monitoring
+- [ ] Set Sentry DSNs (error tracking is pre-wired — see `DEPLOY.md`); add `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` in CI for source-map upload
+- [ ] Configure uptime monitoring (point it at `/api/health`)
 - [ ] Set up log aggregation
 - [ ] Configure alerts for error rate spikes
 - [ ] Set up database monitoring and slow query alerts
@@ -74,6 +77,7 @@ Use this checklist before deploying to production. Each section covers a critica
 
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm lint` passes
+- [ ] `pnpm test` passes
 - [ ] `pnpm build` completes without errors
 - [ ] Manual smoke test: sign up, sign in, core features
 - [ ] Test on real iOS and Android devices

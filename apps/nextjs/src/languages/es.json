@@ -9,27 +9,40 @@
     "edit": "Editar",
     "update": "Actualizar",
     "loading": "Cargando...",
-    "dashboard": "Panel",
-    "settings": "Configuración",
     "logout": "Cerrar sesión"
   },
   "navigation": {
-    "dashboard": "Panel",
-    "settings": "Configuración",
-    "darkMode": "Modo oscuro"
+    "home": "Inicio",
+    "admin": "Administración",
+    "language": "Idioma",
+    "darkMode": "Modo oscuro",
+    "logout": "Cerrar sesión"
   },
-  "dashboard": {
-    "title": "Panel",
-    "welcome": "Bienvenido a Example App",
-    "description": "Esta es una plantilla de inicio con autenticación ya configurada."
+  "home": {
+    "welcome": "Bienvenido",
+    "signedInAs": "Sesión iniciada como {email}",
+    "startBuilding": "Esta es tu página de inicio autenticada. Empieza a construir tu aplicación desde aquí.",
+    "openAdmin": "Abrir administración"
   },
-  "settings": {
-    "title": "Configuración",
-    "profile": "Perfil",
+  "admin": {
+    "title": "Usuarios",
+    "description": "Administra los usuarios de tu aplicación.",
     "name": "Nombre",
     "email": "Correo electrónico",
-    "account": "Cuenta",
-    "signOut": "Cerrar sesión"
+    "role": "Rol",
+    "joined": "Registro",
+    "actions": "Acciones",
+    "roleAdmin": "Administrador",
+    "roleUser": "Usuario",
+    "makeAdmin": "Hacer administrador",
+    "removeAdmin": "Quitar administrador",
+    "you": "Tú",
+    "empty": "No se encontraron usuarios.",
+    "deleteTitle": "¿Eliminar usuario?",
+    "deleteDescription": "Esto elimina permanentemente a {name} y no se puede deshacer.",
+    "userUpdated": "Usuario actualizado",
+    "userDeleted": "Usuario eliminado",
+    "actionFailed": "Algo salió mal. Inténtalo de nuevo."
   },
   "auth": {
     "signIn": "Iniciar sesión",

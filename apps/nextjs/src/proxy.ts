@@ -17,10 +17,9 @@ export default function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // IF user is authenticated AND navigates to the root path, redirect them to dashboard
-  // IF user is authenticated AND navigates to the login page, redirect to dashboard
-  if (pathname === "/" || (sessionCookie && pathname.startsWith("/login"))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // IF user is authenticated AND navigates to the login page, send them to the home landing
+  if (sessionCookie && pathname.startsWith("/login")) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
@@ -28,11 +27,5 @@ export default function proxy(request: NextRequest) {
 
 // Define the routes that should be handled by this middleware
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/settings/:path*",
-    "/admin/:path*",
-    "/login",
-    "/",
-  ],
+  matcher: ["/admin/:path*", "/login", "/"],
 };

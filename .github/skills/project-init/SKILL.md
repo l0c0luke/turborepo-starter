@@ -7,6 +7,11 @@ description: "Initialize this starter template for a new app idea. Use when: boo
 
 Transform this turborepo starter into a production-ready app. Handles mechanical renaming of all placeholders AND intelligent scaffolding of initial features based on the app idea.
 
+> This template is a **bare-bones skeleton** — there are no demo pages to delete.
+> Initialization is about _renaming_ placeholders and _adding_ features. The one
+> reference feature (the users admin) shows the protected-route + tRPC + Drizzle
+> pattern; copy it, don't remove it (unless the app has no admin concept).
+
 ## When to Use
 
 - First time setting up a new project from this template
@@ -57,6 +62,8 @@ Perform find-and-replace across the entire codebase. **Every file listed below m
 - `apps/nextjs/next.config.js` — `transpilePackages` array references
 - `.github/copilot-instructions.md` — all `@example-app/` references
 - `README.md` — all `@example-app/` references
+- `AGENTS.md` — all `@example-app/` references
+- `CLAUDE.md` — references (mostly delegates to `AGENTS.md`)
 
 **Also search all TypeScript/TSX files for import statements:**
 
@@ -191,16 +198,20 @@ export const workoutRouter = createTRPCRouter({
 
 Create pages under `apps/nextjs/src/app/`:
 
-- Each core feature gets a directory with `page.tsx` and `loading.tsx`
+- Each core feature gets a directory with `page.tsx` (and `loading.tsx` if it streams)
 - Use server components by default, client components only when needed
 - Protect routes in `apps/nextjs/src/proxy.ts` by adding to the matcher
-- Add translations for new pages in `apps/nextjs/src/languages/en.json`, `es.json`, `fr.json`
+- Model new pages on `src/app/admin/page.tsx` (server `prefetch` → client
+  `useSuspenseQuery` in `_components/admin/AdminContent.tsx`)
+- Add translations for new pages in every locale file under `apps/nextjs/src/languages/`
+  (`en.json`, `es.json`); add a locale to `src/lib/locale.ts` to support more
 
 #### 3.5 Expo Screens
 
 Create screens under `apps/expo/src/app/`:
 
-- Follow the existing pattern (see `dashboard.tsx` and `settings.tsx`)
+- Follow the existing authed-screen pattern in `home.tsx`, and register each new
+  screen in `apps/expo/src/app/_layout.tsx`
 - Use the design system from `@/styles` — never hardcode colors/spacing
 - Use the custom `NavigationBar` component, NOT the default Expo nav bar
 - Use tRPC hooks for data fetching
@@ -224,7 +235,8 @@ Based on user's choice, update:
 #### 4.2 Update Documentation
 
 - `README.md` — project name, description, features, setup specifics
-- `.github/copilot-instructions.md` — update to reflect new app structure
+- `AGENTS.md` — canonical agent guidance (update structure/feature references)
+- `.github/copilot-instructions.md` and `CLAUDE.md` point to `AGENTS.md`
 
 ### Phase 5: Verification
 
@@ -234,22 +246,17 @@ Run these commands and fix any errors:
 # 1. Install dependencies (regenerates lockfile)
 pnpm install
 
-# 2. Type check
+# 2. Type check, lint, test, format
 pnpm typecheck
-
-# 3. Lint
 pnpm lint
-
-# 4. Format
+pnpm test
 pnpm format:fix
 
-# 5. Verify Docker
-docker compose up -d
+# 3. Bring up the dev environment in one step
+#    (.env + Docker services + db push + seed)
+pnpm setup
 
-# 6. Push schema
-pnpm db:push
-
-# 7. Start dev
+# 4. Start dev (sign in as admin@example.com; magic link at http://localhost:8025)
 pnpm dev
 ```
 

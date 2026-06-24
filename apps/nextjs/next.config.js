@@ -1,4 +1,6 @@
+import path from "node:path";
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 import { createJiti } from "jiti";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -14,6 +16,11 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import("next").NextConfig} */
 const config = {
+  /** Produce a self-contained server build for Docker (see apps/nextjs/Dockerfile) */
+  output: "standalone",
+  /** Trace workspace dependencies from the monorepo root for standalone output */
+  outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
+
   /** Enables hot reloading for local packages without a build step */
   transpilePackages: [
     "@example-app/analytics",
@@ -21,6 +28,7 @@ const config = {
     "@example-app/auth",
     "@example-app/db",
     "@example-app/seo",
+    "@example-app/shared",
     "@example-app/validators",
   ],
 
@@ -53,4 +61,15 @@ const config = {
   },
 };
 
-export default withBundleAnalyzer(withNextIntl(config));
+const nextConfig = withBundleAnalyzer(withNextIntl(config));
+
+// Sentry wraps the final config. With no SENTRY_AUTH_TOKEN it skips source-map
+// upload (a warning, not an error), so the build works out of the box and only
+// reports at runtime once a DSN is set.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+});

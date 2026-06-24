@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommits"],
+  "labels": ["dependencies"],
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 10,
+  "packageRules": [
+    {
+      "description": "Group the Expo SDK — these are version-locked and must be bumped together with `expo install --fix`",
+      "matchPackageNames": [
+        "expo",
+        "expo-*",
+        "@expo/*",
+        "react-native",
+        "react-native-*",
+        "@react-native-community/*"
+      ],
+      "groupName": "expo sdk",
+      "labels": ["dependencies", "expo"]
+    },
+    {
+      "description": "Keep react/react-dom pinned to the Expo-aligned version",
+      "matchPackageNames": ["react", "react-dom"],
+      "groupName": "react"
+    },
+    {
+      "description": "Group Radix UI primitives",
+      "matchPackageNames": ["@radix-ui/*"],
+      "groupName": "radix-ui"
+    },
+    {
+      "description": "Group Sentry SDKs",
+      "matchPackageNames": ["@sentry/*"],
+      "groupName": "sentry"
+    },
+    {
+      "description": "Group non-major dev dependencies into a single PR",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "dev dependencies"
+    },
+    {
+      "description": "Flag major updates for individual review",
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies", "major"]
+    }
+  ]
+}

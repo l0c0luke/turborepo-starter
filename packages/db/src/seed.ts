@@ -1,80 +1,64 @@
 /**
- * Database Seeding Script for Example App
+ * Database seed — deterministic development data.
  *
- * This script generates test data for development purposes.
- * Customize this file to seed your own tables.
+ * Creates a known admin you can sign into immediately. In development, magic
+ * links / OTP codes are delivered to MailHog at http://localhost:8025, so you
+ * can request a sign-in link for `admin@example.com` and land straight on
+ * `/admin`. Re-running clears and recreates these users (idempotent).
+ *
+ * Edit `SEED_USERS` (and add inserts for your own tables) for your app.
  *
  * Usage:
- *   pnpm seed - Run the seed script
+ *   pnpm seed
  *
- * ⚠️  WARNING: This script may clear existing data!
+ * ⚠️  This clears the `user` table — never run it against production data.
  */
-
-import { faker } from "@faker-js/faker";
 
 import { db } from "./client";
 import { user } from "./schema";
 
-// Configuration for seed data
-const SEED_CONFIG = {
-  users: 5,
-};
+const ADMIN_EMAIL = "admin@example.com";
 
-/**
- * Main seed function
- */
+const SEED_USERS = [
+  {
+    id: "seed-admin",
+    name: "Admin User",
+    email: ADMIN_EMAIL,
+    emailVerified: true,
+    isAdmin: true,
+  },
+  {
+    id: "seed-user-1",
+    name: "Alex Example",
+    email: "alex@example.com",
+    emailVerified: true,
+    isAdmin: false,
+  },
+  {
+    id: "seed-user-2",
+    name: "Sam Example",
+    email: "sam@example.com",
+    emailVerified: true,
+    isAdmin: false,
+  },
+];
+
 async function seed() {
-  console.log("🌱 Starting database seed...\n");
+  console.log("🌱 Seeding database...");
 
-  // Clear existing data (be careful in production!)
-  console.log("🗑️  Clearing existing data...");
+  // Clear existing users so re-running is idempotent (dev only).
   await db.delete(user);
 
-  // Seed users
-  console.log(`\n👤 Creating ${SEED_CONFIG.users} users...`);
-  const users = await seedUsers(SEED_CONFIG.users);
-  console.log(`   ✓ Created ${users.length} users`);
+  const now = new Date();
+  await db
+    .insert(user)
+    .values(SEED_USERS.map((u) => ({ ...u, createdAt: now, updatedAt: now })));
 
-  console.log("\n✅ Seed completed successfully!");
-  console.log(`   Total users: ${users.length}`);
-
+  console.log(`✅ Seeded ${SEED_USERS.length} users.`);
+  console.log(`   Sign in as ${ADMIN_EMAIL} to reach /admin.`);
   process.exit(0);
 }
 
-/**
- * Seed users with realistic data
- */
-async function seedUsers(count: number) {
-  const usersData = Array.from({ length: count }, () => ({
-    id: faker.string.uuid(),
-    name: faker.person.fullName(),
-    email: faker.internet.email().toLowerCase(),
-    emailVerified: faker.datatype.boolean(),
-    image: faker.image.avatar(),
-    yearOfBirth: faker.number.int({ min: 1960, max: 2005 }),
-    isAdmin: false,
-    createdAt: faker.date.past(),
-    updatedAt: new Date(),
-  }));
-
-  // Add an admin user
-  usersData.push({
-    id: faker.string.uuid(),
-    name: "Admin User",
-    email: "admin@example.com",
-    emailVerified: true,
-    image: faker.image.avatar(),
-    yearOfBirth: 1990,
-    isAdmin: true,
-    createdAt: faker.date.past(),
-    updatedAt: new Date(),
-  });
-
-  const insertedUsers = await db.insert(user).values(usersData).returning();
-  return insertedUsers;
-}
-
-// Run the seed
 seed().catch((error) => {
   console.error("❌ Seed failed:", error);
   process.exit(1);

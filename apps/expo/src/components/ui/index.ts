@@ -43,4 +43,3 @@ export { EmptyState } from "./EmptyState";
 
 // Modals
 export { HelpModal } from "./HelpModal";
-export { YearOfBirthModal } from "./YearOfBirthModal";

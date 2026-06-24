@@ -5,5 +5,5 @@
  */
 
 export { parseError } from "./parse-error";
-export { log } from "./log";
-export type { Logger } from "./log";
+export { captureException, log, setErrorReporter } from "./log";
+export type { ErrorReporter, Logger } from "./log";

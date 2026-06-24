@@ -6,11 +6,25 @@ import { QueryClientProvider } from "@tanstack/react-query";
 
 import "react-native-reanimated";
 
+import * as Sentry from "@sentry/react-native";
+
+import { setErrorReporter } from "@example-app/shared";
+
 import { queryClient } from "~/utils/api";
+
+// Sentry — inert unless EXPO_PUBLIC_SENTRY_DSN is set.
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (sentryDsn) {
+  Sentry.init({ dsn: sentryDsn, tracesSampleRate: 1 });
+  // Route captureException / log.error from @example-app/shared to Sentry.
+  setErrorReporter((error, context) =>
+    Sentry.captureException(error, context ? { extra: context } : undefined),
+  );
+}
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
-export default function RootLayout() {
+function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       {/*
@@ -36,16 +50,9 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="dashboard"
+          name="home"
           options={{
-            title: "Dashboard",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="settings"
-          options={{
-            title: "Settings",
+            title: "Home",
             headerShown: false,
           }}
         />
@@ -54,3 +61,7 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+
+// `Sentry.wrap` adds an error boundary + performance tracking. It is a no-op
+// passthrough when Sentry has not been initialized (no DSN).
+export default Sentry.wrap(RootLayout);

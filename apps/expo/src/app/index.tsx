@@ -41,7 +41,7 @@ export default function LoginPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (session?.user) {
-      router.replace("/dashboard");
+      router.replace("/home");
     }
   }, [session]);
 
@@ -128,7 +128,7 @@ export default function LoginPage() {
       }
 
       console.log("✅ OTP verification successful:", data);
-      router.replace("/dashboard");
+      router.replace("/home");
     } catch (error: unknown) {
       console.error("❌ Unexpected error during OTP verification:", error);
       setOtpError("An unexpected error occurred. Please try again.");
@@ -192,11 +192,11 @@ export default function LoginPage() {
             // Note: serverAuthCode is for server-side token exchange, not nonce
             // If better-auth needs a nonce, it should be generated cryptographically
           },
-          callbackURL: "/dashboard",
+          callbackURL: "/home",
         });
 
         console.log("Better-auth Google signin successful");
-        router.replace("/dashboard");
+        router.replace("/home");
       } else {
         throw new Error("No ID token received from Google");
       }
@@ -250,7 +250,7 @@ export default function LoginPage() {
 
       if (result.success) {
         console.log("✅ Apple Sign In successful, navigating to dashboard");
-        router.replace("/dashboard");
+        router.replace("/home");
       } else {
         console.error("❌ Apple Sign In failed:", result.error);
         Alert.alert("Sign In Failed", result.error ?? "Apple Sign In failed");

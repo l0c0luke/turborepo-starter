@@ -56,10 +56,8 @@ export function initAuth(options: {
     secret: options.secret,
     user: {
       additionalFields: {
-        yearOfBirth: {
-          type: "number",
-          required: false,
-        },
+        // `isAdmin` is the reference example of a custom user field. It powers
+        // the admin route + adminProcedure. Add your own fields alongside it.
         isAdmin: {
           type: "boolean",
           required: false,

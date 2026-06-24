@@ -24,6 +24,8 @@ export const env = createEnv({
     APPLE_CLIENT_SECRET: z.string().optional(),
     APPLE_APP_BUNDLE_ID: z.string().optional(),
     POSTGRES_URL: z.string(),
+    // Sentry (optional). When unset, Sentry stays inert — no DSN, no reporting.
+    SENTRY_DSN: z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -45,6 +47,7 @@ export const env = createEnv({
       .transform((v) => v === "true")
       .default(false),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().startsWith("G-").optional(),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   },
 
   /**
@@ -62,6 +65,8 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED,
     NEXT_PUBLIC_APPLE_AUTH_ENABLED: process.env.NEXT_PUBLIC_APPLE_AUTH_ENABLED,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    SENTRY_DSN: process.env.SENTRY_DSN,
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,

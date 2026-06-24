@@ -101,7 +101,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: "/",
       });
     } catch {
       setIsGoogleLoading(false);
@@ -115,7 +115,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "apple",
-        callbackURL: "/dashboard",
+        callbackURL: "/",
       });
     } catch {
       setIsAppleLoading(false);
@@ -130,7 +130,7 @@ export default function LoginPage() {
       // Use better-auth magic link via direct API call
       await authClient.signIn.magicLink({
         email: data.email,
-        callbackURL: "/dashboard",
+        callbackURL: "/",
       });
 
       setEmailSent(true);

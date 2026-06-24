@@ -1,21 +1,12 @@
 {
-  "extends": [
-    "@example-app/tsconfig/base.json"
-  ],
+  "extends": ["@example-app/tsconfig/base.json"],
   "compilerOptions": {
     "paths": {
-      "~/*": [
-        "./src/*"
-      ]
+      "~/*": ["./src/*"]
     },
     "jsx": "react-native",
     "checkJs": false,
-    "moduleSuffixes": [
-      ".ios",
-      ".android",
-      ".native",
-      ""
-    ],
+    "moduleSuffixes": [".ios", ".android", ".native", ""],
     "strictNullChecks": true,
     "types": []
   },
@@ -25,9 +16,7 @@
     "*.js",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "src/uniwind-types.d.ts"
+    "nativewind-env.d.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -1,0 +1,18 @@
+# Keep the Docker build context lean. All workspace package.json files and
+# source must remain so pnpm can install the workspace; only build artifacts,
+# installed deps, and secrets are excluded.
+**/node_modules
+**/.next
+**/dist
+**/.cache
+**/.turbo
+**/.expo
+.git
+.github
+**/.env
+.env
+!.env.example
+*.log
+Dockerfile
+**/Dockerfile
+.dockerignore

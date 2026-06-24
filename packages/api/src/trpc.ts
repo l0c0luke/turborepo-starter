@@ -140,7 +140,11 @@ export const adminProcedure = t.procedure
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
-    // TODO: Check if the user is an admin
+    // `isAdmin` is exposed on the session via better-auth `additionalFields`
+    // (see packages/auth/src/index.ts).
+    if (!ctx.session.user.isAdmin) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
 
     return next({
       ctx: {

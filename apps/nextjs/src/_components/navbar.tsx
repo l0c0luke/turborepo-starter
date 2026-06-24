@@ -3,7 +3,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Globe, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { Globe, LogOut, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/_components/ui/avatar";
@@ -23,6 +24,7 @@ import { authClient } from "~/auth/client";
 import { useLocaleSwitch } from "~/hooks/useLocaleSwitch";
 
 export function Navbar() {
+  const t = useTranslations("navigation");
   const { data: session, isPending } = authClient.useSession();
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -65,11 +67,10 @@ export function Navbar() {
     switchLocale(locale);
   };
 
-  // Language options
+  // Language options (add a locale here + a matching file in src/languages/)
   const languages = [
     { code: "en", name: "English", flag: "🇺🇸" },
     { code: "es", name: "Español", flag: "🇪🇸" },
-    { code: "fr", name: "Français", flag: "🇫🇷" },
   ];
 
   // Prevent hydration mismatch
@@ -111,7 +112,7 @@ export function Navbar() {
   return (
     <div className="bg-background sticky top-0 z-50 w-full border-b">
       <nav className="mx-auto flex h-16 w-full max-w-4xl items-center justify-between px-6">
-        <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+        <Link href="/" className="text-lg font-bold tracking-tight">
           <span className="sr-only">Example App</span>
           {/* App title */}
           <div className="relative flex h-8 items-center">
@@ -139,21 +140,25 @@ export function Navbar() {
             <div className="text-muted-foreground px-2 py-2 text-xs font-semibold">
               {session.user.name || session.user.email}
             </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link
-                href="/settings"
-                className="flex items-center gap-2 hover:cursor-pointer"
-              >
-                <SettingsIcon className="h-4 w-4" />
-                <span>Settings</span>
-              </Link>
-            </DropdownMenuItem>
+            {session.user.isAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 hover:cursor-pointer"
+                  >
+                    <Shield className="h-4 w-4" />
+                    <span>{t("admin")}</span>
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                <span>Language</span>
+                <span>{t("language")}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 {languages.map((language) => (
@@ -174,7 +179,7 @@ export function Navbar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <span className="flex w-full items-center justify-between">
-                Dark mode
+                {t("darkMode")}
                 <Switch
                   className="ml-2 hover:cursor-pointer"
                   checked={theme === "dark"}
@@ -188,7 +193,7 @@ export function Navbar() {
               className="text-destructive flex items-center gap-2 hover:cursor-pointer"
             >
               <LogOut className="h-4 w-4" />
-              <span>Log out</span>
+              <span>{t("logout")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

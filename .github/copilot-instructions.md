@@ -1,8 +1,15 @@
 # Example App - Copilot Instructions
 
+> **Canonical guidance lives in [`AGENTS.md`](../AGENTS.md)** (shared by all AI
+> tools). This file mirrors the essentials for GitHub Copilot.
+
 ## Getting Started
 
-This repo is a **starter template**. To initialize it for a new app idea, use the **project-init agent** (`@project-init`). It will walk you through renaming the `@example-app/` scope, scaffolding features, setting up database schema, and configuring auth providers.
+This repo is a **bare-bones skeleton** — not a finished demo. Build by _adding_
+features; there is nothing to delete. To bring up the dev environment in one step:
+`pnpm install && pnpm setup`. To rename + scaffold for a new app idea, use the
+**project-init agent** (`@project-init`), which renames the `@example-app/` scope,
+scaffolds features, and configures auth providers.
 
 ## Overview
 
@@ -15,7 +22,7 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 - **Authentication**: Better-Auth with OTP, Google, and Apple Sign In
 - **Database**: Drizzle ORM with PostgreSQL
 - **API**: tRPC for type-safe APIs
-- **Styling**: Tailwind CSS 4 (web), Uniwind (mobile)
+- **Styling**: Tailwind CSS 4 (web), NativeWind 5 / Tailwind 4 (mobile)
 - **Monorepo**: Turborepo with PNPM 11
 - **Node**: >= 22.13.0
 
@@ -33,8 +40,8 @@ All packages use the `@example-app/` scope:
 - `@example-app/db` - Drizzle ORM database client and schema
 - `@example-app/email` - Email templates and sender
 - `@example-app/seo` - SEO metadata helpers and JSON-LD
-- `@example-app/shared` - Shared utilities (parseError, log)
-- `@example-app/validators` - Zod validation schemas
+- `@example-app/shared` - Framework-agnostic utilities (parseError, log, captureException / Sentry bridge)
+- `@example-app/validators` - Zod validation schemas (shared server + client)
 
 ### Import Patterns
 
@@ -54,7 +61,7 @@ import { log, parseError } from "@example-app/shared";
 
 ### Styling
 
-- The Expo app uses **Uniwind** (Tailwind CSS for React Native) — use `className` on components
+- The Expo app uses **NativeWind 5** (Tailwind 4 for React Native) — use `className` on components (CSS-first: theme in `apps/expo/src/global.css`, wired via `metro.config.js`)
 - Use the global design system from `src/styles/` for design tokens (colors, spacing, typography)
 - Import styles from the centralized export: `import { colors, spacing, typography, commonStyles } from "@/styles"`
 - Never use inline hardcoded colors or spacing values - use design tokens or Tailwind classes
@@ -232,6 +239,9 @@ export const userSchema = z.object({
 ## Common Commands
 
 ```bash
+# One-time setup (.env + Docker + db push + seed)
+pnpm setup
+
 # Development
 pnpm dev              # Start all development servers
 pnpm dev:next         # Start Next.js only
@@ -243,9 +253,9 @@ pnpm db:studio        # Open Drizzle Studio
 # Code Quality
 pnpm lint             # Run ESLint
 pnpm lint:fix         # Fix ESLint issues
-pnpm format           # Check formatting
 pnpm format:fix       # Fix formatting
 pnpm typecheck        # TypeScript check
+pnpm test             # Run Vitest
 
 # Mobile
 pnpm ios              # Run iOS app

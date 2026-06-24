@@ -26,6 +26,10 @@
       "dependsOn": ["^topo", "^build"],
       "outputs": [".cache/tsbuildinfo.json"]
     },
+    "test": {
+      "dependsOn": ["^topo", "^build"],
+      "outputs": []
+    },
     "clean": {
       "cache": false
     },
@@ -57,6 +61,12 @@
     "NEXT_PUBLIC_GOOGLE_AUTH_ENABLED",
     "NEXT_PUBLIC_APPLE_AUTH_ENABLED",
     "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+    "SENTRY_DSN",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "EXPO_PUBLIC_SENTRY_DSN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT",
+    "SENTRY_AUTH_TOKEN",
     "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID",
     "APPLE_CLIENT_ID",
     "APPLE_APP_BUNDLE_ID",
@@ -67,5 +77,10 @@
     "ANALYZE",
     "SKIP_ENV_VALIDATION"
   ],
-  "globalPassThroughEnv": ["NODE_ENV", "CI", "npm_lifecycle_event"]
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "CI",
+    "npm_lifecycle_event",
+    "NEXT_RUNTIME"
+  ]
 }

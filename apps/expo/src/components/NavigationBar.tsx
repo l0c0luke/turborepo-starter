@@ -52,11 +52,6 @@ export function NavigationBar({
     setShowMenuModal(false);
   };
 
-  const handleSettings = () => {
-    setShowMenuModal(false);
-    router.push("/settings");
-  };
-
   return (
     <>
       <View
@@ -165,44 +160,6 @@ export function NavigationBar({
                 elevation: 8,
               }}
             >
-              {/* Settings Option */}
-              <Pressable
-                onPress={handleSettings}
-                style={{
-                  paddingVertical: spacing[3],
-                  paddingHorizontal: spacing[3],
-                  borderRadius: 4,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: spacing[2],
-                  }}
-                >
-                  <Feather
-                    name="settings"
-                    size={20}
-                    color={colors.text.primary}
-                  />
-                  <Text
-                    style={[typography.body, { color: colors.text.primary }]}
-                  >
-                    Settings
-                  </Text>
-                </View>
-              </Pressable>
-
-              {/* Divider */}
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: colors.border.light,
-                  marginVertical: spacing[1],
-                }}
-              />
-
               {/* Logout Option */}
               <Pressable
                 onPress={handleLogout}

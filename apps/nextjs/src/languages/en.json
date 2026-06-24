@@ -9,27 +9,40 @@
     "edit": "Edit",
     "update": "Update",
     "loading": "Loading...",
-    "dashboard": "Dashboard",
-    "settings": "Settings",
     "logout": "Sign Out"
   },
   "navigation": {
-    "dashboard": "Dashboard",
-    "settings": "Settings",
-    "darkMode": "Dark Mode"
+    "home": "Home",
+    "admin": "Admin",
+    "language": "Language",
+    "darkMode": "Dark Mode",
+    "logout": "Sign Out"
   },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome to Example App",
-    "description": "This is a starter template with authentication already set up."
+  "home": {
+    "welcome": "Welcome",
+    "signedInAs": "Signed in as {email}",
+    "startBuilding": "This is your authenticated home page. Start building your app from here.",
+    "openAdmin": "Open admin"
   },
-  "settings": {
-    "title": "Settings",
-    "profile": "Profile",
+  "admin": {
+    "title": "Users",
+    "description": "Manage the users in your application.",
     "name": "Name",
     "email": "Email",
-    "account": "Account",
-    "signOut": "Sign Out"
+    "role": "Role",
+    "joined": "Joined",
+    "actions": "Actions",
+    "roleAdmin": "Admin",
+    "roleUser": "User",
+    "makeAdmin": "Make admin",
+    "removeAdmin": "Remove admin",
+    "you": "You",
+    "empty": "No users found.",
+    "deleteTitle": "Delete user?",
+    "deleteDescription": "This permanently deletes {name} and cannot be undone.",
+    "userUpdated": "User updated",
+    "userDeleted": "User deleted",
+    "actionFailed": "Something went wrong. Please try again."
   },
   "auth": {
     "signIn": "Sign In",
