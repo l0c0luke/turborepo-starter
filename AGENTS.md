@@ -93,7 +93,9 @@ pnpm lint          # eslint   (lint:fix to autofix)
 pnpm format:fix    # prettier
 pnpm test          # vitest
 pnpm build         # production build
-pnpm db:push       # sync schema   ·   pnpm db:studio   ·   pnpm -F @example-app/db seed
+pnpm db:push       # sync schema (prototyping)   ·   pnpm db:studio   ·   pnpm -F @example-app/db seed
+pnpm db:generate   # emit SQL migration from schema changes (commit packages/db/drizzle/)
+pnpm db:migrate    # apply pending migrations (run on deploy)
 ```
 
 Always run `pnpm typecheck` (and `pnpm lint`) after changes. Tests, types,
