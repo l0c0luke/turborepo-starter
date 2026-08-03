@@ -31,8 +31,8 @@ export default function MagicLinkEmail({
           <Section style={section}>
             <Text style={heading}>Welcome to {productName}!</Text>
             <Text style={text}>
-              We received a request to sign you in to your {productName} account using
-              the email address <strong>{email}</strong>.
+              We received a request to sign you in to your {productName} account
+              using the email address <strong>{email}</strong>.
             </Text>
             <Button href={url} style={button}>
               Complete Sign In
@@ -42,8 +42,9 @@ export default function MagicLinkEmail({
             </Text>
             <Hr style={hr} />
             <Text style={disclaimer}>
-              If you did not request this sign-in link, please ignore this email.
-              Your account remains secure and no further action is required.
+              If you did not request this sign-in link, please ignore this
+              email. Your account remains secure and no further action is
+              required.
             </Text>
           </Section>
         </Container>

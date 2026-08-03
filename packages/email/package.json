@@ -11,8 +11,9 @@
     "build": "tsc",
     "clean": "rm -rf .turbo node_modules",
     "dev": "tsc --watch",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "minimatch": "catalog:",
@@ -24,10 +25,13 @@
   },
   "devDependencies": {
     "@example-app/eslint-config": "workspace:*",
+    "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/nodemailer": "catalog:",
     "@types/react": "catalog:react19",
     "eslint": "catalog:",
+    "prettier": "catalog:",
     "typescript": "catalog:"
-  }
+  },
+  "prettier": "@example-app/prettier-config"
 }

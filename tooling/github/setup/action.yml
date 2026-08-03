@@ -10,8 +10,9 @@ runs:
         node-version-file: ".nvmrc"
         cache: "pnpm"
 
-    - shell: bash
-      run: pnpm add -g turbo
-
+    # NOTE: turbo is a root devDependency and every script invokes it through
+    # package.json, so the workspace install is all that's needed. Installing
+    # it globally (`pnpm add -g turbo`) fails on the runner because pnpm's
+    # global bin directory is not on PATH.
     - shell: bash
       run: pnpm install

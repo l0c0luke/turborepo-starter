@@ -20,7 +20,17 @@ export function authEnv() {
       APPLE_PRIVATE_KEY_PATH: z.string().optional(),
     },
     experimental__runtimeEnv: {},
+    // SKIP_ENV_VALIDATION must skip here too (not just in apps/nextjs/src/env):
+    // the auth package calls authEnv() at runtime, so Docker/CI builds that run
+    // `SKIP_ENV_VALIDATION=1 pnpm build` without real secrets would otherwise
+    // fail validation the moment this module is evaluated.
     skipValidation:
-      !!process.env.CI || process.env.npm_lifecycle_event === "lint",
+      !!process.env.SKIP_ENV_VALIDATION ||
+      !!process.env.CI ||
+      process.env.npm_lifecycle_event === "lint",
+    // Treat empty strings as unset, matching apps/nextjs/src/env.ts — e.g. an
+    // empty AUTH_SECRET in a dev .env should behave as "not configured", not
+    // fail min(1).
+    emptyStringAsUndefined: true,
   });
 }

@@ -32,8 +32,13 @@ const config = {
     "@example-app/validators",
   ],
 
-  /** We already do linting and typechecking as separate tasks in CI */
-  typescript: { ignoreBuildErrors: true },
+  /**
+   * Fail the build on type errors. CI runs `typecheck` separately, but the
+   * build is the last line of defense — a package whose typecheck script is
+   * skipped (or a machine that never runs it) should not produce a broken
+   * production bundle that only fails at runtime.
+   */
+  typescript: { ignoreBuildErrors: false },
 
   typedRoutes: true,
 

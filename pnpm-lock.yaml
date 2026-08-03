@@ -1012,6 +1012,9 @@ importers:
       "@example-app/eslint-config":
         specifier: workspace:*
         version: link:../../tooling/eslint
+      "@example-app/prettier-config":
+        specifier: workspace:*
+        version: link:../../tooling/prettier
       "@example-app/tsconfig":
         specifier: workspace:*
         version: link:../../tooling/typescript
@@ -1024,6 +1027,9 @@ importers:
       eslint:
         specifier: "catalog:"
         version: 9.39.4(jiti@2.7.0)
+      prettier:
+        specifier: "catalog:"
+        version: 3.8.4
       typescript:
         specifier: "catalog:"
         version: 5.9.3
@@ -2507,14 +2513,14 @@ packages:
       {
         integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==,
       }
-    deprecated: "Merged into tsx: https://tsx.is"
+    deprecated: "Merged into tsx: https://tsx.hirok.io"
 
   "@esbuild-kit/esm-loader@2.6.5":
     resolution:
       {
         integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==,
       }
-    deprecated: "Merged into tsx: https://tsx.is"
+    deprecated: "Merged into tsx: https://tsx.hirok.io"
 
   "@esbuild/aix-ppc64@0.25.12":
     resolution:
@@ -11424,14 +11430,6 @@ packages:
       prettier-plugin-svelte:
         optional: true
 
-  prettier@3.8.3:
-    resolution:
-      {
-        integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==,
-      }
-    engines: { node: ">=14" }
-    hasBin: true
-
   prettier@3.8.4:
     resolution:
       {
@@ -16277,7 +16275,7 @@ snapshots:
   "@react-email/render@2.0.9(react-dom@19.2.0(react@19.2.0))(react@19.2.0)":
     dependencies:
       html-to-text: 9.0.5
-      prettier: 3.8.3
+      prettier: 3.8.4
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 
@@ -20180,8 +20178,6 @@ snapshots:
       prettier: 3.8.4
     optionalDependencies:
       "@ianvs/prettier-plugin-sort-imports": 4.7.1(prettier@3.8.4)
-
-  prettier@3.8.3: {}
 
   prettier@3.8.4: {}
 

@@ -62,5 +62,9 @@ console.log(
   "\n✅ Setup complete.\n" +
     "   Run `pnpm dev`, open http://localhost:3000, and sign in as\n" +
     "   admin@example.com — the magic link appears in MailHog at\n" +
-    "   http://localhost:8025.",
+    "   http://localhost:8025.\n\n" +
+    "   Note: this bootstrap uses `db:push` (fine for dev). For anything\n" +
+    "   beyond prototyping, use migrations: `pnpm db:generate` after schema\n" +
+    "   changes, commit packages/db/drizzle/, and run `pnpm db:migrate` on\n" +
+    "   deploy. See README.md → Database.",
 );
