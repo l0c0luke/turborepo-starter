@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17
     container_name: example-app-postgres
     restart: always
     environment:
@@ -16,7 +16,7 @@ services:
 
   mailhog:
     container_name: example-app-mailhog
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     ports:
       - "1025:1025"
       - "8025:8025"
