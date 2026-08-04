@@ -54,7 +54,6 @@ Perform find-and-replace across the entire codebase. **Every file listed below m
 - `packages/email/package.json` — `name` field, all `@example-app/*` dependencies
 - `packages/shared/package.json` — `name` field, all `@example-app/*` dependencies
 - `packages/validators/package.json` — `name` field, all `@example-app/*` dependencies
-- `tooling/eslint/package.json` — `name` field, all `@example-app/*` dependencies
 - `tooling/prettier/package.json` — `name` field, all `@example-app/*` dependencies
 - `tooling/typescript/package.json` — `name` field (if present)
 - `turbo/generators/config.ts` — scope reference in prompts and logic

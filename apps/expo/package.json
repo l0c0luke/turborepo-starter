@@ -10,7 +10,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
-    "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -65,11 +64,9 @@
     "@babel/core": "catalog:",
     "@babel/preset-env": "catalog:",
     "@babel/runtime": "catalog:",
-    "@example-app/eslint-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/babel__core": "catalog:",
     "@types/react": "catalog:react19",
-    "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   }

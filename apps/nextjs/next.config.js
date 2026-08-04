@@ -35,6 +35,15 @@ const config = {
   /** We already do linting and typechecking as separate tasks in CI */
   typescript: { ignoreBuildErrors: true },
 
+  experimental: {
+    /**
+     * TypeScript 7 dropped the compiler API Next.js used for its built-in type
+     * checks, so route the remaining checks through the TypeScript CLI.
+     * (`pnpm typecheck` is what actually gates types in CI.)
+     */
+    useTypeScriptCli: true,
+  },
+
   typedRoutes: true,
 
   async headers() {

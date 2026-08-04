@@ -9,11 +9,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   icon: "./assets/icon.svg",
   userInterfaceStyle: "automatic",
-  splash: {
-    image: "./assets/splash.svg",
-    resizeMode: "contain",
-    backgroundColor: "#3B82F6",
-  },
   updates: {
     fallbackToCacheTimeout: 0,
   },
@@ -46,6 +41,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-secure-store",
     "expo-web-browser",
     "expo-apple-authentication",
+    // SDK 57 moved the top-level `splash` config into this plugin.
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash.svg",
+        resizeMode: "contain",
+        backgroundColor: "#3B82F6",
+      },
+    ],
     [
       "@react-native-google-signin/google-signin",
       {

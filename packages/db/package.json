@@ -23,7 +23,6 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
     "push": "pnpm with-env drizzle-kit push --force",
     "studio": "pnpm with-env drizzle-kit studio",
     "seed": "pnpm with-env tsx src/seed.ts",
@@ -39,13 +38,11 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@example-app/eslint-config": "workspace:*",
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/pg": "catalog:",
     "dotenv-cli": "catalog:",
     "drizzle-kit": "catalog:",
-    "eslint": "catalog:",
     "prettier": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"

@@ -23,18 +23,15 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc --watch",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "schema-dts": "catalog:"
   },
   "devDependencies": {
-    "@example-app/eslint-config": "workspace:*",
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/react": "catalog:react19",
-    "eslint": "catalog:",
     "next": "catalog:",
     "prettier": "catalog:",
     "react": "catalog:",

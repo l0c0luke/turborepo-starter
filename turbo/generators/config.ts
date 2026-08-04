@@ -36,11 +36,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       },
       {
         type: "add",
-        path: "packages/{{ name }}/eslint.config.js",
-        templateFile: "templates/eslint.config.js.hbs",
-      },
-      {
-        type: "add",
         path: "packages/{{ name }}/package.json",
         templateFile: "templates/package.json.hbs",
       },
@@ -66,7 +61,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
               )
                 .then((res) => res.json())
                 .then((json) => json.latest);
-              if (!pkg.dependencies) pkg.dependencies = {};
               pkg.dependencies[dep] = `^${version}`;
             }
             return JSON.stringify(pkg, null, 2);

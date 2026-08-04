@@ -20,11 +20,7 @@ import { buttons, buttonText, colors, spacing } from "~/styles";
 import { buttonA11y } from "~/utils/accessibility";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "error";
+  "primary" | "secondary" | "outline" | "ghost" | "error";
 export type ButtonSize = "small" | "medium" | "large";
 
 interface ButtonProps {

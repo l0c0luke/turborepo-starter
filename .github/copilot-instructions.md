@@ -17,13 +17,14 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 
 ## Tech Stack
 
-- **Mobile**: Expo SDK 55 with SDK-aligned React Native, React 19
+- **Mobile**: Expo SDK 57 with SDK-aligned React Native, React 19
 - **Web**: Next.js 16 with React 19
 - **Authentication**: Better-Auth with OTP, Google, and Apple Sign In
 - **Database**: Drizzle ORM with PostgreSQL
 - **API**: tRPC for type-safe APIs
 - **Styling**: Tailwind CSS 4 (web), NativeWind 5 / Tailwind 4 (mobile)
 - **Monorepo**: Turborepo with PNPM 11
+- **Tooling**: TypeScript 7, oxlint (type-aware), Prettier, Vitest
 - **Node**: >= 22.13.0
 
 ---
@@ -251,8 +252,8 @@ pnpm db:push          # Push schema changes
 pnpm db:studio        # Open Drizzle Studio
 
 # Code Quality
-pnpm lint             # Run ESLint
-pnpm lint:fix         # Fix ESLint issues
+pnpm lint             # Run oxlint (type-aware)
+pnpm lint:fix         # Fix oxlint issues
 pnpm format:fix       # Fix formatting
 pnpm typecheck        # TypeScript check
 pnpm test             # Run Vitest

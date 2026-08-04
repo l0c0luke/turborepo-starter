@@ -26,14 +26,15 @@ renames them for a new project.
 
 ## Tech stack
 
-- **Mobile**: Expo SDK 55 (SDK-aligned React Native), React 19, NativeWind 5 (Tailwind 4)
+- **Mobile**: Expo SDK 57 (SDK-aligned React Native), React 19, NativeWind 5 (Tailwind 4)
 - **Web**: Next.js 16 (App Router, Turbopack), React 19, Tailwind 4, shadcn/ui
 - **Auth**: better-auth (email OTP, magic link, Google, Apple)
 - **DB**: Drizzle ORM + PostgreSQL
 - **API**: tRPC v11 (end-to-end type safety)
 - **Validation**: Zod v4 (`import { z } from "zod/v4"`)
 - **Errors**: Sentry (DSN-gated — inert until a DSN is set)
-- **Tests**: Vitest · **Monorepo**: Turborepo + pnpm 11 catalog · **Node** ≥ 22.13
+- **Tests**: Vitest · **Lint**: oxlint (type-aware, `.oxlintrc.json`) · **TypeScript 7**
+- **Monorepo**: Turborepo + pnpm 11 catalog · **Node** ≥ 22.13
 
 ## Layout
 
@@ -49,7 +50,7 @@ packages/
   validators/ # shared Zod schemas (server + client)
   shared/     # framework-agnostic utils: log, parseError, captureException
   analytics/ · seo/  # Next.js helpers
-tooling/      # eslint / prettier / typescript / github configs
+tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.json)
 ```
 
 ## Reference patterns (copy these)
@@ -71,7 +72,7 @@ tooling/      # eslint / prettier / typescript / github configs
 - **Imports**: `@example-app/*` for packages, `~/*` (web) or `@/*` (mobile) for local.
 - **Never** use `any`; strict TypeScript everywhere.
 - **Env**: import the validated `env` from `~/env` — never `process.env` directly
-  (enforced by eslint; `env.ts` and a few framework files are the only exceptions).
+  (enforced by oxlint; `env.ts` and a few framework files are the only exceptions).
 - **Web styling**: Tailwind + shadcn/ui (`src/_components/ui/`).
 - **Mobile styling**: NativeWind `className` (Tailwind) and/or design tokens from
   `@/styles` — never hardcode colors/spacing. Screens use the custom `NavigationBar`,
@@ -89,7 +90,7 @@ tooling/      # eslint / prettier / typescript / github configs
 pnpm setup         # one-time: .env + docker + db push + seed
 pnpm dev           # all dev servers (pnpm dev:next for web only)
 pnpm typecheck     # tsc across the workspace
-pnpm lint          # eslint   (lint:fix to autofix)
+pnpm lint          # oxlint (type-aware; lint:fix to autofix)
 pnpm format:fix    # prettier
 pnpm test          # vitest
 pnpm build         # production build

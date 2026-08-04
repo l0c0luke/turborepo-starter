@@ -15,7 +15,6 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -30,10 +29,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@example-app/eslint-config": "workspace:*",
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
-    "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },

@@ -29,7 +29,7 @@ A production-ready monorepo **skeleton** for building full-stack applications wi
 
 This monorepo contains everything you need to start building a full-stack application:
 
-- **Mobile App**: Expo SDK 55 with SDK-aligned React Native and React 19
+- **Mobile App**: Expo SDK 57 with SDK-aligned React Native and React 19
 - **Web App**: Next.js 16 with React 19
 - **Shared Packages**: Database, API, Authentication, Validation, and more
 
@@ -37,13 +37,14 @@ This monorepo contains everything you need to start building a full-stack applic
 
 | Category           | Technology                                      |
 | ------------------ | ----------------------------------------------- |
-| **Mobile**         | Expo SDK 55, React Native, React 19, NativeWind |
+| **Mobile**         | Expo SDK 57, React Native, React 19, NativeWind |
 | **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui |
 | **Authentication** | Better-Auth (OTP, Google, Apple Sign In)        |
 | **Database**       | Drizzle ORM, PostgreSQL                         |
 | **API**            | tRPC (end-to-end type safety)                   |
 | **Validation**     | Zod v4                                          |
 | **Monorepo**       | Turborepo, PNPM 11                              |
+| **Tooling**        | TypeScript 7, oxlint, Prettier, Vitest          |
 | **Runtime**        | Node.js >= 22.13.0                              |
 
 ## Features
@@ -132,7 +133,6 @@ seeded admin can reach the users admin at `/admin`.
 │   └── validators/           # Zod validation schemas
 │
 └── tooling/
-    ├── eslint/               # ESLint configuration
     ├── prettier/             # Prettier configuration
     └── typescript/           # TypeScript base configs
 ```
@@ -168,8 +168,8 @@ pnpm db:studio        # Open Drizzle Studio
 pnpm -F @example-app/db seed   # Re-seed dev data
 
 # Code Quality
-pnpm lint             # Run ESLint
-pnpm lint:fix         # Fix ESLint issues automatically
+pnpm lint             # Run oxlint (type-aware)
+pnpm lint:fix         # Fix oxlint issues automatically
 pnpm format:fix       # Fix Prettier formatting
 pnpm typecheck        # Run TypeScript type checking
 pnpm test             # Run Vitest
@@ -314,7 +314,7 @@ export const exampleRouter = createTRPCRouter({
 ### Standards
 
 - **TypeScript**: Strict mode enabled - never use `any`
-- **Linting**: ESLint with shared config in `tooling/eslint/`
+- **Linting**: [oxlint](https://oxc.rs) (Rust, type-aware via `oxlint-tsgolint`) configured in `.oxlintrc.json`
 - **Formatting**: Prettier with shared config in `tooling/prettier/`
 - **Validation**: Use Zod v4 (`import { z } from "zod/v4"`)
 
