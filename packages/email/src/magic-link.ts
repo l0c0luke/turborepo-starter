@@ -1,21 +1,22 @@
 import { render } from "react-email";
+
 import type { EmailSender } from "./sender";
 import type { MagicLinkEmailOptions } from "./types";
-import { MagicLinkEmailSchema } from "./types";
 import MagicLinkEmail from "./templates/magic-link";
+import { MagicLinkEmailSchema } from "./types";
 
 export class MagicLinkService {
   constructor(private emailSender: EmailSender) {}
 
   async sendMagicLink(options: MagicLinkEmailOptions): Promise<void> {
     const validatedOptions = MagicLinkEmailSchema.parse(options);
-    
+
     const html = await render(
       MagicLinkEmail({
         email: validatedOptions.email,
         url: validatedOptions.url,
         productName: validatedOptions.productName,
-      })
+      }),
     );
 
     const text = this.generatePlainText(validatedOptions);

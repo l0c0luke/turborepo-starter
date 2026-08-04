@@ -163,7 +163,9 @@ pnpm dev              # Start all development servers
 pnpm dev:next         # Start Next.js development server only
 
 # Database
-pnpm db:push          # Push schema changes to database
+pnpm db:push          # Push schema straight to the database (prototyping only)
+pnpm db:generate      # Generate SQL migrations from schema changes
+pnpm db:migrate       # Apply pending migrations (use this on deploy)
 pnpm db:studio        # Open Drizzle Studio
 pnpm -F @example-app/db seed   # Re-seed dev data
 
@@ -271,8 +273,18 @@ The app uses [Better-Auth](https://better-auth.js.org/) for authentication with 
 ### Schema Management
 
 - Schema files: `packages/db/src/schema.ts` and `packages/db/src/auth-schema.ts`
-- Push changes: `pnpm db:push`
+- Prototype changes: `pnpm db:push` (syncs the schema directly, no history)
+- Generate migrations: `pnpm db:generate`
+- Apply migrations: `pnpm db:migrate`
 - View data: `pnpm db:studio`
+
+**Migrations workflow** (use this for anything beyond local prototyping): after
+changing the schema, run `pnpm db:generate` to emit a SQL migration into
+`packages/db/drizzle/` and commit that folder alongside your schema change.
+On deploy, run `pnpm db:migrate` (or invoke `packages/db/src/migrate.ts`
+directly) before starting the server — it applies only the pending migrations
+and records them in the database. `db:push` is for local iteration only: it
+diffs and mutates the database in place with no history and can drop data.
 
 ### Drizzle ORM Usage
 

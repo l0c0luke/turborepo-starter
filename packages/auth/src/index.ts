@@ -8,6 +8,10 @@ import * as schema from "@example-app/db";
 import { db } from "@example-app/db/client";
 import { EmailSender, MagicLinkService, OTPService } from "@example-app/email";
 
+import { authEnv } from "../env";
+
+const isProduction = () => authEnv().NODE_ENV === "production";
+
 export function initAuth(options: {
   baseUrl: string;
   productionUrl: string;
@@ -83,11 +87,16 @@ export function initAuth(options: {
                 productName: "Example App",
               });
               console.log(`Magic link sent to ${email}`);
-            } else {
-              // Fallback for development or missing email config
-              console.log(`Magic link for ${email}: ${url}`);
+            } else if (!isProduction()) {
+              // Dev-only fallback when no email service is configured (e.g.
+              // before MailHog/SMTP is set up). Magic-link URLs are sign-in
+              // credentials — they must never reach production logs.
               console.warn(
-                "Email service not configured. Using console fallback.",
+                `Email service not configured. Magic link for ${email}: ${url}`,
+              );
+            } else {
+              throw new Error(
+                "Email service is not configured. Refusing to log a magic link in production — set EMAIL_SERVER_HOST/EMAIL_SERVER_PORT/EMAIL_FROM.",
               );
             }
           } catch (error) {
@@ -98,30 +107,28 @@ export function initAuth(options: {
       }),
       emailOTP({
         async sendVerificationOTP({ email, otp, type }) {
-          console.log(`🔥 sendVerificationOTP called with:`, {
-            email,
-            otp,
-            type,
-          });
-
           try {
             if (otpService) {
-              console.log(`📧 Using email service to send OTP`);
               await otpService.sendOTP({
                 email,
                 otp,
                 productName: "Example App",
               });
-              console.log(`✅ OTP sent to ${email}`);
-            } else {
-              // Fallback for development or missing email config
-              console.log(`📝 OTP for ${email}: ${otp}`);
+              console.log(`OTP (${type}) sent to ${email}`);
+            } else if (!isProduction()) {
+              // Dev-only fallback when no email service is configured (e.g.
+              // before MailHog/SMTP is set up). OTPs are credentials — they
+              // must never reach production logs.
               console.warn(
-                "⚠️ Email service not configured. Using console fallback.",
+                `Email service not configured. OTP for ${email}: ${otp}`,
+              );
+            } else {
+              throw new Error(
+                "Email service is not configured. Refusing to log an OTP in production — set EMAIL_SERVER_HOST/EMAIL_SERVER_PORT/EMAIL_FROM.",
               );
             }
           } catch (error) {
-            console.error("❌ Failed to send OTP:", error);
+            console.error("Failed to send OTP:", error);
             throw error;
           }
         },

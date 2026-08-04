@@ -30,6 +30,48 @@ Point the platform at this repo and set the project root to `apps/nextjs`.
 Add the environment variables from `.env.example`. These platforms detect Next.js
 and the `standalone` output automatically.
 
+### Option C — Coolify (self-hosted PaaS)
+
+Coolify can build and run the included Dockerfile directly from your Git repo.
+
+1. **App resource** — create an Application from your Git repository. Set the
+   build pack to **Dockerfile**, the Dockerfile location to
+   `apps/nextjs/Dockerfile`, and keep the **build context at the repository
+   root** (the whole pnpm workspace must be in the build context). Exposed
+   port: `3000`.
+2. **Database** — add a Coolify-managed PostgreSQL resource. Pin a major
+   version (e.g. `postgres:17` to match `docker-compose.yml`) rather than
+   `latest` — an unplanned major bump will refuse to start against the old
+   data volume. Point `POSTGRES_URL` at the internal connection URL Coolify
+   shows for the database.
+3. **Environment variables** — enter the values from `.env.example` in the
+   application's _Environment Variables_ tab (mark secrets like `AUTH_SECRET`
+   as build-time hidden/runtime only). The image builds with
+   `SKIP_ENV_VALIDATION=1`; env vars are validated when the container starts.
+4. **Migrations on start** — run pending migrations before the server boots.
+   Replace the container start command with a small wrapper (or bake a
+   `start.sh` into the image):
+
+   ```sh
+   #!/bin/sh
+   set -e
+   pnpm --filter @example-app/db migrate   # runs packages/db/src/migrate.ts
+   exec node apps/nextjs/server.js
+   ```
+
+   Note the runtime image only contains the standalone server output — if you
+   use this pattern, copy `packages/db` (and its `drizzle/` folder) into the
+   runner stage, or run migrations as a separate deploy step/one-off command
+   (`MIGRATIONS_DIR` lets `migrate.ts` find the folder wherever you copy it).
+
+5. **Health check** — set the health check path to `/api/health`. It returns
+   `503` when the database is unreachable, so Coolify will hold traffic until
+   the app can actually serve it.
+6. **Persistent storage** — the app itself is stateless (sessions live in
+   Postgres). If you add user uploads, write them to a directory backed by a
+   Coolify **persistent volume** (or better, object storage) — anything else
+   on the container filesystem is lost on every redeploy.
+
 ### Health check
 
 `GET /api/health` returns `{ status, db }` and a `503` when the database is

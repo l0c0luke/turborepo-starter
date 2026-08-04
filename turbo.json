@@ -32,6 +32,12 @@
     "//#clean": {
       "cache": false
     },
+    "generate": {
+      "cache": false
+    },
+    "migrate": {
+      "cache": false
+    },
     "push": {
       "cache": false,
       "interactive": true
@@ -47,6 +53,7 @@
   },
   "globalEnv": [
     "POSTGRES_URL",
+    "MIGRATIONS_DIR",
     "AUTH_GOOGLE_ID",
     "AUTH_GOOGLE_SECRET",
     "AUTH_REDIRECT_PROXY_URL",
