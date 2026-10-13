@@ -35,17 +35,17 @@ This monorepo contains everything you need to start building a full-stack applic
 
 ### Key Technologies
 
-| Category           | Technology                                      |
-| ------------------ | ----------------------------------------------- |
-| **Mobile**         | Expo SDK 57, React Native, React 19, NativeWind |
-| **Web**            | Next.js 16, React 19, Tailwind CSS 4, shadcn/ui |
-| **Authentication** | Better-Auth (OTP, Google, Apple Sign In)        |
-| **Database**       | Drizzle ORM, PostgreSQL                         |
-| **API**            | tRPC (end-to-end type safety)                   |
-| **Validation**     | Zod v4                                          |
-| **Monorepo**       | Turborepo, PNPM 11                              |
-| **Tooling**        | TypeScript 7, oxlint, Prettier, Vitest          |
-| **Runtime**        | Node.js >= 22.13.0                              |
+| Category           | Technology                                             |
+| ------------------ | ------------------------------------------------------ |
+| **Mobile**         | Expo SDK 57, React Native 0.86, React 19, NativeWind 5 |
+| **Web**            | Next.js 16.4, React 19, Tailwind CSS 4, shadcn/ui      |
+| **Authentication** | Better-Auth 1.7 (OTP, Google, Apple Sign In)           |
+| **Database**       | Drizzle ORM (0.45), PostgreSQL                         |
+| **API**            | tRPC v11 (end-to-end type safety)                      |
+| **Validation**     | Zod v4                                                 |
+| **Monorepo**       | Turborepo 2.11, PNPM 11                                |
+| **Tooling**        | TypeScript 7, oxlint 1.88, Prettier, Vitest 5          |
+| **Runtime**        | Node.js >= 22.13.0                                     |
 
 ## Features
 

@@ -24,6 +24,7 @@
     "@example-app/tsconfig": "workspace:*",
     "prettier": "catalog:",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:"
   },
   "prettier": "@example-app/prettier-config"

@@ -9,7 +9,7 @@
     "moduleResolution": "Bundler",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "types": ["react"]
+    "types": ["react", "node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

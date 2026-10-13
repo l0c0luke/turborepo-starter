@@ -44,11 +44,11 @@ export const trpc = createTRPCProxyClient<AppRouter>({
     httpBatchLink({
       transformer: superjson,
       url: `${process.env.EXPO_PUBLIC_BASE_URL}/api/trpc`,
-      headers() {
+      async headers() {
         const headers = new Map<string, string>();
         headers.set("x-trpc-source", "expo-react");
 
-        const cookies = authClient.getCookie();
+        const cookies = await authClient.getCookie();
         if (cookies) {
           headers.set("Cookie", cookies);
         }

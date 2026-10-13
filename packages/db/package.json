@@ -42,6 +42,7 @@
   "devDependencies": {
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "@types/pg": "catalog:",
     "dotenv-cli": "catalog:",
     "drizzle-kit": "catalog:",

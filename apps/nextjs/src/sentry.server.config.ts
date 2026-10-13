@@ -12,7 +12,6 @@ if (dsn) {
   Sentry.init({
     dsn,
     tracesSampleRate: 1,
-    enableLogs: true,
   });
 
   // Route `captureException` / `log.error` from @example-app/shared to Sentry.

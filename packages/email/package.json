@@ -25,6 +25,7 @@
   "devDependencies": {
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "@types/nodemailer": "catalog:",
     "@types/react": "catalog:react19",
     "prettier": "catalog:",

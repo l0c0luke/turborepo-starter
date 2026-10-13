@@ -27,6 +27,7 @@
       { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
     ],
     "react/react-in-jsx-scope": "off",
+    "react/set-state-in-effect": "off",
     "import/no-unassigned-import": "off",
     "import/no-named-as-default-member": "off",
     "unicorn/consistent-function-scoping": "off",

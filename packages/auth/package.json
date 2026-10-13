@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "generate": "dotenv -e ../../.env -- pnpm dlx @better-auth/cli@1.4.21 generate --output ../db/src/auth-schema.ts",
+    "generate": "dotenv -e ../../.env -- pnpm dlx @better-auth/cli@1.7.7 generate --output ../db/src/auth-schema.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,6 +32,7 @@
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/jsonwebtoken": "catalog:",
+    "@types/node": "catalog:",
     "@types/react": "catalog:react19",
     "prettier": "catalog:",
     "typescript": "catalog:"

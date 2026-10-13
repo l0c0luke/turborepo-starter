@@ -9,7 +9,7 @@ import {
   loggerLink,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import SuperJSON from "superjson";
+import superjson from "superjson";
 
 import type { AppRouter } from "@example-app/api";
 
@@ -45,7 +45,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
                 false,
         }),
         httpBatchStreamLink({
-          transformer: SuperJSON,
+          transformer: superjson,
           url: getBaseUrl() + "/api/trpc",
           headers() {
             const headers = new Headers();

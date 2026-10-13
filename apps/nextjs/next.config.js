@@ -1,6 +1,6 @@
 import path from "node:path";
 import bundleAnalyzer from "@next/bundle-analyzer";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { createJiti } from "jiti";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -77,9 +77,6 @@ const config = {
 
 const nextConfig = withBundleAnalyzer(withNextIntl(config));
 
-// Sentry wraps the final config. With no SENTRY_AUTH_TOKEN it skips source-map
-// upload (a warning, not an error), so the build works out of the box and only
-// reports at runtime once a DSN is set.
 export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,

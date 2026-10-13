@@ -1,7 +1,7 @@
 {
   "extends": "@example-app/tsconfig/base.json",
   "compilerOptions": {
-    "types": []
+    "types": ["node"]
   },
   "include": ["src", "*.ts"],
   "exclude": ["node_modules"]

@@ -26,15 +26,15 @@ renames them for a new project.
 
 ## Tech stack
 
-- **Mobile**: Expo SDK 57 (SDK-aligned React Native), React 19, NativeWind 5 (Tailwind 4)
-- **Web**: Next.js 16 (App Router, Turbopack), React 19, Tailwind 4, shadcn/ui
-- **Auth**: better-auth (email OTP, magic link, Google, Apple)
-- **DB**: Drizzle ORM + PostgreSQL
+- **Mobile**: Expo SDK 57 (SDK-aligned React Native 0.86), React 19, NativeWind 5 (Tailwind 4)
+- **Web**: Next.js 16.4 (App Router, Turbopack), React 19, Tailwind 4, shadcn/ui
+- **Auth**: better-auth 1.7 (email OTP, magic link, Google, Apple)
+- **DB**: Drizzle ORM (0.45) + PostgreSQL
 - **API**: tRPC v11 (end-to-end type safety)
 - **Validation**: Zod v4 (`import { z } from "zod/v4"`)
-- **Errors**: Sentry (DSN-gated — inert until a DSN is set)
-- **Tests**: Vitest · **Lint**: oxlint (type-aware, `.oxlintrc.json`) · **TypeScript 7**
-- **Monorepo**: Turborepo + pnpm 11 catalog · **Node** ≥ 22.13
+- **Errors**: Sentry v11 (DSN-gated — inert until a DSN is set)
+- **Tests**: Vitest 5 · **Lint**: oxlint 1.88 (type-aware, `.oxlintrc.json`) · **TypeScript 7**
+- **Monorepo**: Turborepo 2.11 + pnpm 11 catalog · **Node** ≥ 22.13
 
 ## Layout
 

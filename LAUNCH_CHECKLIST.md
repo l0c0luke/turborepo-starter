@@ -24,7 +24,7 @@ Use this checklist before deploying to production. Each section covers a critica
 
 ## Database
 
-- [ ] Run `pnpm db:push` against production database
+- [ ] Run `pnpm db:migrate` against production database
 - [ ] Verify schema matches expected state
 - [ ] Set up database backups and point-in-time recovery
 - [ ] Configure connection pooling (PgBouncer or provider-managed)
