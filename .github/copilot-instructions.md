@@ -60,6 +60,11 @@ import { log, parseError } from "@example-app/shared";
 
 ## Expo App Guidelines
 
+### Location & Tooling
+
+- **Location**: The mobile app **must always remain in the `apps/` directory** (`apps/expo`). Never move it to the repository root, never extract it outside `apps/`, and never scaffold mobile files outside `apps/expo`.
+- **Package Manager**: **Always use `pnpm`** (e.g., `pnpm ios`, `pnpm android`, `pnpm --filter @example-app/expo ...`). Never use `npm`, `yarn`, `bun`, or raw `npx expo`.
+
 ### Styling
 
 - The Expo app uses **NativeWind 5** (Tailwind 4 for React Native) — use `className` on components (CSS-first: theme in `apps/expo/src/global.css`, wired via `metro.config.js`)
@@ -277,3 +282,5 @@ pnpm build            # Build all packages
 5. **Follow existing patterns** - Look at similar code in the codebase before implementing new features
 6. **Export from index files** - Always export new modules from their package's index.ts
 7. **Use path aliases** - Use `@/` for local imports within apps, `@example-app/` for packages
+8. **Always use pnpm** - Never use `npm`, `yarn`, `bun`, or raw `npx` commands that bypass workspace dependencies.
+9. **Keep mobile in apps/** - The mobile app must stay in `apps/expo` inside the `apps/` directory. Never move or extract it to root.

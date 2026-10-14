@@ -201,18 +201,20 @@ All packages use the `@example-app/` scope and are located in `packages/`:
 
 ## Mobile Development
 
+The mobile app lives strictly in `apps/expo` within the `apps/` directory and is managed via `pnpm`.
+
 ### iOS Setup
 
 ```bash
-cd apps/expo
-npx expo run:ios
+pnpm ios
+# or: cd apps/expo && pnpm ios
 ```
 
 ### Android Setup
 
 ```bash
-cd apps/expo
-npx expo run:android
+pnpm android
+# or: cd apps/expo && pnpm android
 ```
 
 ### Expo Styling Guidelines

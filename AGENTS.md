@@ -41,6 +41,7 @@ renames them for a new project.
 ```
 apps/
   expo/      # React Native app — app/ screens, components/ui, styles/ tokens, utils/
+             # (MUST remain in apps/expo — never move to root or outside apps/)
   nextjs/    # Next.js app — src/app routes, src/_components/ui shadcn, src/trpc, src/auth
 packages/
   api/        # tRPC routers (router/) + root.ts + trpc.ts
@@ -69,6 +70,13 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 
 ## Conventions
 
+- **Package manager**: **Always use `pnpm`**. Never use `npm`, `yarn`, or `bun`.
+  Never run raw `npx` commands that bypass workspace dependencies — use `pnpm dlx`,
+  `pnpm exec`, or root package scripts. All dependencies, migrations, scripts, and
+  app commands must be run through `pnpm`.
+- **Mobile app directory**: The mobile app **must always remain in the `apps/` directory**
+  (`apps/expo`). Never move it to the repository root, never extract it into a separate
+  standalone repository or root-level folder, and never generate mobile code outside `apps/expo`.
 - **Imports**: `@example-app/*` for packages, `~/*` (web) or `@/*` (mobile) for local.
 - **Never** use `any`; strict TypeScript everywhere.
 - **Env**: import the validated `env` from `~/env` — never `process.env` directly
@@ -89,6 +97,8 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 ```bash
 pnpm setup         # one-time: .env + docker + db push + seed
 pnpm dev           # all dev servers (pnpm dev:next for web only)
+pnpm ios           # run expo iOS app
+pnpm android       # run expo Android app
 pnpm typecheck     # tsc across the workspace
 pnpm lint          # oxlint (type-aware; lint:fix to autofix)
 pnpm format:fix    # prettier

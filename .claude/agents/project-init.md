@@ -27,6 +27,8 @@ Follow the complete step-by-step procedure in
 
 ## Constraints
 
+- Always use `pnpm` (never `npm`, `yarn`, `bun`, or raw `npx`).
+- Mobile app must remain in `apps/expo` within the `apps/` directory — never move it to the root or outside `apps/`.
 - Never use `any`; never read `process.env` directly (use `~/env`); always import
   Zod from `zod/v4`.
 - Mobile: design tokens from `@/styles`, custom `NavigationBar`, no hardcoded

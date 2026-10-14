@@ -30,6 +30,8 @@ This template is a **bare-bones skeleton** — there is no demo content to remov
 
 ## Constraints
 
+- MUST KEEP MOBILE APP IN `apps/`: The mobile app must always stay in `apps/expo` within the `apps/` directory — NEVER move it to the repo root or outside `apps/`
+- ALWAYS USE `pnpm`: Never use `npm`, `yarn`, `bun`, or raw `npx` — all commands, scripts, and package installations must use `pnpm`
 - DO NOT skip mechanical replacements — every `@example-app/` reference must be updated
 - DO NOT use `any` types — always use proper TypeScript typing
 - DO NOT hardcode colors or spacing in Expo — use the design system from `@/styles`

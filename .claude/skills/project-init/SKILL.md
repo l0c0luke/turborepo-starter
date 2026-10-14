@@ -209,6 +209,8 @@ Create pages under `apps/nextjs/src/app/`:
 
 Create screens under `apps/expo/src/app/`:
 
+- The mobile app must remain strictly in the `apps/` directory (`apps/expo`) — never move it to the root or create mobile screens elsewhere.
+- Always use `pnpm` for all mobile commands and dependency additions (e.g. `pnpm --filter @{scope}/expo add <pkg>`).
 - Follow the existing authed-screen pattern in `home.tsx`, and register each new
   screen in `apps/expo/src/app/_layout.tsx`
 - Use the design system from `@/styles` — never hardcode colors/spacing
@@ -275,6 +277,8 @@ Remind the user to:
 
 | Pattern             | Rule                                                                |
 | ------------------- | ------------------------------------------------------------------- |
+| Package manager     | ALWAYS use `pnpm` — never `npm`, `yarn`, `bun`, or raw `npx`        |
+| Mobile app location | MUST stay in `apps/expo` inside `apps/` — never move to root        |
 | Imports             | Use `@{scope}/` for packages, `@/` for local                        |
 | Zod                 | Always `import { z } from "zod/v4"`                                 |
 | Styling (web)       | Tailwind CSS + shadcn/ui components                                 |
