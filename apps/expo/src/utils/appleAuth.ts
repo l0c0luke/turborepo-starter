@@ -40,16 +40,18 @@ export async function isAppleAuthAvailable(): Promise<boolean> {
 }
 
 /**
- * Generate a cryptographically random nonce for Apple Sign In
+ * Generate a cryptographically random nonce for Apple Sign In.
+ *
+ * Uses the platform CSPRNG via expo-crypto (Math.random is predictable and
+ * must not be used for nonces). The charset has exactly 64 characters, so
+ * `byte % 64` maps every random byte without modulo bias.
  */
 function generateNonce(): string {
   const charset =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._";
-  let result = "";
-  for (let i = 0; i < 32; i++) {
-    result += charset.charAt(Math.floor(Math.random() * charset.length));
-  }
-  return result;
+  return Array.from(Crypto.getRandomBytes(32), (byte) =>
+    charset.charAt(byte % charset.length),
+  ).join("");
 }
 
 /**
