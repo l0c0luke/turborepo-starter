@@ -412,8 +412,11 @@ See [DEPLOY.md](DEPLOY.md) for full details. In short:
 ### Web (Next.js)
 
 Builds to a self-contained server via `output: "standalone"`. Deploy with the
-included `apps/nextjs/Dockerfile` (build from the repo root) or any Node host
-(Vercel, Railway, Fly.io, AWS, …):
+included `apps/nextjs/Dockerfile` (build from the repo root; it uses
+`turbo prune --docker` so only the web app's dependency graph is installed and
+the install layer stays cached, runs as a non-root user, and has a
+`HEALTHCHECK` on `/api/health`) or any Node host (Vercel, Railway, Fly.io,
+AWS, …):
 
 ```bash
 docker build -f apps/nextjs/Dockerfile -t example-app-web .

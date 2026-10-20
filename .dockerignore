@@ -1,6 +1,7 @@
 # Keep the Docker build context lean. All workspace package.json files and
-# source must remain so pnpm can install the workspace; only build artifacts,
-# installed deps, and secrets are excluded.
+# source must remain so `turbo prune` (apps/nextjs/Dockerfile) can compute the
+# pruned workspace; only build artifacts, installed deps, native project dirs
+# and secrets are excluded.
 **/node_modules
 **/.next
 **/dist
@@ -10,8 +11,13 @@
 .git
 .github
 **/.env
+**/.env.*
 .env
 !.env.example
+out
+coverage
+apps/expo/ios
+apps/expo/android
 *.log
 Dockerfile
 **/Dockerfile

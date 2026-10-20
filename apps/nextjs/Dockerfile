@@ -6,29 +6,47 @@
 #   docker build -f apps/nextjs/Dockerfile -t example-app-web .
 #   docker run -p 3000:3000 --env-file .env example-app-web
 #
+# Stages: `turbo prune --docker` reduces the workspace to @example-app/nextjs
+# and the packages it depends on, so the dependency-install layer is keyed
+# only on their package.json files + the pruned lockfile and stays cached
+# across source-only changes; the runner ships just the standalone server.
 # See DEPLOY.md for details.
 
-FROM node:24.22.0-alpine3.24@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
+# Node 24 LTS, pinned by exact version AND digest (Renovate updates both).
+# Keep in step with .nvmrc / engines / apps/expo/eas.json.
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV NEXT_TELEMETRY_DISABLED=1
+# pnpm comes from corepack, pinned by `packageManager` in package.json.
 RUN corepack enable
 WORKDIR /app
 
-# --- Build the app -----------------------------------------------------------
-FROM base AS builder
+# --- 1. Prune the workspace to the web app's dependency graph ----------------
+FROM base AS pruner
 COPY . .
+# Run the same turbo version the lockfile pins, so prune output matches it.
+RUN TURBO_VERSION="$(sed -n 's/^  turbo@\([0-9][^:(]*\):$/\1/p' pnpm-lock.yaml | head -n 1)" \
+    && pnpm dlx "turbo@${TURBO_VERSION:?turbo not found in pnpm-lock.yaml}" \
+       prune @example-app/nextjs --docker
+
+# --- 2. Install deps (cached until a pruned manifest/lockfile changes), build -
+FROM base AS builder
+COPY --from=pruner /app/out/json/ .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
+COPY --from=pruner /app/out/full/ .
 # Env is validated at runtime, not build time.
 ENV SKIP_ENV_VALIDATION=1
 RUN pnpm turbo run build --filter=@example-app/nextjs
 
-# --- Run the standalone server ----------------------------------------------
+# --- 3. Run the standalone server as a non-root user ------------------------
 FROM base AS runner
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+    && adduser --system --uid 1001 --ingroup nodejs nextjs
 
 # `output: "standalone"` + `outputFileTracingRoot` (next.config.js) emit a
 # self-contained server under .next/standalone, preserving the monorepo layout.
@@ -38,7 +56,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/nextjs/public ./apps/nextjs/
 
 USER nextjs
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+
+# Probes GET /api/health (200 when the app can reach Postgres, 503 when not).
+# Uses Node's built-in fetch, so it needs no curl/wget in the image. Platforms
+# with their own probes (Kubernetes, Cloud Run, Coolify) can point at the
+# same path; Docker/Compose/Swarm use this directly.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "-e", "fetch(`http://127.0.0.1:${process.env.PORT ?? 3000}/api/health`).then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 
 CMD ["node", "apps/nextjs/server.js"]

@@ -19,7 +19,27 @@ docker build -f apps/nextjs/Dockerfile -t example-app-web .
 docker run -p 3000:3000 --env-file .env example-app-web
 ```
 
-The image runs `node apps/nextjs/server.js` as a non-root user on port 3000.
+How the image is built:
+
+1. **Prune** — `turbo prune @example-app/nextjs --docker` (same turbo version as
+   the lockfile) reduces the workspace to the web app and the packages it
+   depends on: `out/json` (manifests + pruned lockfile) and `out/full` (sources).
+2. **Install, then build** — `pnpm install --frozen-lockfile` runs on the
+   manifests alone, so that layer stays cached until a dependency changes
+   (source-only edits skip straight to the build); then
+   `turbo run build --filter=@example-app/nextjs`. Packages the web app doesn't
+   use (e.g. `apps/expo`) never enter the image.
+3. **Run** — only the standalone server, static assets and `public/`, on a
+   Node 24 LTS Alpine base pinned by version **and digest** (Renovate bumps
+   both). Runs as the non-root `nextjs` user (uid 1001) on port 3000, with a
+   `HEALTHCHECK` that probes `GET /api/health` using Node's built-in `fetch`
+   (no curl/wget needed) — the container reports `unhealthy` while the
+   database is unreachable.
+
+Building on Apple Silicon for an amd64 host (most cloud runtimes)? Add
+`--platform linux/amd64` to `docker build`.
+
+The image runs `node apps/nextjs/server.js`.
 Provide real environment variables at runtime (see `.env.example`). Note: Docker's
 `--env-file` expects plain `KEY=VALUE` lines (no inline `#` comments) — the bundled
 `.env.example` is already compatible, or pass `-e` flags / your platform's secrets UI.
@@ -75,12 +95,17 @@ Coolify can build and run the included Dockerfile directly from your Git repo.
 ### Health check
 
 `GET /api/health` returns `{ status, db }` and a `503` when the database is
-unreachable — wire it into your platform's health probe / uptime monitor.
+unreachable — wire it into your platform's health probe / uptime monitor. The
+Docker image's `HEALTHCHECK` uses the same endpoint (interval 30 s, 30 s start
+period, 3 retries). If your orchestrator restarts unhealthy containers and you
+don't want a database outage to cause restart loops, point its liveness probe
+at a path that doesn't touch the database and keep `/api/health` for readiness.
 
 ## Mobile (Expo)
 
-Use EAS Build (`apps/expo/eas.json`). Set the EAS project id and bundle ids in
-`apps/expo/app.config.ts`, then:
+Use EAS Build (`apps/expo/eas.json` — pins the same Node 24 and pnpm versions
+as `.nvmrc` / `packageManager`; keep them in step). Set the EAS project id and
+bundle ids in `apps/expo/app.config.ts`, then:
 
 ```bash
 pnpm --filter @example-app/expo exec eas build --platform ios

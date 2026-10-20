@@ -123,5 +123,8 @@ format on commit and typecheck/lint on push.
 ## Deploy
 
 `output: "standalone"` Next.js build → `apps/nextjs/Dockerfile` (build from repo
-root) or any Node host. Health probe: `GET /api/health`. See `DEPLOY.md` and
+root; `turbo prune --docker` → cached install → build → non-root runner with a
+`/api/health` `HEALTHCHECK`, Node 24 base pinned by digest) or any Node host.
+If you add a workspace package the web app imports, `turbo prune` picks it up
+automatically — no Dockerfile edit needed. Health probe: `GET /api/health`. See `DEPLOY.md` and
 `LAUNCH_CHECKLIST.md`. Dependencies are kept current via `renovate.json`.
