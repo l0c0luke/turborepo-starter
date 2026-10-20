@@ -34,7 +34,7 @@ renames them for a new project.
 - **Validation**: Zod v4 (`import { z } from "zod/v4"`)
 - **Errors**: Sentry v11 (DSN-gated — inert until a DSN is set)
 - **Tests**: Vitest 5 · **Lint**: oxlint 1.88 (type-aware, `.oxlintrc.json`) · **TypeScript 7**
-- **Monorepo**: Turborepo 2.11 + pnpm 11 catalog · **Node** ≥ 22.13
+- **Monorepo**: Turborepo 2.11 + pnpm 11 catalog · **Node** 24 LTS (`.nvmrc`)
 
 ## Layout
 

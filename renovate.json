@@ -24,6 +24,11 @@
       "groupName": "react"
     },
     {
+      "description": "Stay on the Node 24 LTS line (.nvmrc, engines, Dockerfile, eas.json, @types/node). Move to the next LTS deliberately, updating all of them together",
+      "matchPackageNames": ["node", "@types/node"],
+      "allowedVersions": "<25"
+    },
+    {
       "description": "Group Radix UI primitives",
       "matchPackageNames": ["@radix-ui/*"],
       "groupName": "radix-ui"

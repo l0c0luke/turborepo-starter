@@ -45,7 +45,7 @@ This monorepo contains everything you need to start building a full-stack applic
 | **Validation**     | Zod v4                                                 |
 | **Monorepo**       | Turborepo 2.11, PNPM 11                                |
 | **Tooling**        | TypeScript 7, oxlint 1.88, Prettier, Vitest 5          |
-| **Runtime**        | Node.js >= 22.13.0                                     |
+| **Runtime**        | Node.js 24 LTS (`.nvmrc`; engines `>=24.11.0`)         |
 
 ## Features
 
@@ -67,7 +67,7 @@ This monorepo contains everything you need to start building a full-stack applic
 
 ### Prerequisites
 
-- Node.js >= 22.13.0
+- Node.js 24 LTS (`nvm use` reads `.nvmrc`; engines require `>=24.11.0`)
 - PNPM 11 (`corepack enable`)
 - Docker (for PostgreSQL and MailHog)
 

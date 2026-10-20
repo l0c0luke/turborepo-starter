@@ -25,7 +25,7 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 - **Styling**: Tailwind CSS 4 (web), NativeWind 5 / Tailwind 4 (mobile)
 - **Monorepo**: Turborepo with PNPM 11
 - **Tooling**: TypeScript 7, oxlint (type-aware), Prettier, Vitest
-- **Node**: >= 22.13.0
+- **Node**: 24 LTS (`.nvmrc`; engines `>=24.11.0`)
 
 ---
 
