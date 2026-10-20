@@ -7,7 +7,10 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    EMAIL_SERVER_HOST: z.string().default("email-smtp.us-east-1.amazonaws.com"),
+    // No default host: when unset, sign-in emails are logged in development
+    // and refused in production (packages/auth), instead of silently trying a
+    // provider you never configured.
+    EMAIL_SERVER_HOST: z.string().optional(),
     EMAIL_SERVER_PORT: z.coerce.number().default(587),
     EMAIL_SERVER_USER: z.string().optional(),
     EMAIL_SERVER_PASSWORD: z.string().optional(),
