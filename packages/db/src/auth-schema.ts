@@ -52,3 +52,13 @@ export const verification = pgTable("verification", (t) => ({
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t.timestamp().defaultNow().notNull(),
 }));
+
+// Better Auth rate-limit counters (`rateLimit.storage: "database"` in
+// packages/auth). Stored in Postgres so limits hold across server instances —
+// the default in-memory store is per-process and resets on every deploy.
+export const rateLimit = pgTable("rate_limit", (t) => ({
+  id: t.text().primaryKey(),
+  key: t.text().notNull().unique(),
+  count: t.integer().notNull(),
+  lastRequest: t.bigint({ mode: "number" }).notNull(),
+}));

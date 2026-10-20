@@ -62,7 +62,6 @@
     "emailSentDescription": "We've sent you a magic link to sign in. Check your inbox and click the link to continue.",
     "enterEmailAddress": "Enter your email address",
     "sendingLink": "Sending link...",
-    "sendSignInLink": "Send sign-in link",
-    "providerNotConfigured": "This sign-in method is not configured"
+    "sendSignInLink": "Send sign-in link"
   }
 }

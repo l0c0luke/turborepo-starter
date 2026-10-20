@@ -28,13 +28,13 @@ renames them for a new project.
 
 - **Mobile**: Expo SDK 57 (SDK-aligned React Native 0.86), React 19, NativeWind 5 (Tailwind 4)
 - **Web**: Next.js 16.4 (App Router, Turbopack), React 19, Tailwind 4, shadcn/ui
-- **Auth**: better-auth 1.7 (email OTP, magic link, Google, Apple)
+- **Auth**: better-auth 1.7 (email OTP, magic link; Google/Apple optional — on only when their env vars are set)
 - **DB**: Drizzle ORM (0.45) + PostgreSQL
 - **API**: tRPC v11 (end-to-end type safety)
 - **Validation**: Zod v4 (`import { z } from "zod/v4"`)
 - **Errors**: Sentry v11 (DSN-gated — inert until a DSN is set)
 - **Tests**: Vitest 5 · **Lint**: oxlint 1.88 (type-aware, `.oxlintrc.json`) · **TypeScript 7**
-- **Monorepo**: Turborepo 2.11 + pnpm 11 catalog · **Node** ≥ 22.13
+- **Monorepo**: Turborepo 2.11 + pnpm 11 catalog · **Node** 24 LTS (`.nvmrc`)
 
 ## Layout
 
@@ -56,7 +56,7 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 
 ## Reference patterns (copy these)
 
-- **Auth loop**: `apps/nextjs/src/app/login/page.tsx` → `src/proxy.ts` (gating) →
+- **Auth loop**: `apps/nextjs/src/app/login/page.tsx` (form: `src/_components/auth/LoginForm.tsx`) → `src/proxy.ts` (gating) →
   `src/app/page.tsx` (authed landing). Mobile: `apps/expo/src/app/index.tsx` → `home.tsx`.
 - **Protected, role-gated feature** (the canonical example): the **users admin** —
   `packages/api/src/router/admin.ts` (`adminProcedure` + validators in
@@ -89,6 +89,12 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 - **i18n**: all web user-facing strings via `next-intl`; files in
   `apps/nextjs/src/languages/` (`en`, `es` — add a file + a `lib/locale.ts` entry per locale).
 - **API**: tRPC only — no custom fetch wrappers. **DB**: Drizzle via `@example-app/db/client`.
+- **Auth security defaults** (`packages/auth/src/index.ts`): 5-minute session
+  cookie cache (role/`isAdmin` changes and revocations apply within 5 min),
+  database-backed rate limiting (`rate_limit` table), and an explicit origin
+  allow-list — extra browser origins go in `TRUSTED_ORIGINS` (feeds Better
+  Auth `trustedOrigins` and the `/api/trpc` CORS headers). Never reintroduce
+  `Access-Control-Allow-Origin: *`.
 - **Errors**: report via Sentry; server/shared code can use `captureException` from
   `@example-app/shared` (forwards to Sentry when a DSN is set).
 
@@ -101,6 +107,7 @@ pnpm ios           # run expo iOS app
 pnpm android       # run expo Android app
 pnpm typecheck     # tsc across the workspace
 pnpm lint          # oxlint (type-aware; lint:fix to autofix)
+pnpm lint:ws       # sherif workspace lint (pinned devDependency; runs in CI, not on install)
 pnpm format:fix    # prettier
 pnpm test          # vitest
 pnpm build         # production build
@@ -116,5 +123,8 @@ format on commit and typecheck/lint on push.
 ## Deploy
 
 `output: "standalone"` Next.js build → `apps/nextjs/Dockerfile` (build from repo
-root) or any Node host. Health probe: `GET /api/health`. See `DEPLOY.md` and
+root; `turbo prune --docker` → cached install → build → non-root runner with a
+`/api/health` `HEALTHCHECK`, Node 24 base pinned by digest) or any Node host.
+If you add a workspace package the web app imports, `turbo prune` picks it up
+automatically — no Dockerfile edit needed. Health probe: `GET /api/health`. See `DEPLOY.md` and
 `LAUNCH_CHECKLIST.md`. Dependencies are kept current via `renovate.json`.

@@ -18,6 +18,12 @@ overrides:
   # Keep a single esbuild across the tree; mixed versions break its
   # postinstall binary check (drizzle-kit still pulls the legacy @esbuild-kit).
   esbuild: ^0.28.2
+  # Keep a single @types/node across the tree. Without this, tools such as
+  # @turbo/gen pull a newer @types/node, and (with autoInstallPeers: false +
+  # the hoisted linker) `next` gets installed as two peer variants — one at the
+  # root, one under apps/nextjs — whose NextConfig types don't match, failing
+  # `pnpm typecheck` on apps/nextjs/next.config.js. Tracks the catalog version.
+  "@types/node": "catalog:"
 
 catalog:
   # --- Auth ---
@@ -152,6 +158,9 @@ catalog:
   oxlint: ^1.88.0
   oxlint-tsgolint: ^7.0.2004
   prettier: ^3.9.10
+  # Workspace/monorepo linter (`pnpm lint:ws`; runs in CI). Pinned exactly so
+  # local runs and CI agree; Renovate bumps it.
+  sherif: 1.13.0
   typescript: ^7.0.2
   turbo: ^2.11.8
   "@turbo/gen": ^2.11.8
@@ -166,8 +175,9 @@ catalog:
   prettier-plugin-tailwindcss: ^0.8.1
 
   # --- Type definitions ---
-  # NOTE: @types/node stays on 22.x to match the Node 22 runtime (not 26.x).
-  "@types/node": ^22.20.5
+  # NOTE: @types/node tracks the Node 24 LTS runtime (.nvmrc / engines /
+  # Dockerfile / eas.json) — bump it together with those, not to the latest major.
+  "@types/node": ^24.19.2
   "@types/nodemailer": ^8.0.2
   "@types/pg": ^8.23.1
   "@types/jsonwebtoken": ^9.0.10

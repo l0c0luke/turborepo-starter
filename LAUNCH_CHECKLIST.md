@@ -16,9 +16,9 @@ Use this checklist before deploying to production. Each section covers a critica
 
 ## Authentication
 
-- [ ] Configure Google OAuth credentials for production redirect URIs
-- [ ] Configure Apple Sign In with correct Service ID and redirect URIs
-- [ ] Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` and `NEXT_PUBLIC_APPLE_AUTH_ENABLED` as needed
+- [ ] Decide which social providers to offer — each is on only when its credentials are set (leave them unset to disable)
+- [ ] Google (if used): `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` with production redirect URIs; `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` for mobile builds
+- [ ] Apple (if used): Services ID (`APPLE_CLIENT_ID`), a current `APPLE_CLIENT_SECRET` (expires ≤ 6 months — calendar the rotation), `APPLE_APP_BUNDLE_ID`, redirect URIs; `EXPO_PUBLIC_APPLE_AUTH_ENABLED="true"` for iOS builds
 - [ ] Verify OTP email delivery works end-to-end
 - [ ] Test all auth flows on production domain
 
@@ -68,9 +68,10 @@ Use this checklist before deploying to production. Each section covers a critica
 ## Security
 
 - [ ] Run `pnpm audit` and resolve critical vulnerabilities
-- [ ] Verify CORS configuration for production domains
-- [ ] Review rate limiting on auth endpoints
-- [ ] Ensure no secrets are committed to the repository
+- [ ] Set `TRUSTED_ORIGINS` only to origins that really need cross-origin API/auth access (empty = same-origin only; it is the `/api/trpc` CORS allow-list)
+- [ ] Review rate limiting on auth endpoints (counters live in the Postgres `rate_limit` table — make sure your migrations create it) and that the client-IP header your proxy sets is one Better Auth reads
+- [ ] Confirm the 5-minute session cookie cache is acceptable (role changes / revocations take up to 5 min) — see README "Security defaults"
+- [ ] Ensure no secrets are committed to the repository (CI `secret-scan` job runs gitleaks over the full history; locally: `gitleaks git --redact .`)
 - [ ] Verify `.env` is in `.gitignore`
 
 ## Final Verification

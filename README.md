@@ -39,19 +39,19 @@ This monorepo contains everything you need to start building a full-stack applic
 | ------------------ | ------------------------------------------------------ |
 | **Mobile**         | Expo SDK 57, React Native 0.86, React 19, NativeWind 5 |
 | **Web**            | Next.js 16.4, React 19, Tailwind CSS 4, shadcn/ui      |
-| **Authentication** | Better-Auth 1.7 (OTP, Google, Apple Sign In)           |
+| **Authentication** | Better-Auth 1.7 (OTP; optional Google, Apple Sign In)  |
 | **Database**       | Drizzle ORM (0.45), PostgreSQL                         |
 | **API**            | tRPC v11 (end-to-end type safety)                      |
 | **Validation**     | Zod v4                                                 |
 | **Monorepo**       | Turborepo 2.11, PNPM 11                                |
 | **Tooling**        | TypeScript 7, oxlint 1.88, Prettier, Vitest 5          |
-| **Runtime**        | Node.js >= 22.13.0                                     |
+| **Runtime**        | Node.js 24 LTS (`.nvmrc`; engines `>=24.11.0`)         |
 
 ## Features
 
 ### Mobile App (Expo)
 
-- 🔐 **Authentication** - OTP, Google, and Apple Sign In
+- 🔐 **Authentication** - Email OTP, plus optional Google and Apple Sign In
 - 📱 **Cross-Platform** - iOS and Android support
 - 🎨 **Design System** - Centralized styling with design tokens
 - 🧭 **Custom Navigation** - Consistent custom navigation bar
@@ -59,7 +59,7 @@ This monorepo contains everything you need to start building a full-stack applic
 ### Web Dashboard (Next.js)
 
 - 👤 **User Management** - User authentication and profiles
-- 🔑 **Multi-Provider Auth** - OTP, Google, and Apple Sign In
+- 🔑 **Multi-Provider Auth** - Magic link / OTP, plus optional Google and Apple Sign In
 - 🌐 **Internationalization** - Multi-language support with next-intl
 - 🎨 **Modern UI** - Tailwind CSS with shadcn/ui components
 
@@ -67,7 +67,7 @@ This monorepo contains everything you need to start building a full-stack applic
 
 ### Prerequisites
 
-- Node.js >= 22.13.0
+- Node.js 24 LTS (`nvm use` reads `.nvmrc`; engines require `>=24.11.0`)
 - PNPM 11 (`corepack enable`)
 - Docker (for PostgreSQL and MailHog)
 
@@ -150,7 +150,7 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 EXPO_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-Optional provider flags and credentials are also documented in `.env.example` for Google Sign In, Apple Sign In, SMTP, and Google Analytics.
+Optional credentials are also documented in `.env.example` for Google Sign In and Apple Sign In (each enabled only when its credentials are set — see [Authentication](#authentication)), SMTP, `TRUSTED_ORIGINS`, Sentry and Google Analytics.
 
 ### Available Scripts
 
@@ -171,6 +171,7 @@ pnpm -F @example-app/db seed   # Re-seed dev data
 
 # Code Quality
 pnpm lint             # Run oxlint (type-aware)
+pnpm lint:ws          # Workspace lint with sherif (dependency versions/order; also runs in CI)
 pnpm lint:fix         # Fix oxlint issues automatically
 pnpm format:fix       # Fix Prettier formatting
 pnpm typecheck        # Run TypeScript type checking
@@ -266,9 +267,45 @@ Translation files are in `apps/nextjs/src/languages/`.
 
 The app uses [Better-Auth](https://better-auth.js.org/) for authentication with support for:
 
-- **Email OTP** - Passwordless login via email
-- **Google Sign In** - OAuth with Google
-- **Apple Sign In** - OAuth with Apple (iOS/web)
+- **Email OTP / magic link** - Passwordless login via email (always on)
+- **Google Sign In** - OAuth with Google (optional)
+- **Apple Sign In** - OAuth with Apple (iOS/web, optional)
+
+Social providers are **off unless configured** — there are no feature flags to
+keep in sync. On the web/server a provider is registered, and its button shown,
+only when its credentials are present at runtime
+(`apps/nextjs/src/auth/providers.ts`):
+
+| Provider | Web / server                              | Mobile (Expo build env)                       |
+| -------- | ----------------------------------------- | --------------------------------------------- |
+| Google   | `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`   | `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`            |
+| Apple    | `APPLE_CLIENT_ID` + `APPLE_CLIENT_SECRET` | `EXPO_PUBLIC_APPLE_AUTH_ENABLED="true"` (iOS) |
+
+The mobile flags only show the native buttons; the app's ID token is verified
+by the server, so the matching server variables must be set too (for Apple
+also `APPLE_APP_BUNDLE_ID`). See `.env.example` for details.
+
+### Security defaults
+
+Configured in `packages/auth/src/index.ts`:
+
+- **Session cookie cache: 5 minutes.** `getSession()` trusts a signed cache
+  cookie for up to 5 minutes before re-reading the database, so a revoked
+  session, deleted user or changed role (e.g. `isAdmin`) can take up to 5
+  minutes to apply. Disable `session.cookieCache` if changes must apply on the
+  next request, or bump its `version` to invalidate every cache at once.
+- **Rate limiting** (Better Auth enables it in production) stores counters in
+  Postgres — the `rate_limit` table in `packages/db/src/auth-schema.ts` — so
+  limits are shared across instances and survive restarts. Include the table
+  in your migrations (`pnpm db:generate`) or `pnpm db:push` locally. Behind a
+  proxy/load balancer, make sure the client IP header it sets is one Better
+  Auth reads (`advanced.ipAddress.ipAddressHeaders`).
+- **Trusted origins / CORS.** Better Auth trusts `NEXT_PUBLIC_BASE_URL` and the
+  mobile app scheme. `/api/trpc` only returns CORS headers to
+  `NEXT_PUBLIC_BASE_URL`. To allow another browser origin (a separate
+  frontend, Expo web in dev, …) add it to the comma-separated
+  `TRUSTED_ORIGINS` env var — it feeds both lists. Native apps send no Origin
+  header and need no entry.
 
 ## Database
 
@@ -332,6 +369,29 @@ export const exampleRouter = createTRPCRouter({
 - **Formatting**: Prettier with shared config in `tooling/prettier/`
 - **Validation**: Use Zod v4 (`import { z } from "zod/v4"`)
 
+### Workspace lint (sherif)
+
+[sherif](https://github.com/QuiiBz/sherif) checks the workspace itself — one
+version per dependency across packages, sorted dependency lists, and so on. It
+is a pinned root devDependency, runs in CI (`pnpm lint:ws`), and deliberately
+**not** in `postinstall` (an install-time gate would block every `pnpm` command,
+because pnpm 11 re-verifies dependencies before running scripts). To exempt a
+package that can't follow the shared catalog yet (e.g. an imported legacy app),
+pass `-p <package-name>` in the `lint:ws` script, or list it under
+`"sherif": { "ignorePackage": [...] }` in the root `package.json`.
+
+### Secret scanning (gitleaks)
+
+CI's `secret-scan` job runs a pinned, checksum-verified
+[gitleaks](https://github.com/gitleaks/gitleaks) over the **full git history**
+and fails on any finding. Run it locally before pushing with
+`gitleaks git --redact .` (`brew install gitleaks`). For a confirmed false
+positive, add its fingerprint to a `.gitleaksignore` file. If you import
+history that contains already-rotated secrets, record them once with
+`gitleaks git --report-path .gitleaks-baseline.json` and add
+`--baseline-path .gitleaks-baseline.json` to the CI step — and rotate them
+first: a baseline hides findings, it doesn't revoke anything.
+
 ### Tests & pre-commit
 
 Tests run with **Vitest** (`pnpm test`) — colocate `*.test.ts` next to the source
@@ -352,8 +412,11 @@ See [DEPLOY.md](DEPLOY.md) for full details. In short:
 ### Web (Next.js)
 
 Builds to a self-contained server via `output: "standalone"`. Deploy with the
-included `apps/nextjs/Dockerfile` (build from the repo root) or any Node host
-(Vercel, Railway, Fly.io, AWS, …):
+included `apps/nextjs/Dockerfile` (build from the repo root; it uses
+`turbo prune --docker` so only the web app's dependency graph is installed and
+the install layer stays cached, runs as a non-root user, and has a
+`HEALTHCHECK` on `/api/health`) or any Node host (Vercel, Railway, Fly.io,
+AWS, …):
 
 ```bash
 docker build -f apps/nextjs/Dockerfile -t example-app-web .
@@ -387,4 +450,4 @@ See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for a comprehensive pre-launch ch
 
 ## License
 
-MIT License
+[MIT](LICENSE) © 2026 Luke Ollett.

@@ -17,14 +17,29 @@ export function initAuth(options: {
   productionUrl: string;
   secret: string | undefined;
 
-  googleClientId: string;
-  googleClientSecret: string;
+  /**
+   * Extra origins trusted for auth callbacks/redirects and the CSRF origin
+   * check, in addition to `baseUrl` (always trusted) and the mobile app
+   * scheme. Comes from the `TRUSTED_ORIGINS` env var. Supports Better Auth
+   * wildcard patterns (e.g. "https://*.example.com").
+   */
+  trustedOrigins?: string[];
 
-  // Apple Sign In configuration
-  appleClientId?: string;
-  appleClientSecret?: string;
-  appleAppBundleId?: string;
-  appleEnabled?: boolean;
+  /**
+   * Social providers are optional: each is registered only when its config
+   * is passed (apps/nextjs/src/auth/providers.ts passes it only when the
+   * provider's credentials are set). Email OTP / magic link are always on.
+   */
+  google?: {
+    clientId: string;
+    clientSecret: string;
+  };
+  apple?: {
+    clientId: string;
+    clientSecret: string;
+    /** iOS bundle id — required to verify ID tokens from the native app */
+    appBundleId?: string;
+  };
 
   // Email configuration for magic links
   emailFrom: string;
@@ -71,10 +86,24 @@ export function initAuth(options: {
       },
     },
     session: {
+      // The cookie cache lets getSession() skip the database while the signed
+      // cache cookie is fresh. Keep it short: while it is valid, a revoked
+      // session, a deleted user or a changed role (e.g. `isAdmin`, which
+      // `adminProcedure` trusts) is NOT re-read from the database. 5 minutes
+      // bounds that window; set `enabled: false` if changes must apply on the
+      // very next request, or bump `version` to invalidate every cache at once.
       cookieCache: {
         enabled: true,
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 5, // 5 minutes
       },
+    },
+    rateLimit: {
+      // Better Auth only rate-limits in production by default. Store counters
+      // in Postgres (the `rate_limit` table in packages/db) rather than
+      // process memory, so limits are shared by every server instance and
+      // survive restarts/deploys. Default window/max apply, plus Better Auth's
+      // stricter built-in rules for sign-in/sign-up/OTP endpoints.
+      storage: "database",
     },
     plugins: [
       magicLink({
@@ -142,28 +171,33 @@ export function initAuth(options: {
       expo(),
     ],
     socialProviders: {
-      google: {
-        clientId: options.googleClientId,
-        clientSecret: options.googleClientSecret,
-      },
-      ...(options.appleEnabled &&
-        options.appleClientId &&
-        options.appleClientSecret && {
-          apple: {
-            clientId: options.appleClientId,
-            clientSecret: options.appleClientSecret,
-            redirectURI: `${options.baseUrl}/api/auth/callback/apple`,
-            // Required for native iOS apps
-            ...(options.appleAppBundleId && {
-              appBundleIdentifier: options.appleAppBundleId,
-            }),
-          },
-        }),
+      ...(options.google && {
+        google: {
+          clientId: options.google.clientId,
+          clientSecret: options.google.clientSecret,
+        },
+      }),
+      ...(options.apple && {
+        apple: {
+          clientId: options.apple.clientId,
+          clientSecret: options.apple.clientSecret,
+          redirectURI: `${options.baseUrl}/api/auth/callback/apple`,
+          // Required for native iOS apps
+          ...(options.apple.appBundleId && {
+            appBundleIdentifier: options.apple.appBundleId,
+          }),
+        },
+      }),
     },
+    // Better Auth always trusts `baseURL`. Everything else is explicit: the
+    // mobile deep-link scheme (must match `scheme` in apps/expo/app.config.ts),
+    // Apple's form_post callback origin when Apple is enabled, and any extra
+    // origins from TRUSTED_ORIGINS. (The Expo plugin adds `exp://` in dev.)
     trustedOrigins: [
       "example-app://",
       "example-app://*",
-      "https://appleid.apple.com",
+      ...(options.apple ? ["https://appleid.apple.com"] : []),
+      ...(options.trustedOrigins ?? []),
     ],
   } satisfies BetterAuthOptions;
 

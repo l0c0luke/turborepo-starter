@@ -7,7 +7,10 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    EMAIL_SERVER_HOST: z.string().default("email-smtp.us-east-1.amazonaws.com"),
+    // No default host: when unset, sign-in emails are logged in development
+    // and refused in production (packages/auth), instead of silently trying a
+    // provider you never configured.
+    EMAIL_SERVER_HOST: z.string().optional(),
     EMAIL_SERVER_PORT: z.coerce.number().default(587),
     EMAIL_SERVER_USER: z.string().optional(),
     EMAIL_SERVER_PASSWORD: z.string().optional(),
@@ -16,10 +19,17 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
-    AUTH_GOOGLE_ID: z.string(),
-    AUTH_GOOGLE_SECRET: z.string(),
+    // Comma-separated extra origins (besides NEXT_PUBLIC_BASE_URL) that are
+    // trusted by Better Auth and allowed to call /api/trpc cross-origin, e.g.
+    // "https://admin.example.com,http://localhost:8081". Parsed with
+    // parseOriginList() from @example-app/shared. Unset = same-origin only.
+    TRUSTED_ORIGINS: z.string().optional(),
+    // Google sign-in (optional) — enabled when both are set.
+    AUTH_GOOGLE_ID: z.string().optional(),
+    AUTH_GOOGLE_SECRET: z.string().optional(),
 
-    // Apple Sign In (optional)
+    // Apple Sign In (optional) — enabled when APPLE_CLIENT_ID and
+    // APPLE_CLIENT_SECRET are both set.
     APPLE_CLIENT_ID: z.string().optional(),
     APPLE_CLIENT_SECRET: z.string().optional(),
     APPLE_APP_BUNDLE_ID: z.string().optional(),
@@ -38,14 +48,6 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_BASE_URL: z.string(),
-    NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: z
-      .string()
-      .transform((v) => v === "true")
-      .default(false),
-    NEXT_PUBLIC_APPLE_AUTH_ENABLED: z
-      .string()
-      .transform((v) => v === "true")
-      .default(false),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().startsWith("G-").optional(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   },
@@ -61,13 +63,11 @@ export const env = createEnv({
     EMAIL_SERVER_PASSWORD: process.env.EMAIL_SERVER_PASSWORD,
     EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-    NEXT_PUBLIC_GOOGLE_AUTH_ENABLED:
-      process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED,
-    NEXT_PUBLIC_APPLE_AUTH_ENABLED: process.env.NEXT_PUBLIC_APPLE_AUTH_ENABLED,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     SENTRY_DSN: process.env.SENTRY_DSN,
     AUTH_SECRET: process.env.AUTH_SECRET,
+    TRUSTED_ORIGINS: process.env.TRUSTED_ORIGINS,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
 
