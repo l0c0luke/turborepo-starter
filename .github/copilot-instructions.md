@@ -19,7 +19,7 @@ This is a Turborepo monorepo containing a full-stack application with a React Na
 
 - **Mobile**: Expo SDK 57 with SDK-aligned React Native, React 19
 - **Web**: Next.js 16 with React 19
-- **Authentication**: Better-Auth with OTP, Google, and Apple Sign In
+- **Authentication**: Better-Auth with OTP; Google and Apple Sign In are optional (enabled only when their env vars are set)
 - **Database**: Drizzle ORM with PostgreSQL
 - **API**: tRPC for type-safe APIs
 - **Styling**: Tailwind CSS 4 (web), NativeWind 5 / Tailwind 4 (mobile)

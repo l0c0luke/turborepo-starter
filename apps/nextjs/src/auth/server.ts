@@ -6,6 +6,7 @@ import { initAuth } from "@example-app/auth";
 import { parseOriginList } from "@example-app/shared";
 
 import { env } from "~/env";
+import { socialProviders } from "./providers";
 
 const baseUrl = env.NEXT_PUBLIC_BASE_URL;
 
@@ -14,14 +15,9 @@ export const auth = initAuth({
   productionUrl: env.NEXT_PUBLIC_BASE_URL,
   secret: env.AUTH_SECRET,
   trustedOrigins: parseOriginList(env.TRUSTED_ORIGINS),
-  googleClientId: env.AUTH_GOOGLE_ID,
-  googleClientSecret: env.AUTH_GOOGLE_SECRET,
-
-  // Apple Sign In configuration
-  appleClientId: env.APPLE_CLIENT_ID,
-  appleClientSecret: env.APPLE_CLIENT_SECRET,
-  appleAppBundleId: env.APPLE_APP_BUNDLE_ID,
-  appleEnabled: !!(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET),
+  // Optional social providers — only registered when their env vars are set.
+  google: socialProviders.google,
+  apple: socialProviders.apple,
 
   emailFrom: env.EMAIL_FROM,
   // Add email service configuration here if needed

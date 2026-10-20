@@ -228,10 +228,16 @@ Create screens under `apps/expo/src/app/`:
 
 Based on user's choice, update:
 
-- `apps/nextjs/src/env.ts` — remove unused provider env vars
-- `.env.example` — remove unused provider config blocks
-- `packages/auth/src/index.ts` — disable unused social providers
-- Feature flags: `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED`, `NEXT_PUBLIC_APPLE_AUTH_ENABLED`
+Google and Apple are already optional — each turns on only when its env vars
+are set (`apps/nextjs/src/auth/providers.ts`; Expo: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`,
+`EXPO_PUBLIC_APPLE_AUTH_ENABLED`). To keep a provider, leave it alone. To remove
+one entirely:
+
+- `apps/nextjs/src/env.ts` / `packages/auth/env.ts` — remove its env vars
+- `.env.example` and `turbo.json` `globalEnv` — remove its config block / vars
+- `apps/nextjs/src/auth/providers.ts` — drop its entry; `packages/auth/src/index.ts` — drop its `socialProviders` block
+- UI: its button in `apps/nextjs/src/_components/auth/LoginForm.tsx` and `apps/expo/src/app/index.tsx`
+- Expo: Google — `@react-native-google-signin/google-signin` (dependency + `app.config.ts` plugin) and `utils/auth.ts`; Apple — `expo-apple-authentication` (dependency + plugin + `ios.entitlements`) and `utils/appleAuth.ts`
 
 #### 4.2 Update Documentation
 

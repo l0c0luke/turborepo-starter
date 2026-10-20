@@ -25,14 +25,21 @@ export function initAuth(options: {
    */
   trustedOrigins?: string[];
 
-  googleClientId: string;
-  googleClientSecret: string;
-
-  // Apple Sign In configuration
-  appleClientId?: string;
-  appleClientSecret?: string;
-  appleAppBundleId?: string;
-  appleEnabled?: boolean;
+  /**
+   * Social providers are optional: each is registered only when its config
+   * is passed (apps/nextjs/src/auth/providers.ts passes it only when the
+   * provider's credentials are set). Email OTP / magic link are always on.
+   */
+  google?: {
+    clientId: string;
+    clientSecret: string;
+  };
+  apple?: {
+    clientId: string;
+    clientSecret: string;
+    /** iOS bundle id — required to verify ID tokens from the native app */
+    appBundleId?: string;
+  };
 
   // Email configuration for magic links
   emailFrom: string;
@@ -164,23 +171,23 @@ export function initAuth(options: {
       expo(),
     ],
     socialProviders: {
-      google: {
-        clientId: options.googleClientId,
-        clientSecret: options.googleClientSecret,
-      },
-      ...(options.appleEnabled &&
-        options.appleClientId &&
-        options.appleClientSecret && {
-          apple: {
-            clientId: options.appleClientId,
-            clientSecret: options.appleClientSecret,
-            redirectURI: `${options.baseUrl}/api/auth/callback/apple`,
-            // Required for native iOS apps
-            ...(options.appleAppBundleId && {
-              appBundleIdentifier: options.appleAppBundleId,
-            }),
-          },
-        }),
+      ...(options.google && {
+        google: {
+          clientId: options.google.clientId,
+          clientSecret: options.google.clientSecret,
+        },
+      }),
+      ...(options.apple && {
+        apple: {
+          clientId: options.apple.clientId,
+          clientSecret: options.apple.clientSecret,
+          redirectURI: `${options.baseUrl}/api/auth/callback/apple`,
+          // Required for native iOS apps
+          ...(options.apple.appBundleId && {
+            appBundleIdentifier: options.apple.appBundleId,
+          }),
+        },
+      }),
     },
     // Better Auth always trusts `baseURL`. Everything else is explicit: the
     // mobile deep-link scheme (must match `scheme` in apps/expo/app.config.ts),
@@ -189,7 +196,7 @@ export function initAuth(options: {
     trustedOrigins: [
       "example-app://",
       "example-app://*",
-      ...(options.appleEnabled ? ["https://appleid.apple.com"] : []),
+      ...(options.apple ? ["https://appleid.apple.com"] : []),
       ...(options.trustedOrigins ?? []),
     ],
   } satisfies BetterAuthOptions;

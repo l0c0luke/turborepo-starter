@@ -39,7 +39,7 @@ This monorepo contains everything you need to start building a full-stack applic
 | ------------------ | ------------------------------------------------------ |
 | **Mobile**         | Expo SDK 57, React Native 0.86, React 19, NativeWind 5 |
 | **Web**            | Next.js 16.4, React 19, Tailwind CSS 4, shadcn/ui      |
-| **Authentication** | Better-Auth 1.7 (OTP, Google, Apple Sign In)           |
+| **Authentication** | Better-Auth 1.7 (OTP; optional Google, Apple Sign In)  |
 | **Database**       | Drizzle ORM (0.45), PostgreSQL                         |
 | **API**            | tRPC v11 (end-to-end type safety)                      |
 | **Validation**     | Zod v4                                                 |
@@ -51,7 +51,7 @@ This monorepo contains everything you need to start building a full-stack applic
 
 ### Mobile App (Expo)
 
-- 🔐 **Authentication** - OTP, Google, and Apple Sign In
+- 🔐 **Authentication** - Email OTP, plus optional Google and Apple Sign In
 - 📱 **Cross-Platform** - iOS and Android support
 - 🎨 **Design System** - Centralized styling with design tokens
 - 🧭 **Custom Navigation** - Consistent custom navigation bar
@@ -59,7 +59,7 @@ This monorepo contains everything you need to start building a full-stack applic
 ### Web Dashboard (Next.js)
 
 - 👤 **User Management** - User authentication and profiles
-- 🔑 **Multi-Provider Auth** - OTP, Google, and Apple Sign In
+- 🔑 **Multi-Provider Auth** - Magic link / OTP, plus optional Google and Apple Sign In
 - 🌐 **Internationalization** - Multi-language support with next-intl
 - 🎨 **Modern UI** - Tailwind CSS with shadcn/ui components
 
@@ -150,7 +150,7 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 EXPO_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-Optional provider flags and credentials are also documented in `.env.example` for Google Sign In, Apple Sign In, SMTP, and Google Analytics.
+Optional credentials are also documented in `.env.example` for Google Sign In and Apple Sign In (each enabled only when its credentials are set — see [Authentication](#authentication)), SMTP, `TRUSTED_ORIGINS`, Sentry and Google Analytics.
 
 ### Available Scripts
 
@@ -267,9 +267,23 @@ Translation files are in `apps/nextjs/src/languages/`.
 
 The app uses [Better-Auth](https://better-auth.js.org/) for authentication with support for:
 
-- **Email OTP** - Passwordless login via email
-- **Google Sign In** - OAuth with Google
-- **Apple Sign In** - OAuth with Apple (iOS/web)
+- **Email OTP / magic link** - Passwordless login via email (always on)
+- **Google Sign In** - OAuth with Google (optional)
+- **Apple Sign In** - OAuth with Apple (iOS/web, optional)
+
+Social providers are **off unless configured** — there are no feature flags to
+keep in sync. On the web/server a provider is registered, and its button shown,
+only when its credentials are present at runtime
+(`apps/nextjs/src/auth/providers.ts`):
+
+| Provider | Web / server                              | Mobile (Expo build env)                       |
+| -------- | ----------------------------------------- | --------------------------------------------- |
+| Google   | `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`   | `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`            |
+| Apple    | `APPLE_CLIENT_ID` + `APPLE_CLIENT_SECRET` | `EXPO_PUBLIC_APPLE_AUTH_ENABLED="true"` (iOS) |
+
+The mobile flags only show the native buttons; the app's ID token is verified
+by the server, so the matching server variables must be set too (for Apple
+also `APPLE_APP_BUNDLE_ID`). See `.env.example` for details.
 
 ### Security defaults
 

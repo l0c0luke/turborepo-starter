@@ -28,7 +28,7 @@ renames them for a new project.
 
 - **Mobile**: Expo SDK 57 (SDK-aligned React Native 0.86), React 19, NativeWind 5 (Tailwind 4)
 - **Web**: Next.js 16.4 (App Router, Turbopack), React 19, Tailwind 4, shadcn/ui
-- **Auth**: better-auth 1.7 (email OTP, magic link, Google, Apple)
+- **Auth**: better-auth 1.7 (email OTP, magic link; Google/Apple optional — on only when their env vars are set)
 - **DB**: Drizzle ORM (0.45) + PostgreSQL
 - **API**: tRPC v11 (end-to-end type safety)
 - **Validation**: Zod v4 (`import { z } from "zod/v4"`)
@@ -56,7 +56,7 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 
 ## Reference patterns (copy these)
 
-- **Auth loop**: `apps/nextjs/src/app/login/page.tsx` → `src/proxy.ts` (gating) →
+- **Auth loop**: `apps/nextjs/src/app/login/page.tsx` (form: `src/_components/auth/LoginForm.tsx`) → `src/proxy.ts` (gating) →
   `src/app/page.tsx` (authed landing). Mobile: `apps/expo/src/app/index.tsx` → `home.tsx`.
 - **Protected, role-gated feature** (the canonical example): the **users admin** —
   `packages/api/src/router/admin.ts` (`adminProcedure` + validators in

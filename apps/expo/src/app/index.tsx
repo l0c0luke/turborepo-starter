@@ -26,7 +26,12 @@ import {
   typography,
 } from "~/styles";
 import { completeAppleSignIn, isAppleAuthAvailable } from "~/utils/appleAuth";
-import { authClient, GoogleSignin } from "~/utils/auth";
+import {
+  authClient,
+  GoogleSignin,
+  isAppleAuthEnabled,
+  isGoogleAuthEnabled,
+} from "~/utils/auth";
 
 export default function LoginPage() {
   const { data: session, isPending } = authClient.useSession();
@@ -37,6 +42,17 @@ export default function LoginPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
   const otpRefs = useRef<TextInput[]>([]);
+  // Apple is offered only when enabled for this build AND the device supports
+  // it (iOS 13+); Google only when its client ID is configured.
+  const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+  const showGoogle = isGoogleAuthEnabled;
+  const showApple = isAppleAuthEnabled && isAppleAvailable;
+  const hasSocialProviders = showGoogle || showApple;
+
+  useEffect(() => {
+    if (!isAppleAuthEnabled) return;
+    void isAppleAuthAvailable().then(setIsAppleAvailable);
+  }, []);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -338,73 +354,81 @@ export default function LoginPage() {
                 )}
               </Pressable>
 
-              {/* Divider */}
-              <View
-                style={[
-                  commonStyles.dividerWithText,
-                  { marginVertical: spacing[6] },
-                ]}
-              >
-                <View style={dividers.line} />
-                <Text
-                  style={[
-                    typography.caption,
-                    { paddingHorizontal: spacing[4] },
-                  ]}
-                >
-                  or
-                </Text>
-                <View style={dividers.line} />
-              </View>
+              {hasSocialProviders && (
+                <>
+                  {/* Divider */}
+                  <View
+                    style={[
+                      commonStyles.dividerWithText,
+                      { marginVertical: spacing[6] },
+                    ]}
+                  >
+                    <View style={dividers.line} />
+                    <Text
+                      style={[
+                        typography.caption,
+                        { paddingHorizontal: spacing[4] },
+                      ]}
+                    >
+                      or
+                    </Text>
+                    <View style={dividers.line} />
+                  </View>
 
-              {/* Social Sign In Buttons Row */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: spacing[3],
-                  width: "100%",
-                }}
-              >
-                {/* Google Sign In Button */}
-                <Pressable
-                  style={[
-                    buttons.base,
-                    buttons.large,
-                    buttons.secondary,
-                    isLoading && buttons.disabled,
-                    { flex: 1, flexDirection: "row", gap: spacing[2] },
-                  ]}
-                  onPress={handleGoogleAuth}
-                  disabled={isLoading}
-                >
-                  <AntDesign
-                    name="google"
-                    size={20}
-                    color={colors.text.primary}
-                  />
-                  <Text style={buttonText.secondary}>Google</Text>
-                </Pressable>
+                  {/* Social Sign In Buttons Row */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: spacing[3],
+                      width: "100%",
+                    }}
+                  >
+                    {/* Google Sign In Button */}
+                    {showGoogle && (
+                      <Pressable
+                        style={[
+                          buttons.base,
+                          buttons.large,
+                          buttons.secondary,
+                          isLoading && buttons.disabled,
+                          { flex: 1, flexDirection: "row", gap: spacing[2] },
+                        ]}
+                        onPress={handleGoogleAuth}
+                        disabled={isLoading}
+                      >
+                        <AntDesign
+                          name="google"
+                          size={20}
+                          color={colors.text.primary}
+                        />
+                        <Text style={buttonText.secondary}>Google</Text>
+                      </Pressable>
+                    )}
 
-                {/* Apple Sign In Button */}
-                <Pressable
-                  style={[
-                    buttons.base,
-                    buttons.large,
-                    buttons.secondary,
-                    isLoading && buttons.disabled,
-                    { flex: 1, flexDirection: "row", gap: spacing[2] },
-                  ]}
-                  onPress={handleAppleAuth}
-                  disabled={isLoading}
-                >
-                  <FontAwesome
-                    name="apple"
-                    size={20}
-                    color={colors.text.primary}
-                  />
-                  <Text style={buttonText.secondary}>Apple</Text>
-                </Pressable>
-              </View>
+                    {/* Apple Sign In Button */}
+                    {showApple && (
+                      <Pressable
+                        style={[
+                          buttons.base,
+                          buttons.large,
+                          buttons.secondary,
+                          isLoading && buttons.disabled,
+                          { flex: 1, flexDirection: "row", gap: spacing[2] },
+                        ]}
+                        onPress={handleAppleAuth}
+                        disabled={isLoading}
+                      >
+                        <FontAwesome
+                          name="apple"
+                          size={20}
+                          color={colors.text.primary}
+                        />
+                        <Text style={buttonText.secondary}>Apple</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </>
+              )}
             </>
           )}
 
