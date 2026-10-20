@@ -59,6 +59,8 @@ Perform find-and-replace across the entire codebase. **Every file listed below m
 - `turbo/generators/config.ts` — scope reference in prompts and logic
 - `turbo/generators/templates/package.json.hbs` — `@example-app/` in name and deps
 - `apps/nextjs/next.config.js` — `transpilePackages` array references
+- `apps/nextjs/Dockerfile` — `turbo prune @example-app/nextjs` and `--filter=@example-app/nextjs` (the image build fails if these don't match the renamed package)
+- `DEPLOY.md` / `LAUNCH_CHECKLIST.md` — `@example-app/*` in commands
 - `.github/copilot-instructions.md` — all `@example-app/` references
 - `README.md` — all `@example-app/` references
 - `AGENTS.md` — all `@example-app/` references
