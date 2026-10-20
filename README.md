@@ -344,6 +344,18 @@ package that can't follow the shared catalog yet (e.g. an imported legacy app),
 pass `-p <package-name>` in the `lint:ws` script, or list it under
 `"sherif": { "ignorePackage": [...] }` in the root `package.json`.
 
+### Secret scanning (gitleaks)
+
+CI's `secret-scan` job runs a pinned, checksum-verified
+[gitleaks](https://github.com/gitleaks/gitleaks) over the **full git history**
+and fails on any finding. Run it locally before pushing with
+`gitleaks git --redact .` (`brew install gitleaks`). For a confirmed false
+positive, add its fingerprint to a `.gitleaksignore` file. If you import
+history that contains already-rotated secrets, record them once with
+`gitleaks git --report-path .gitleaks-baseline.json` and add
+`--baseline-path .gitleaks-baseline.json` to the CI step — and rotate them
+first: a baseline hides findings, it doesn't revoke anything.
+
 ### Tests & pre-commit
 
 Tests run with **Vitest** (`pnpm test`) — colocate `*.test.ts` next to the source

@@ -70,7 +70,7 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Run `pnpm audit` and resolve critical vulnerabilities
 - [ ] Verify CORS configuration for production domains
 - [ ] Review rate limiting on auth endpoints
-- [ ] Ensure no secrets are committed to the repository
+- [ ] Ensure no secrets are committed to the repository (CI `secret-scan` job runs gitleaks over the full history; locally: `gitleaks git --redact .`)
 - [ ] Verify `.env` is in `.gitignore`
 
 ## Final Verification
