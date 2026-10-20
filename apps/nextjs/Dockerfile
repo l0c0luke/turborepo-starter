@@ -16,7 +16,9 @@
 # Keep in step with .nvmrc / engines / apps/expo/eas.json.
 FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
 ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+# pnpm 11 puts global bins in $PNPM_HOME/bin (and refuses `--global` commands
+# when that isn't on PATH).
+ENV PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
 ENV NEXT_TELEMETRY_DISABLED=1
 # pnpm comes from corepack, pinned by `packageManager` in package.json.
 RUN corepack enable
@@ -33,6 +35,11 @@ RUN TURBO_VERSION="$(sed -n 's/^  turbo@\([0-9][^:(]*\):$/\1/p' pnpm-lock.yaml |
 # --- 2. Install deps (cached until a pruned manifest/lockfile changes), build -
 FROM base AS builder
 COPY --from=pruner /app/out/json/ .
+# The frozen install below is authoritative. Turn off pnpm's "verify deps
+# before run" check for the rest of the build: copying out/full refreshes the
+# manifests' mtimes, so on a cached install layer every `pnpm run` (including
+# the ones turbo spawns) would otherwise re-install without the store cache.
+RUN pnpm config set --global verify-deps-before-run false
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
