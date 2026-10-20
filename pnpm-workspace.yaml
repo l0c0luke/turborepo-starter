@@ -18,6 +18,12 @@ overrides:
   # Keep a single esbuild across the tree; mixed versions break its
   # postinstall binary check (drizzle-kit still pulls the legacy @esbuild-kit).
   esbuild: ^0.28.2
+  # Keep a single @types/node across the tree. Without this, tools such as
+  # @turbo/gen pull a newer @types/node, and (with autoInstallPeers: false +
+  # the hoisted linker) `next` gets installed as two peer variants — one at the
+  # root, one under apps/nextjs — whose NextConfig types don't match, failing
+  # `pnpm typecheck` on apps/nextjs/next.config.js. Tracks the catalog version.
+  "@types/node": "catalog:"
 
 catalog:
   # --- Auth ---
