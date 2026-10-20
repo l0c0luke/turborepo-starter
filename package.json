@@ -1,6 +1,7 @@
 {
   "name": "example-app",
   "private": true,
+  "license": "MIT",
   "engines": {
     "node": ">=24.11.0"
   },

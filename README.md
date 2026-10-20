@@ -450,4 +450,4 @@ See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for a comprehensive pre-launch ch
 
 ## License
 
-MIT License
+[MIT](LICENSE) © 2026 Luke Ollett.
