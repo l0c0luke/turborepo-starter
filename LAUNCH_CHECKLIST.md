@@ -68,8 +68,9 @@ Use this checklist before deploying to production. Each section covers a critica
 ## Security
 
 - [ ] Run `pnpm audit` and resolve critical vulnerabilities
-- [ ] Verify CORS configuration for production domains
-- [ ] Review rate limiting on auth endpoints
+- [ ] Set `TRUSTED_ORIGINS` only to origins that really need cross-origin API/auth access (empty = same-origin only; it is the `/api/trpc` CORS allow-list)
+- [ ] Review rate limiting on auth endpoints (counters live in the Postgres `rate_limit` table — make sure your migrations create it) and that the client-IP header your proxy sets is one Better Auth reads
+- [ ] Confirm the 5-minute session cookie cache is acceptable (role changes / revocations take up to 5 min) — see README "Security defaults"
 - [ ] Ensure no secrets are committed to the repository (CI `secret-scan` job runs gitleaks over the full history; locally: `gitleaks git --redact .`)
 - [ ] Verify `.env` is in `.gitignore`
 

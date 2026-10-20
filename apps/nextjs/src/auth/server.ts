@@ -3,6 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 
 import { initAuth } from "@example-app/auth";
+import { parseOriginList } from "@example-app/shared";
 
 import { env } from "~/env";
 
@@ -12,6 +13,7 @@ export const auth = initAuth({
   baseUrl,
   productionUrl: env.NEXT_PUBLIC_BASE_URL,
   secret: env.AUTH_SECRET,
+  trustedOrigins: parseOriginList(env.TRUSTED_ORIGINS),
   googleClientId: env.AUTH_GOOGLE_ID,
   googleClientSecret: env.AUTH_GOOGLE_SECRET,
 

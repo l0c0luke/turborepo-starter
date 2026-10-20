@@ -89,6 +89,12 @@ tooling/      # prettier / typescript / github configs (lint config: .oxlintrc.j
 - **i18n**: all web user-facing strings via `next-intl`; files in
   `apps/nextjs/src/languages/` (`en`, `es` — add a file + a `lib/locale.ts` entry per locale).
 - **API**: tRPC only — no custom fetch wrappers. **DB**: Drizzle via `@example-app/db/client`.
+- **Auth security defaults** (`packages/auth/src/index.ts`): 5-minute session
+  cookie cache (role/`isAdmin` changes and revocations apply within 5 min),
+  database-backed rate limiting (`rate_limit` table), and an explicit origin
+  allow-list — extra browser origins go in `TRUSTED_ORIGINS` (feeds Better
+  Auth `trustedOrigins` and the `/api/trpc` CORS headers). Never reintroduce
+  `Access-Control-Allow-Origin: *`.
 - **Errors**: report via Sentry; server/shared code can use `captureException` from
   `@example-app/shared` (forwards to Sentry when a DSN is set).
 

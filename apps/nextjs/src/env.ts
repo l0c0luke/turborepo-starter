@@ -16,6 +16,11 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
+    // Comma-separated extra origins (besides NEXT_PUBLIC_BASE_URL) that are
+    // trusted by Better Auth and allowed to call /api/trpc cross-origin, e.g.
+    // "https://admin.example.com,http://localhost:8081". Parsed with
+    // parseOriginList() from @example-app/shared. Unset = same-origin only.
+    TRUSTED_ORIGINS: z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
 
@@ -68,6 +73,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     SENTRY_DSN: process.env.SENTRY_DSN,
     AUTH_SECRET: process.env.AUTH_SECRET,
+    TRUSTED_ORIGINS: process.env.TRUSTED_ORIGINS,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
 

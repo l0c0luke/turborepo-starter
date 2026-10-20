@@ -17,6 +17,14 @@ export function initAuth(options: {
   productionUrl: string;
   secret: string | undefined;
 
+  /**
+   * Extra origins trusted for auth callbacks/redirects and the CSRF origin
+   * check, in addition to `baseUrl` (always trusted) and the mobile app
+   * scheme. Comes from the `TRUSTED_ORIGINS` env var. Supports Better Auth
+   * wildcard patterns (e.g. "https://*.example.com").
+   */
+  trustedOrigins?: string[];
+
   googleClientId: string;
   googleClientSecret: string;
 
@@ -71,10 +79,24 @@ export function initAuth(options: {
       },
     },
     session: {
+      // The cookie cache lets getSession() skip the database while the signed
+      // cache cookie is fresh. Keep it short: while it is valid, a revoked
+      // session, a deleted user or a changed role (e.g. `isAdmin`, which
+      // `adminProcedure` trusts) is NOT re-read from the database. 5 minutes
+      // bounds that window; set `enabled: false` if changes must apply on the
+      // very next request, or bump `version` to invalidate every cache at once.
       cookieCache: {
         enabled: true,
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 5, // 5 minutes
       },
+    },
+    rateLimit: {
+      // Better Auth only rate-limits in production by default. Store counters
+      // in Postgres (the `rate_limit` table in packages/db) rather than
+      // process memory, so limits are shared by every server instance and
+      // survive restarts/deploys. Default window/max apply, plus Better Auth's
+      // stricter built-in rules for sign-in/sign-up/OTP endpoints.
+      storage: "database",
     },
     plugins: [
       magicLink({
@@ -160,10 +182,15 @@ export function initAuth(options: {
           },
         }),
     },
+    // Better Auth always trusts `baseURL`. Everything else is explicit: the
+    // mobile deep-link scheme (must match `scheme` in apps/expo/app.config.ts),
+    // Apple's form_post callback origin when Apple is enabled, and any extra
+    // origins from TRUSTED_ORIGINS. (The Expo plugin adds `exp://` in dev.)
     trustedOrigins: [
       "example-app://",
       "example-app://*",
-      "https://appleid.apple.com",
+      ...(options.appleEnabled ? ["https://appleid.apple.com"] : []),
+      ...(options.trustedOrigins ?? []),
     ],
   } satisfies BetterAuthOptions;
 

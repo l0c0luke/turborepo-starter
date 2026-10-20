@@ -5,5 +5,6 @@
  */
 
 export { parseError } from "./parse-error";
+export { matchAllowedOrigin, parseOriginList } from "./origins";
 export { captureException, log, setErrorReporter } from "./log";
 export type { ErrorReporter, Logger } from "./log";

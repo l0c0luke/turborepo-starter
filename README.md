@@ -271,6 +271,28 @@ The app uses [Better-Auth](https://better-auth.js.org/) for authentication with 
 - **Google Sign In** - OAuth with Google
 - **Apple Sign In** - OAuth with Apple (iOS/web)
 
+### Security defaults
+
+Configured in `packages/auth/src/index.ts`:
+
+- **Session cookie cache: 5 minutes.** `getSession()` trusts a signed cache
+  cookie for up to 5 minutes before re-reading the database, so a revoked
+  session, deleted user or changed role (e.g. `isAdmin`) can take up to 5
+  minutes to apply. Disable `session.cookieCache` if changes must apply on the
+  next request, or bump its `version` to invalidate every cache at once.
+- **Rate limiting** (Better Auth enables it in production) stores counters in
+  Postgres — the `rate_limit` table in `packages/db/src/auth-schema.ts` — so
+  limits are shared across instances and survive restarts. Include the table
+  in your migrations (`pnpm db:generate`) or `pnpm db:push` locally. Behind a
+  proxy/load balancer, make sure the client IP header it sets is one Better
+  Auth reads (`advanced.ipAddress.ipAddressHeaders`).
+- **Trusted origins / CORS.** Better Auth trusts `NEXT_PUBLIC_BASE_URL` and the
+  mobile app scheme. `/api/trpc` only returns CORS headers to
+  `NEXT_PUBLIC_BASE_URL`. To allow another browser origin (a separate
+  frontend, Expo web in dev, …) add it to the comma-separated
+  `TRUSTED_ORIGINS` env var — it feeds both lists. Native apps send no Origin
+  header and need no entry.
+
 ## Database
 
 ### Schema Management
