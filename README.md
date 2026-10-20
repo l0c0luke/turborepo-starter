@@ -171,6 +171,7 @@ pnpm -F @example-app/db seed   # Re-seed dev data
 
 # Code Quality
 pnpm lint             # Run oxlint (type-aware)
+pnpm lint:ws          # Workspace lint with sherif (dependency versions/order; also runs in CI)
 pnpm lint:fix         # Fix oxlint issues automatically
 pnpm format:fix       # Fix Prettier formatting
 pnpm typecheck        # Run TypeScript type checking
@@ -331,6 +332,17 @@ export const exampleRouter = createTRPCRouter({
 - **Linting**: [oxlint](https://oxc.rs) (Rust, type-aware via `oxlint-tsgolint`) configured in `.oxlintrc.json`
 - **Formatting**: Prettier with shared config in `tooling/prettier/`
 - **Validation**: Use Zod v4 (`import { z } from "zod/v4"`)
+
+### Workspace lint (sherif)
+
+[sherif](https://github.com/QuiiBz/sherif) checks the workspace itself — one
+version per dependency across packages, sorted dependency lists, and so on. It
+is a pinned root devDependency, runs in CI (`pnpm lint:ws`), and deliberately
+**not** in `postinstall` (an install-time gate would block every `pnpm` command,
+because pnpm 11 re-verifies dependencies before running scripts). To exempt a
+package that can't follow the shared catalog yet (e.g. an imported legacy app),
+pass `-p <package-name>` in the `lint:ws` script, or list it under
+`"sherif": { "ignorePackage": [...] }` in the root `package.json`.
 
 ### Tests & pre-commit
 

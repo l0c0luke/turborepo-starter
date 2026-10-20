@@ -101,6 +101,7 @@ pnpm ios           # run expo iOS app
 pnpm android       # run expo Android app
 pnpm typecheck     # tsc across the workspace
 pnpm lint          # oxlint (type-aware; lint:fix to autofix)
+pnpm lint:ws       # sherif workspace lint (pinned devDependency; runs in CI, not on install)
 pnpm format:fix    # prettier
 pnpm test          # vitest
 pnpm build         # production build

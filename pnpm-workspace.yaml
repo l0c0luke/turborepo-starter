@@ -158,6 +158,9 @@ catalog:
   oxlint: ^1.88.0
   oxlint-tsgolint: ^7.0.2004
   prettier: ^3.9.10
+  # Workspace/monorepo linter (`pnpm lint:ws`; runs in CI). Pinned exactly so
+  # local runs and CI agree; Renovate bumps it.
+  sherif: 1.13.0
   typescript: ^7.0.2
   turbo: ^2.11.8
   "@turbo/gen": ^2.11.8
