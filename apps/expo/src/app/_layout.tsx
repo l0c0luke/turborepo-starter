@@ -8,14 +8,16 @@ import "react-native-reanimated";
 
 import * as Sentry from "@sentry/react-native";
 
-import { setErrorReporter } from "@example-app/shared";
+import { errorTrackingOptions, setErrorReporter } from "@example-app/shared";
 
+import { env } from "~/env";
 import { queryClient } from "~/utils/api";
 
-// Sentry — inert unless EXPO_PUBLIC_SENTRY_DSN is set.
-const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+// Error tracking (Sentry SDK → Bugsink locally) — inert unless
+// EXPO_PUBLIC_SENTRY_DSN is set; `pnpm setup` fills it in.
+const sentryDsn = env.EXPO_PUBLIC_SENTRY_DSN;
 if (sentryDsn) {
-  Sentry.init({ dsn: sentryDsn, tracesSampleRate: 1 });
+  Sentry.init({ dsn: sentryDsn, ...errorTrackingOptions });
   // Route captureException / log.error from @example-app/shared to Sentry.
   setErrorReporter((error, context) =>
     Sentry.captureException(error, context ? { extra: context } : undefined),
