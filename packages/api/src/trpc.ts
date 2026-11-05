@@ -12,6 +12,7 @@ import { z, ZodError } from "zod/v4";
 
 import type { Auth } from "@example-app/auth";
 import { db } from "@example-app/db/client";
+import { log } from "@example-app/shared";
 
 /**
  * 1. CONTEXT
@@ -72,24 +73,37 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 /**
+ * Create a server-side caller — used by tests (and anywhere you need to call a
+ * procedure directly) without going through HTTP.
+ * @see https://trpc.io/docs/server/server-side-calls
+ */
+export const createCallerFactory = t.createCallerFactory;
+
+/**
  * Middleware for timing procedure execution and adding an articifial delay in development.
  *
  * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
  * network latency that would occur in production but not in local development.
  */
+// Local development only — not under test (NODE_ENV=test), where runs should
+// be fast, deterministic and quiet.
+const isLocalDev = t._config.isDev && process.env.NODE_ENV !== "test";
+
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
-  if (t._config.isDev) {
-    // artificial delay in dev 100-500ms
+  if (isLocalDev) {
+    // artificial delay in dev 100-500ms — keeps loading skeletons visible so
+    // you notice a screen without one (see the add-feature skill)
     const waitMs = Math.floor(Math.random() * 400) + 100;
     await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
 
   const result = await next();
 
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  if (isLocalDev) {
+    log.debug(`[TRPC] ${path} took ${Date.now() - start}ms to execute`);
+  }
 
   return result;
 });
@@ -128,26 +142,14 @@ export const protectedProcedure = t.procedure
 /**
  * Admin-only procedure
  *
- * If you want a query or mutation to ONLY be accessible to admin users, use this. It verifies
- * the session is valid and guarantees the user is an admin.
+ * If you want a query or mutation to ONLY be accessible to admin users, use this. It builds on
+ * `protectedProcedure` (so the session is already guaranteed) and additionally rejects non-admins.
  */
-export const adminProcedure = t.procedure
-  .use(timingMiddleware)
-  .use(({ ctx, next }) => {
-    if (!ctx.session?.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    // `isAdmin` is exposed on the session via better-auth `additionalFields`
-    // (see packages/auth/src/index.ts).
-    if (!ctx.session.user.isAdmin) {
-      throw new TRPCError({ code: "FORBIDDEN" });
-    }
-
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
-  });
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  // `isAdmin` is exposed on the session via better-auth `additionalFields`
+  // (see packages/auth/src/index.ts).
+  if (!ctx.session.user.isAdmin) {
+    throw new TRPCError({ code: "FORBIDDEN" });
+  }
+  return next();
+});
