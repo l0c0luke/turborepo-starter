@@ -42,30 +42,51 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
 
   const { data: users } = useSuspenseQuery(trpc.admin.listUsers.queryOptions());
 
-  const invalidate = () =>
-    queryClient.invalidateQueries(trpc.admin.listUsers.queryFilter());
+  // Instant feedback (the pattern to copy for every mutation): update the
+  // cached list optimistically in onMutate so the UI changes on click, roll
+  // back + toast on error, and revalidate against the server once settled.
+  const listKey = trpc.admin.listUsers.queryKey();
+  type UserList = typeof users;
+
+  const optimisticallyUpdate = async (update: (list: UserList) => UserList) => {
+    await queryClient.cancelQueries({ queryKey: listKey });
+    const previous = queryClient.getQueryData(listKey);
+    queryClient.setQueryData(listKey, (list) => list && update(list));
+    return { previous };
+  };
+  const rollback = (snapshot?: { previous?: UserList }) => {
+    if (snapshot?.previous)
+      queryClient.setQueryData(listKey, snapshot.previous);
+    toast.error(t("actionFailed"));
+  };
+  const revalidate = () => queryClient.invalidateQueries({ queryKey: listKey });
 
   const setUserAdmin = useMutation(
     trpc.admin.setUserAdmin.mutationOptions({
-      onSuccess: async () => {
-        await invalidate();
-        toast.success(t("userUpdated"));
-      },
-      onError: () => toast.error(t("actionFailed")),
+      onMutate: ({ userId, isAdmin }) =>
+        optimisticallyUpdate((list) =>
+          list.map((u) => (u.id === userId ? { ...u, isAdmin } : u)),
+        ),
+      onError: (_error, _variables, snapshot) => rollback(snapshot),
+      onSuccess: () => toast.success(t("userUpdated")),
+      onSettled: revalidate,
     }),
   );
 
   const deleteUser = useMutation(
     trpc.admin.deleteUser.mutationOptions({
-      onSuccess: async () => {
-        await invalidate();
-        toast.success(t("userDeleted"));
-      },
-      onError: () => toast.error(t("actionFailed")),
+      onMutate: ({ userId }) =>
+        optimisticallyUpdate((list) => list.filter((u) => u.id !== userId)),
+      onError: (_error, _variables, snapshot) => rollback(snapshot),
+      onSuccess: () => toast.success(t("userDeleted")),
+      onSettled: revalidate,
     }),
   );
 
-  const pending = setUserAdmin.isPending || deleteUser.isPending;
+  // Only the row being changed is locked while its request is in flight.
+  const isRowPending = (userId: string) =>
+    (setUserAdmin.isPending && setUserAdmin.variables.userId === userId) ||
+    (deleteUser.isPending && deleteUser.variables.userId === userId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,6 +118,7 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
             ) : (
               users.map((u) => {
                 const isSelf = u.id === currentUserId;
+                const rowPending = isRowPending(u.id);
                 return (
                   <TableRow key={u.id}>
                     <TableCell>
@@ -135,7 +157,7 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
                       <div className="flex items-center justify-end gap-4">
                         <Switch
                           checked={u.isAdmin}
-                          disabled={isSelf || pending}
+                          disabled={isSelf || rowPending}
                           onCheckedChange={(checked) =>
                             setUserAdmin.mutate({
                               userId: u.id,
@@ -151,7 +173,7 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              disabled={isSelf || pending}
+                              disabled={isSelf || rowPending}
                               className="text-destructive"
                             >
                               <Trash2 className="h-4 w-4" />
