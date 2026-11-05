@@ -1,20 +1,19 @@
 # CLAUDE.md
 
 Canonical agent guidance for this repo lives in **[AGENTS.md](./AGENTS.md)** —
-read it first.
+read it first. Rules change there, once.
 
 @AGENTS.md
 
 ## Notes for Claude Code
 
-- Safe commands (typecheck, lint, build, test, db push, docker compose) are
-  pre-approved in `.claude/settings.json`.
-- **Always use `pnpm`** (never `npm`, `yarn`, `bun`, or raw `npx`). All dependency management,
-  script execution, and commands must run through `pnpm`.
-- **Mobile app must stay in `apps/`**: The mobile app lives strictly at `apps/expo`.
-  Never move it to the repository root, never extract it outside `apps/`, and never scaffold
-  mobile screens/features outside `apps/expo`.
-- To rename + scaffold this skeleton for a new app, run the **project-init** skill
-  (`.claude/skills/project-init/`).
-- Run `pnpm typecheck` after edits. The skeleton is intentionally minimal — add
-  features, don't expect demo pages to delete.
+- Done means `pnpm check` passes (the pre-push hook runs it; CI runs it plus
+  build, bundle budget, Docker, audit and secret scan).
+- `.claude/settings.json` pre-approves the safe commands (check, test, lint,
+  typecheck, db, docker compose) and **denies** `npm`/`npx`/`yarn`/`bun` and
+  hook bypasses (`--no-verify`) — use `pnpm`, and fix failing hooks.
+- Project skills are in `.agents/skills/` (symlinked into `.claude/skills/`):
+  `add-feature` for any feature work, `testing` for tests, `security-audit`
+  for auth/API/data changes, `next-bundle-optimizer` when the bundle budget
+  fails, `project-init` to start a new app from this skeleton.
+- The mobile app lives strictly at `apps/expo` — never move it.

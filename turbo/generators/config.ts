@@ -10,7 +10,7 @@ interface PackageJson {
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("init", {
-    description: "Generate a new package for the Acme Monorepo",
+    description: "Generate a new workspace package (with a starter test)",
     prompts: [
       {
         type: "input",
@@ -50,18 +50,38 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         template: "export const name = '{{ name }}';",
       },
       {
+        // Testing is policy: every package ships with at least one test.
+        type: "add",
+        path: "packages/{{ name }}/src/index.test.ts",
+        template: [
+          'import { describe, expect, it } from "vitest";',
+          "",
+          'import { name } from "./index";',
+          "",
+          'describe("{{ name }}", () => {',
+          '  it("exports its name", () => {',
+          '    expect(name).toBe("{{ name }}");',
+          "  });",
+          "});",
+          "",
+        ].join("\n"),
+      },
+      {
         type: "modify",
         path: "packages/{{ name }}/package.json",
         async transform(content, answers) {
-          if ("deps" in answers && typeof answers.deps === "string") {
+          const deps: unknown = (answers as { deps?: unknown }).deps;
+          if (typeof deps === "string") {
             const pkg = JSON.parse(content) as PackageJson;
-            for (const dep of answers.deps.split(" ").filter(Boolean)) {
-              const version = await fetch(
+            for (const dep of deps.split(" ").filter(Boolean)) {
+              const res = await fetch(
                 `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
-              )
-                .then((res) => res.json())
-                .then((json) => json.latest);
-              pkg.dependencies[dep] = `^${version}`;
+              );
+              const tags = (await res.json()) as { latest?: string };
+              if (!tags.latest) {
+                throw new Error(`Could not resolve a version for ${dep}`);
+              }
+              pkg.dependencies[dep] = `^${tags.latest}`;
             }
             return JSON.stringify(pkg, null, 2);
           }

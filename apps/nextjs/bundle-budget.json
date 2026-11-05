@@ -1,0 +1,11 @@
+{
+  "$comment": "Max initial (non-lazy) client JS per route, in KB — compressed module sizes from `next analyze` (sum of per-module gzip: an over-estimate of transfer size, but stable for comparisons). Enforced by `pnpm check:bundle` in CI. Over budget? Run the next-bundle-optimizer skill before raising a number, and say why in the PR.",
+  "defaultKb": 430,
+  "routes": {
+    "/": 420,
+    "/admin": 430,
+    "/login": 440,
+    "/_not-found": 420,
+    "/_global-error": 280
+  }
+}

@@ -4,20 +4,12 @@ import {
 } from "@tanstack/react-query";
 import superjson from "superjson";
 
+import { queryDefaults } from "@example-app/shared";
+
 export const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: {
-        // Disable all caching to avoid stale data issues
-        staleTime: 0, // No caching - consider data stale immediately
-        gcTime: 0, // No garbage collection time - data removed immediately
-        refetchOnMount: "always", // Always refetch when component mounts
-        refetchOnWindowFocus: true, // Refetch when window gains focus
-        refetchOnReconnect: true, // Refetch when network reconnects
-      },
-      mutations: {
-        gcTime: 0, // No garbage collection time for mutations
-      },
+      ...queryDefaults,
       dehydrate: {
         serializeData: superjson.serialize,
         shouldDehydrateQuery: (query) =>

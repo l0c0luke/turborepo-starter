@@ -1,9 +1,3 @@
-import { defineConfig } from "vitest/config";
+import { createVitestConfig } from "@example-app/vitest-config";
 
-export default defineConfig({
-  test: {
-    // Node environment is the default; switch to "jsdom" for component tests.
-    environment: "node",
-    include: ["src/**/*.{test,spec}.ts"],
-  },
-});
+export default createVitestConfig();

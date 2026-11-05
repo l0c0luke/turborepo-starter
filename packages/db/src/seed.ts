@@ -2,7 +2,7 @@
  * Database seed — deterministic development data.
  *
  * Creates a known admin you can sign into immediately. In development, magic
- * links / OTP codes are delivered to MailHog at http://localhost:8025, so you
+ * links / OTP codes are delivered to Mailpit at http://localhost:8025, so you
  * can request a sign-in link for `admin@example.com` and land straight on
  * `/admin`.
  *

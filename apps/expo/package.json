@@ -4,24 +4,21 @@
   "private": true,
   "scripts": {
     "clean": "git clean -xdf .cache .expo .turbo android ios node_modules",
-    "dev": "expo run:android --device",
-    "dev:android": "expo start --android",
-    "dev:ios": "expo start --ios",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
-    "typecheck": "tsc --noEmit"
+    "dev": "pnpm with-env expo start",
+    "android": "pnpm with-env expo run:android",
+    "ios": "pnpm with-env expo run:ios",
+    "check:expo": "expo install --check",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@better-auth/expo": "catalog:",
     "@example-app/api": "workspace:*",
-    "@example-app/db": "workspace:*",
     "@example-app/shared": "workspace:*",
     "@expo/dom-webview": "catalog:",
     "@expo/metro-runtime": "catalog:",
     "@expo/vector-icons": "catalog:",
     "@react-native-community/datetimepicker": "catalog:",
-    "@react-native-community/slider": "catalog:",
     "@react-native-google-signin/google-signin": "catalog:",
     "@sentry/react-native": "catalog:",
     "@tailwindcss/postcss": "catalog:",
@@ -30,7 +27,6 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
-    "cronstrue": "catalog:",
     "expo": "catalog:",
     "expo-apple-authentication": "catalog:",
     "expo-constants": "catalog:",
@@ -38,14 +34,12 @@
     "expo-dev-client": "catalog:",
     "expo-font": "catalog:",
     "expo-linking": "catalog:",
-    "expo-location": "catalog:",
     "expo-router": "catalog:",
     "expo-secure-store": "catalog:",
     "expo-splash-screen": "catalog:",
     "expo-status-bar": "catalog:",
     "expo-system-ui": "catalog:",
     "expo-web-browser": "catalog:",
-    "minimatch": "catalog:",
     "nativewind": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -62,12 +56,17 @@
   },
   "devDependencies": {
     "@babel/core": "catalog:",
-    "@babel/preset-env": "catalog:",
-    "@babel/runtime": "catalog:",
     "@example-app/tsconfig": "workspace:*",
     "@types/babel__core": "catalog:",
     "@types/react": "catalog:react19",
-    "prettier": "catalog:",
+    "dotenv-cli": "catalog:",
     "typescript": "catalog:"
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "typescript"
+      ]
+    }
   }
 }

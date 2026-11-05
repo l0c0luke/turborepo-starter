@@ -6,5 +6,11 @@
 
 export { parseError } from "./parse-error";
 export { matchAllowedOrigin, parseOriginList } from "./origins";
-export { captureException, log, setErrorReporter } from "./log";
+export { queryDefaults } from "./query";
+export {
+  captureException,
+  errorTrackingOptions,
+  log,
+  setErrorReporter,
+} from "./log";
 export type { ErrorReporter, Logger } from "./log";

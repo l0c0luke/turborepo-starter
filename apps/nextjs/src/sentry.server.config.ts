@@ -1,8 +1,8 @@
 // Sentry server-side initialization (Node runtime).
-// Loaded by `src/instrumentation.ts`. Inert unless SENTRY_DSN is set.
+// Loaded by `src/instrumentation.ts`. Inert unless a DSN is set (`pnpm setup` points it at the local Bugsink).
 import * as Sentry from "@sentry/nextjs";
 
-import { setErrorReporter } from "@example-app/shared";
+import { errorTrackingOptions, setErrorReporter } from "@example-app/shared";
 
 import { env } from "~/env";
 
@@ -11,7 +11,7 @@ const dsn = env.SENTRY_DSN ?? env.NEXT_PUBLIC_SENTRY_DSN;
 if (dsn) {
   Sentry.init({
     dsn,
-    tracesSampleRate: 1,
+    ...errorTrackingOptions,
   });
 
   // Route `captureException` / `log.error` from @example-app/shared to Sentry.

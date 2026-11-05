@@ -43,7 +43,18 @@ RUN pnpm config set --global verify-deps-before-run false
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
-# Env is validated at runtime, not build time.
+# NEXT_PUBLIC_* values are inlined at BUILD time (browser bundle AND server code) —
+# setting them only on the running container is too late (GA would never
+# load and browser errors would never be reported). Pass them as build args:
+#   docker build --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXX ...
+# (Coolify: mark these variables "Build Variable"). They are public by design.
+ARG NEXT_PUBLIC_BASE_URL
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
+ARG NEXT_PUBLIC_SENTRY_DSN
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL \
+    NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
+    NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
+# Server-side env is validated at runtime, not build time.
 ENV SKIP_ENV_VALIDATION=1
 RUN pnpm turbo run build --filter=@example-app/nextjs
 

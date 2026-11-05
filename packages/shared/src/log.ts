@@ -55,3 +55,16 @@ export const log: Logger = {
   },
   debug: (...args: unknown[]) => c.debug(...args),
 };
+
+/**
+ * Options shared by every Sentry SDK init in the repo (web client, server,
+ * edge, mobile). Errors go to Bugsink by default, which is Sentry-compatible
+ * but ignores performance data — so tracing is off rather than sending 100%
+ * of transactions nowhere. Raise `tracesSampleRate` here (once) if you point
+ * the DSNs at Sentry and want tracing.
+ */
+export const errorTrackingOptions = {
+  tracesSampleRate: 0,
+  /** Never attach IPs, cookies or request bodies to events by default. */
+  sendDefaultPii: false,
+} as const;

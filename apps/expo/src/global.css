@@ -1,2 +1,10 @@
-@import "tailwindcss";
+/*
+ * NativeWind v5 / Tailwind 4 entry (imported once, in src/app/_layout.tsx).
+ * Utilities stay unlayered on purpose: a single `@import "tailwindcss"` can
+ * rank them below React Native Web's defaults.
+ */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
 @import "nativewind/theme";

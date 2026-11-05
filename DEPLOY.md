@@ -60,7 +60,7 @@ Coolify can build and run the included Dockerfile directly from your Git repo.
    root** (the whole pnpm workspace must be in the build context). Exposed
    port: `3000`.
 2. **Database** — add a Coolify-managed PostgreSQL resource. Pin a major
-   version (e.g. `postgres:17` to match `docker-compose.yml`) rather than
+   version (e.g. `postgres:18` to match `docker-compose.yml`) rather than
    `latest` — an unplanned major bump will refuse to start against the old
    data volume. Point `POSTGRES_URL` at the internal connection URL Coolify
    shows for the database.
@@ -68,6 +68,12 @@ Coolify can build and run the included Dockerfile directly from your Git repo.
    application's _Environment Variables_ tab (mark secrets like `AUTH_SECRET`
    as build-time hidden/runtime only). The image builds with
    `SKIP_ENV_VALIDATION=1`; env vars are validated when the container starts.
+   **`NEXT_PUBLIC_*` variables are different**: Next.js inlines them into the
+   browser bundle at build time, so mark `NEXT_PUBLIC_BASE_URL`,
+   `NEXT_PUBLIC_GA_MEASUREMENT_ID` and `NEXT_PUBLIC_SENTRY_DSN` as **Build
+   Variables** (they become `--build-arg`s for `apps/nextjs/Dockerfile`).
+   Set only at runtime, Google Analytics never loads and browser errors are
+   never reported. (They're public values — that's fine.)
 4. **Migrations on start** — run pending migrations before the server boots.
    Replace the container start command with a small wrapper (or bake a
    `start.sh` into the image):
@@ -112,17 +118,34 @@ pnpm --filter @example-app/expo exec eas build --platform ios
 pnpm --filter @example-app/expo exec eas build --platform android
 ```
 
-## Error tracking (Sentry)
+## Error tracking (Bugsink)
 
-Sentry is wired but inert until you set a DSN. For production:
+Both apps report errors with the Sentry SDKs; the default backend is
+[Bugsink](https://www.bugsink.com), a self-hosted, Sentry-compatible tracker
+(the same one `docker-compose.yml` runs locally). Reporting is inert until a
+DSN is set.
 
-- Web: set `NEXT_PUBLIC_SENTRY_DSN` (and `SENTRY_DSN`).
-- Mobile: set `EXPO_PUBLIC_SENTRY_DSN`.
-- Source-map upload at build time: set `SENTRY_ORG`, `SENTRY_PROJECT`, and
-  `SENTRY_AUTH_TOKEN` (CI only).
+- **Run Bugsink**: deploy the `bugsink/bugsink` image (Coolify: a Docker
+  image resource) with a persistent volume on `/data` (or `DATABASE_URL` for
+  an external database), `SECRET_KEY` (50+ random chars), `BASE_URL` (its
+  public URL), `BEHIND_HTTPS_PROXY=true`, and SMTP settings for alert emails.
+  Create a team plus a web and a mobile project in its UI; each project page
+  shows its DSN.
+- **Web**: set `NEXT_PUBLIC_SENTRY_DSN` as a **build** variable (browser) —
+  the server falls back to it; set `SENTRY_DSN` to override server-side.
+- **Mobile**: set `EXPO_PUBLIC_SENTRY_DSN` in the EAS build environment.
+- **Source maps** (optional, CI only): `SENTRY_URL` (your Bugsink),
+  `SENTRY_AUTH_TOKEN` (a Bugsink API token), `SENTRY_ORG`, `SENTRY_PROJECT`.
+- Prefer hosted Sentry? Point the DSNs at it instead — no code changes. To
+  use tracing there, raise `tracesSampleRate` in `errorTrackingOptions`
+  (`packages/shared/src/log.ts`) and set `excludeTracing: false` in
+  `apps/nextjs/next.config.js`.
 
 ## Dependencies
 
 `renovate.json` opens grouped dependency-update PRs. Enable Renovate on the repo
-to keep the catalog current. Expo SDK packages are grouped and should be bumped
-together with `expo install --fix`.
+to keep the catalog current (it waits 3 days after a release and pins GitHub
+Actions to digests). Expo SDK packages are grouped and should be bumped
+together with `pnpm -F @example-app/expo exec expo install --fix` — CI's
+`check:expo` fails on drift. Agent skills are not covered by Renovate: run
+`pnpm skills:update` periodically.

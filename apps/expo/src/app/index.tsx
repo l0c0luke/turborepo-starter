@@ -1,3 +1,4 @@
+import type { TextInputInstance } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,6 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 
+import { log } from "@example-app/shared";
+
+import { Skeleton } from "~/components/ui/Skeleton";
 import {
   buttons,
   buttonText,
@@ -41,7 +45,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const otpRefs = useRef<TextInput[]>([]);
+  const otpRefs = useRef<TextInputInstance[]>([]);
   // Apple is offered only when enabled for this build AND the device supports
   // it (iOS 13+); Google only when its client ID is configured.
   const [isAppleAvailable, setIsAppleAvailable] = useState(false);
@@ -68,24 +72,22 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    console.log("🔐 Sending OTP to:", email.trim());
 
     try {
-      const result = await authClient.emailOtp.sendVerificationOtp({
+      await authClient.emailOtp.sendVerificationOtp({
         email: email.trim(),
         type: "sign-in",
       });
 
-      console.log("✅ OTP send result:", result);
       setOtpSent(true);
     } catch (error: unknown) {
-      console.error("❌ Failed to send OTP:", error);
+      log.error("❌ Failed to send OTP:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
 
       Alert.alert(
         "Failed to Send OTP",
-        `Could not send verification code to ${email.trim()}.\n\nError: ${errorMessage}\n\n🔧 For development: Make sure MailHog is running with 'docker-compose up'`,
+        `Could not send verification code to ${email.trim()}.\n\nError: ${errorMessage}\n\n🔧 For development: make sure the local services are running ('pnpm setup')`,
         [
           { text: "Retry", onPress: () => void handleSendOTP() },
           { text: "Cancel", style: "cancel" },
@@ -108,21 +110,15 @@ export default function LoginPage() {
     }
 
     setOtpLoading(true);
-    console.log("🔐 Verifying OTP:", {
-      email: email.trim(),
-      otpLength: otpString.length,
-    });
 
     try {
-      const { data, error } = await authClient.signIn.emailOtp({
+      const { error } = await authClient.signIn.emailOtp({
         email: email.trim(),
         otp: otpString,
       });
 
-      console.log("🔐 OTP verification result:", { data, error });
-
       if (error) {
-        console.error("❌ OTP verification failed:", error);
+        log.error("❌ OTP verification failed:", error);
 
         const errorMessage = error.message ?? "Unknown error occurred";
 
@@ -143,10 +139,9 @@ export default function LoginPage() {
         return; // Don't proceed to dashboard on error
       }
 
-      console.log("✅ OTP verification successful:", data);
       router.replace("/home");
     } catch (error: unknown) {
-      console.error("❌ Unexpected error during OTP verification:", error);
+      log.error("❌ Unexpected error during OTP verification:", error);
       setOtpError("An unexpected error occurred. Please try again.");
     } finally {
       setOtpLoading(false);
@@ -185,18 +180,15 @@ export default function LoginPage() {
   };
 
   const handleGoogleAuth = async () => {
-    console.log("Google auth button pressed");
     setIsLoading(true);
     try {
-      // Check if Google Play Services are available
-      console.log("Checking Google Play Services...");
-      const hasPlayServices = await GoogleSignin.hasPlayServices();
-      console.log("Play Services available:", hasPlayServices);
+      // Throws (and offers an update dialog) if Play Services are unavailable
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
 
       // Sign in with Google (regular Google Sign-In, not Universal)
-      console.log("Starting Google sign-in...");
       const userInfo = await GoogleSignin.signIn();
-      console.log("Google sign-in result:", userInfo);
 
       // For regular Google Sign-In, idToken is directly on userInfo
       if (userInfo.data?.idToken) {
@@ -211,21 +203,18 @@ export default function LoginPage() {
           callbackURL: "/home",
         });
 
-        console.log("Better-auth Google signin successful");
         router.replace("/home");
       } else {
         throw new Error("No ID token received from Google");
       }
     } catch (error: unknown) {
-      console.error("Google auth error:", error);
+      log.error("Google auth error:", error);
 
       // Handle specific Google Sign-In errors
       const googleError = error as { code?: string };
       if (googleError.code === "SIGN_IN_CANCELLED") {
-        console.log("User cancelled Google sign-in");
         return; // Don't show error for user cancellation
       } else if (googleError.code === "IN_PROGRESS") {
-        console.log("Google sign-in already in progress");
         return;
       } else if (googleError.code === "PLAY_SERVICES_NOT_AVAILABLE") {
         Alert.alert(
@@ -245,7 +234,6 @@ export default function LoginPage() {
   };
 
   const handleAppleAuth = async () => {
-    console.log("Apple auth button pressed");
     setIsLoading(true);
 
     try {
@@ -262,17 +250,14 @@ export default function LoginPage() {
       // Complete Apple Sign In flow
       const result = await completeAppleSignIn();
 
-      console.log("Apple Sign In result:", result);
-
       if (result.success) {
-        console.log("✅ Apple Sign In successful, navigating to dashboard");
         router.replace("/home");
       } else {
-        console.error("❌ Apple Sign In failed:", result.error);
+        log.error("❌ Apple Sign In failed:", result.error);
         Alert.alert("Sign In Failed", result.error ?? "Apple Sign In failed");
       }
     } catch (error: unknown) {
-      console.error("Apple auth error:", error);
+      log.error("Apple auth error:", error);
       Alert.alert(
         "Authentication Failed",
         (error as Error).message || "Failed to sign in with Apple",
@@ -282,20 +267,23 @@ export default function LoginPage() {
     }
   };
 
-  // Show loading while checking authentication status
+  // While the stored session is checked, show the sign-in layout as a
+  // skeleton (not a spinner) so the screen appears instantly and doesn't jump.
   if (isPending) {
     return (
       <SafeAreaView style={containers.safeArea}>
-        <View style={commonStyles.fullScreenLoading}>
-          <ActivityIndicator size="large" color={colors.primary[500]} />
-          <Text
-            style={[
-              typography.body,
-              { marginTop: spacing[4], color: colors.text.secondary },
-            ]}
-          >
-            Loading...
-          </Text>
+        <View
+          style={{
+            flex: 1,
+            padding: spacing[6],
+            gap: spacing[4],
+            justifyContent: "center",
+          }}
+        >
+          <Skeleton width="60%" height={32} />
+          <Skeleton width="80%" height={16} />
+          <Skeleton height={48} radius={12} style={{ marginTop: spacing[4] }} />
+          <Skeleton height={48} radius={12} />
         </View>
       </SafeAreaView>
     );

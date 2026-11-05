@@ -7,11 +7,11 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Generate a strong `AUTH_SECRET` (`openssl rand -base64 32`)
 - [ ] Set `NEXT_PUBLIC_BASE_URL` to production domain
 - [ ] Set `EXPO_PUBLIC_BASE_URL` to production API domain
-- [ ] Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` if Google Analytics is enabled
+- [ ] Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` as a **build** variable (every project ships with GA4 — the server logs a warning at startup if it's missing)
 - [ ] Configure production `POSTGRES_URL` (use connection pooling)
 - [ ] Configure production SMTP settings (`EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`)
 - [ ] Set `EMAIL_FROM` to a verified sender address
-- [ ] Set Sentry DSNs to enable error tracking (`NEXT_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_SENTRY_DSN`)
+- [ ] Deploy Bugsink (see `DEPLOY.md`) and set its DSNs: `NEXT_PUBLIC_SENTRY_DSN` (build variable) and `EXPO_PUBLIC_SENTRY_DSN` (EAS env); trigger a test error and see it arrive
 - [ ] Ensure no development secrets are in production env
 
 ## Authentication
@@ -59,7 +59,8 @@ Use this checklist before deploying to production. Each section covers a critica
 
 ## Monitoring & Observability
 
-- [ ] Set Sentry DSNs (error tracking is pre-wired — see `DEPLOY.md`); add `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` in CI for source-map upload
+- [ ] Bugsink receives errors from web (browser + server) and mobile; alert emails reach the team; optional source maps via `SENTRY_URL` / `SENTRY_AUTH_TOKEN` in CI (see `DEPLOY.md`)
+- [ ] Google Analytics shows real-time traffic and the key `trackEvent` events
 - [ ] Configure uptime monitoring (point it at `/api/health`)
 - [ ] Set up log aggregation
 - [ ] Configure alerts for error rate spikes
@@ -67,18 +68,18 @@ Use this checklist before deploying to production. Each section covers a critica
 
 ## Security
 
-- [ ] Run `pnpm audit` and resolve critical vulnerabilities
+- [ ] **Full security audit** with the `security-audit` agent skill ("security audit this codebase"); fix every confirmed finding and resolve the needs-validation ones
+- [ ] `pnpm check:audit` passes (no high/critical advisories)
 - [ ] Set `TRUSTED_ORIGINS` only to origins that really need cross-origin API/auth access (empty = same-origin only; it is the `/api/trpc` CORS allow-list)
-- [ ] Review rate limiting on auth endpoints (counters live in the Postgres `rate_limit` table — make sure your migrations create it) and that the client-IP header your proxy sets is one Better Auth reads
+- [ ] Review rate limiting on auth endpoints (counters live in the Postgres `rate_limit` table, created by the baseline migration) and that the client-IP header your proxy sets is one Better Auth reads
 - [ ] Confirm the 5-minute session cookie cache is acceptable (role changes / revocations take up to 5 min) — see README "Security defaults"
 - [ ] Ensure no secrets are committed to the repository (CI `secret-scan` job runs gitleaks over the full history; locally: `gitleaks git --redact .`)
 - [ ] Verify `.env` is in `.gitignore`
 
 ## Final Verification
 
-- [ ] `pnpm typecheck` passes
-- [ ] `pnpm lint` passes
-- [ ] `pnpm test` passes
-- [ ] `pnpm build` completes without errors
+- [ ] `pnpm check` passes and CI (`ci-ok`) is green on the release commit
+- [ ] Bundle budgets hold (`pnpm check:bundle`); run the `next-bundle-optimizer` skill once on the key routes
+- [ ] `ci-ok` is a required status check on `main`
 - [ ] Manual smoke test: sign up, sign in, core features
 - [ ] Test on real iOS and Android devices

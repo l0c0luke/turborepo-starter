@@ -22,7 +22,6 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "generate": "pnpm with-env drizzle-kit generate",
     "migrate": "pnpm with-env tsx src/migrate.ts",
     "push": "pnpm with-env drizzle-kit push",
@@ -32,21 +31,15 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "drizzle-cuid2": "catalog:",
     "drizzle-orm": "catalog:",
-    "drizzle-zod": "catalog:",
-    "minimatch": "catalog:",
-    "postgres": "catalog:",
-    "zod": "catalog:"
+    "postgres": "catalog:"
   },
   "devDependencies": {
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
     "@types/node": "catalog:",
-    "@types/pg": "catalog:",
     "dotenv-cli": "catalog:",
     "drizzle-kit": "catalog:",
-    "prettier": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"
   },

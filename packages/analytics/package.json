@@ -15,6 +15,10 @@
     "./keys": {
       "types": "./dist/keys.d.ts",
       "default": "./src/keys.ts"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "default": "./src/events.ts"
     }
   },
   "license": "MIT",
@@ -22,7 +26,6 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc --watch",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -36,7 +39,6 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
     "next": "catalog:",
-    "prettier": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:"
   },

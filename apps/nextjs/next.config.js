@@ -1,5 +1,4 @@
 import path from "node:path";
-import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs/config";
 import { createJiti } from "jiti";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -10,9 +9,6 @@ const jiti = createJiti(import.meta.url);
 await jiti.import("./src/env");
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -75,12 +71,28 @@ const config = {
   },
 };
 
-const nextConfig = withBundleAnalyzer(withNextIntl(config));
+// Bundle analysis: `pnpm -F @example-app/nextjs analyze` (Turbopack's built-in
+// `next analyze`); CI enforces a size budget with `pnpm check:bundle`.
+const nextConfig = withNextIntl(config);
 
+// Source maps upload only when SENTRY_AUTH_TOKEN is set (CI/release). Works
+// with Bugsink as well as Sentry: set SENTRY_URL to your Bugsink instance.
 export default withSentryConfig(nextConfig, {
+  sentryUrl: process.env.SENTRY_URL,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
   sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  // Tree-shake SDK code we don't use out of the browser bundle (~30 KB gz):
+  // tracing is off (errorTrackingOptions in @example-app/shared — Bugsink
+  // ignores it) and Session Replay isn't enabled. Flip excludeTracing to
+  // false if you move to Sentry and raise tracesSampleRate.
+  bundleSizeOptimizations: {
+    excludeTracing: true,
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+    excludeReplayWorker: true,
+  },
 });

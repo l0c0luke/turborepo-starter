@@ -1,13 +1,15 @@
 // Sentry browser-side initialization.
-// Inert unless NEXT_PUBLIC_SENTRY_DSN is set.
+// Inert unless NEXT_PUBLIC_SENTRY_DSN is set (`pnpm setup` points it at the local Bugsink).
 import * as Sentry from "@sentry/nextjs";
+
+import { errorTrackingOptions } from "@example-app/shared";
 
 import { env } from "~/env";
 
 if (env.NEXT_PUBLIC_SENTRY_DSN) {
   Sentry.init({
     dsn: env.NEXT_PUBLIC_SENTRY_DSN,
-    tracesSampleRate: 1,
+    ...errorTrackingOptions,
   });
 }
 

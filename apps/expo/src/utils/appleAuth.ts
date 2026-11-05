@@ -8,6 +8,8 @@ import { Platform } from "react-native";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
 
+import { log } from "@example-app/shared";
+
 /**
  * Apple Sign In response interface
  */
@@ -34,7 +36,7 @@ export async function isAppleAuthAvailable(): Promise<boolean> {
   try {
     return await AppleAuthentication.isAvailableAsync();
   } catch (error) {
-    console.warn("Apple Authentication availability check failed:", error);
+    log.warn("Apple Authentication availability check failed:", error);
     return false;
   }
 }
@@ -77,13 +79,11 @@ async function hashNonce(nonce: string): Promise<string> {
  * if (result.success) {
  *   console.log('✅ Apple Sign In successful');
  * } else {
- *   console.error('❌ Apple Sign In failed:', result.error);
+ *   log.error('❌ Apple Sign In failed:', result.error);
  * }
  * ```
  */
 export async function signInWithApple(): Promise<AppleSignInResult> {
-  console.log("🍎 Starting Apple Sign In process...");
-
   // Check availability first
   const isAvailable = await isAppleAuthAvailable();
   if (!isAvailable) {
@@ -98,8 +98,6 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
     const nonce = generateNonce();
     const hashedNonce = await hashNonce(nonce);
 
-    console.log("🔐 Generated nonce for Apple Sign In");
-
     // Perform Apple authentication
     const appleResponse = await AppleAuthentication.signInAsync({
       requestedScopes: [
@@ -108,14 +106,6 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
       ],
       nonce: hashedNonce,
     });
-
-    console.log("✅ Apple native authentication successful");
-    console.log("📧 Email:", appleResponse.email ?? "Not provided");
-    console.log(
-      "👤 Full Name:",
-      appleResponse.fullName?.givenName,
-      appleResponse.fullName?.familyName,
-    );
 
     if (!appleResponse.identityToken) {
       return {
@@ -137,7 +127,7 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
         : undefined,
     };
   } catch (error: unknown) {
-    console.error("❌ Apple Sign In failed:", error);
+    log.error("❌ Apple Sign In failed:", error);
 
     // Handle specific error cases
     const appleError = error as { code?: string; message?: string };
@@ -175,8 +165,6 @@ export async function authenticateWithBetterAuth(
   identityToken: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log("🔄 Authenticating with BetterAuth using ID Token...");
-
     const { authClient } = await import("./auth");
 
     // Use BetterAuth's social sign-in with ID Token approach
@@ -188,17 +176,16 @@ export async function authenticateWithBetterAuth(
     });
 
     if (result.error) {
-      console.error("❌ BetterAuth authentication failed:", result.error);
+      log.error("❌ BetterAuth authentication failed:", result.error);
       return {
         success: false,
         error: result.error.message ?? "Authentication failed",
       };
     }
 
-    console.log("✅ BetterAuth authentication successful");
     return { success: true };
   } catch (error: unknown) {
-    console.error("❌ BetterAuth authentication failed:", error);
+    log.error("❌ BetterAuth authentication failed:", error);
     return {
       success: false,
       error:
@@ -240,10 +227,9 @@ export async function completeAppleSignIn(): Promise<{
       };
     }
 
-    console.log("✅ Complete Apple Sign In flow successful");
     return { success: true };
   } catch (error: unknown) {
-    console.error("❌ Complete Apple Sign In flow failed:", error);
+    log.error("❌ Complete Apple Sign In flow failed:", error);
     return {
       success: false,
       error:
@@ -260,22 +246,15 @@ export async function completeAppleSignIn(): Promise<{
  */
 export async function checkAppleCredentialState(
   userID: string,
-): Promise<number | null> {
+): Promise<AppleAuthentication.AppleAuthenticationCredentialState | null> {
   if (Platform.OS !== "ios") {
     return null;
   }
 
   try {
-    // Apple credential states are numeric constants
-    // Using any here as getCredentialStateAsync is not in the official types but exists in the API
-    /* eslint-disable typescript/no-explicit-any */
-    const credentialState = await (
-      AppleAuthentication as any
-    ).getCredentialStateAsync(userID);
-    return credentialState as number;
-    /* eslint-enable typescript/no-explicit-any */
+    return await AppleAuthentication.getCredentialStateAsync(userID);
   } catch (error) {
-    console.warn("Failed to check Apple credential state:", error);
+    log.warn("Failed to check Apple credential state:", error);
     return null;
   }
 }

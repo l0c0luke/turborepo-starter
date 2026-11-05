@@ -1,7 +1,7 @@
 import type { TRPCQueryOptions } from "@trpc/tanstack-react-query";
 import { cache } from "react";
 import { headers } from "next/headers";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, noop } from "@tanstack/react-query";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 
 import type { AppRouter } from "@example-app/api";
@@ -45,10 +45,13 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
   queryOptions: T,
 ) {
   const queryClient = getQueryClient();
+  // Start the fetch on the server without awaiting it; <HydrateClient>
+  // streams the pending query to the client. Errors surface there (via the
+  // client's useSuspenseQuery + error boundary), so swallow them here.
   if (queryOptions.queryKey[1]?.type === "infinite") {
     // eslint-disable-next-line typescript/no-unsafe-argument, typescript/no-explicit-any
-    void queryClient.prefetchInfiniteQuery(queryOptions as any);
+    queryClient.infiniteQuery(queryOptions as any).catch(noop);
   } else {
-    void queryClient.prefetchQuery(queryOptions);
+    queryClient.query(queryOptions).catch(noop);
   }
 }

@@ -1,0 +1,7 @@
+# Vendored/generated content — keep byte-for-byte (skills are hash-pinned in skills-lock.json).
+.agents/
+.claude/skills/
+skills-lock.json
+packages/db/drizzle/
+pnpm-lock.yaml
+apps/expo/nativewind-env.d.ts

@@ -7,6 +7,8 @@ import { Globe, LogOut, Shield } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
+import { log } from "@example-app/shared";
+
 import { Avatar, AvatarFallback, AvatarImage } from "~/_components/ui/avatar";
 import { Button } from "~/_components/ui/button";
 import {
@@ -95,7 +97,7 @@ export function Navbar() {
         },
       });
     } catch (error) {
-      console.error("Logout failed:", error);
+      log.error("Logout failed:", error);
       // Even if logout fails, redirect to login to be safe
       window.location.href = "/login";
     }

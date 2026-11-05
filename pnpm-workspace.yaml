@@ -5,6 +5,13 @@ packages:
 
 autoInstallPeers: false
 
+# Peer issues fail CI (`pnpm check:peers`). Only list a peer here with a reason.
+peerDependencyRules:
+  ignoreMissing:
+    # react-native-worklets asks for it; Expo apps bundle with
+    # @expo/metro-config instead, which Expo supplies.
+    - "@react-native/metro-config"
+
 allowBuilds:
   "@parcel/watcher": true
   "@sentry/cli": true
@@ -14,7 +21,7 @@ allowBuilds:
   sharp: true
 
 overrides:
-  postcss: ^8.5.30
+  postcss: ^8.5.32
   # Keep a single esbuild across the tree; mixed versions break its
   # postinstall binary check (drizzle-kit still pulls the legacy @esbuild-kit).
   esbuild: ^0.28.2
@@ -24,95 +31,110 @@ overrides:
   # root, one under apps/nextjs — whose NextConfig types don't match, failing
   # `pnpm typecheck` on apps/nextjs/next.config.js. Tracks the catalog version.
   "@types/node": "catalog:"
+  # NativeWind v5 (react-native-css) serialises its CSS AST with lightningcss;
+  # newer lightningcss releases change that format and the Expo bundle fails
+  # with "failed to deserialize ... Specifier". Pinned per the NativeWind v5
+  # install guide — revisit when NativeWind 5 goes stable.
+  lightningcss: 1.30.1
+  # --- Security floors for transitive deps (pnpm audit, CI `check:audit`) ---
+  # Each selector only matches the vulnerable range, so nothing else moves.
+  # Delete an entry once `pnpm why <pkg>` shows upstream has caught up.
+  "ws@>=8 <8.21.0": ^8.21.0
+  "ws@<7.5.11": ^7.5.11
+  "fast-uri@<3.1.9": ^3.1.9
+  "browserslist@<4.28.7": ^4.28.7
+  "@xmldom/xmldom@>=0.9 <0.9.12": ^0.9.12
+  "@xmldom/xmldom@<0.8.15": ^0.8.15
+  "baseline-browser-mapping@<2.11.0": ^2.11.0
 
 catalog:
   # --- Auth ---
-  "@better-auth/expo": ^1.7.7
-  better-auth: ^1.7.7
+  "@better-auth/expo": ^1.7.16
+  better-auth: ^1.7.16
+  # Better Auth CLI (`pnpm auth:generate`) — keep on the same version as better-auth.
+  auth: ^1.7.16
 
   # --- API ---
-  "@trpc/client": ^11.19.0
-  "@trpc/server": ^11.19.0
-  "@trpc/tanstack-react-query": ^11.19.0
-  "@tanstack/react-query": ^5.104.2
+  "@trpc/client": ^11.24.0
+  "@trpc/server": ^11.24.0
+  "@trpc/tanstack-react-query": ^11.24.0
+  "@tanstack/react-query": ^5.105.3
   superjson: ^2.2.6
-  expo-server-sdk: ^7.2.0
 
   # --- Database ---
-  drizzle-cuid2: ^2.2.0
   drizzle-kit: ^0.31.11
   drizzle-orm: ^0.45.4
-  drizzle-zod: ^0.8.3
   postgres: ^3.4.9
 
   # --- Email ---
-  react-email: ^6.11.1
-  nodemailer: ^10.1.0
+  react-email: ^6.11.6
+  nodemailer: ^10.3.1
 
   # --- Validation ---
   zod: ^4.6.7
 
   # --- Testing ---
-  vitest: ^5.0.4
-  vite: ^8.3.4
+  vitest: ^5.1.0
+  # Keep in lockstep with vitest (exact peer).
+  "@vitest/coverage-v8": ^5.1.0
+  vite: ^8.3.5
 
-  # --- React / React Native (Expo SDK 57 aligned) ---
-  # NOTE: these are pinned to Expo SDK 57 / React Native 0.86 requirements.
-  # Do not bump independently — run `expo install --fix` after changing the Expo SDK.
-  react: 19.2.3
-  react-dom: 19.2.3
-  react-native: 0.86.3
-  react-native-gesture-handler: ~2.32.0
-  react-native-reanimated: 4.5.1
-  react-native-safe-area-context: ~5.7.0
-  react-native-screens: ~4.26.2
-  react-native-worklets: 0.10.1
+  # --- React / React Native (Expo SDK 58 aligned) ---
+  # NOTE: these are pinned to Expo SDK 58 / React Native 0.88 requirements.
+  # Do not bump independently — after changing the Expo SDK run
+  # `pnpm -F @example-app/expo exec expo install --fix`. CI (`pnpm check:expo`)
+  # fails when these drift from what the SDK expects.
+  react: 19.3.0
+  react-dom: 19.3.0
+  react-native: 0.88.1
+  react-native-gesture-handler: ~3.3.0
+  react-native-reanimated: 4.7.1
+  react-native-safe-area-context: ~5.11.1
+  react-native-screens: ~4.30.1
+  react-native-worklets: 0.13.0
 
-  # --- Expo SDK 57 ---
-  expo: ~57.0.28
-  expo-apple-authentication: ~57.0.2
-  expo-constants: ~57.0.21
-  expo-crypto: ~57.0.4
-  expo-dev-client: ~57.0.20
-  expo-font: ~57.0.4
-  expo-linking: ~57.0.12
-  expo-location: ~57.0.21
-  expo-router: ~57.0.26
-  expo-secure-store: ~57.0.4
-  expo-splash-screen: ~57.0.10
-  expo-status-bar: ~57.0.1
-  expo-system-ui: ~57.0.4
-  expo-web-browser: ~57.0.3
-  "@expo/dom-webview": ~57.0.1
-  "@expo/metro-runtime": ~57.0.16
+  # --- Expo SDK 58 ---
+  expo: ~58.0.23
+  expo-apple-authentication: ~58.0.2
+  expo-constants: ~58.0.15
+  expo-crypto: ~58.0.7
+  expo-dev-client: ~58.0.18
+  expo-font: ~58.0.11
+  expo-linking: ~58.0.16
+  expo-router: ~58.0.30
+  expo-secure-store: ~58.0.2
+  expo-splash-screen: ~58.0.13
+  expo-status-bar: ~58.0.4
+  expo-system-ui: ~58.0.7
+  expo-web-browser: ~58.0.7
+  "@expo/dom-webview": ~58.0.2
+  "@expo/metro-runtime": ~58.0.17
   "@expo/vector-icons": ^15.1.1
-  "@react-native-community/datetimepicker": 9.1.0
-  "@react-native-community/slider": 5.2.1
-  "@react-native-google-signin/google-signin": ^16.1.5
+  "@react-native-community/datetimepicker": 9.2.1
+  "@react-native-google-signin/google-signin": ^17.0.0
 
   # --- Next.js ---
-  next: ^16.4.0
+  next: ^16.4.5
   next-intl: ^4.14.9
   next-themes: ^0.4.6
-  "@next/bundle-analyzer": ^16.4.0
-  "@next/third-parties": ^16.4.0
+  "@next/third-parties": ^16.4.5
   "@t3-oss/env-nextjs": ^0.13.11
 
   # --- SEO ---
   schema-dts: ^2.1.0
 
   # --- Observability (Sentry) ---
-  "@sentry/nextjs": ^11.7.0
-  "@sentry/react-native": ~7.11.0
+  "@sentry/nextjs": ^11.10.0
+  "@sentry/react-native": ~8.28.0
 
   # --- Tailwind / Styling ---
   # Both apps use Tailwind 4. The Expo app uses NativeWind 5 (preview), which is
   # built on Tailwind 4 + @tailwindcss/postcss and the react-native-css engine.
-  tailwindcss: ^4.3.3
-  nativewind: 5.0.0-rc.0
-  react-native-css: ^3.0.7
-  "@tailwindcss/postcss": ^4.3.3
-  postcss: ^8.5.30
+  tailwindcss: ^4.3.4
+  nativewind: 5.0.0-rc.1
+  react-native-css: 3.1.0-rc.1
+  "@tailwindcss/postcss": ^4.3.4
+  postcss: ^8.5.32
   tailwind-merge: ^3.7.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
@@ -122,6 +144,7 @@ catalog:
   "@radix-ui/react-alert-dialog": ^1.2.1
   "@radix-ui/react-avatar": ^1.3.1
   "@radix-ui/react-checkbox": ^1.4.1
+  "@radix-ui/react-dialog": ^1.3.1
   "@radix-ui/react-dropdown-menu": ^2.2.1
   "@radix-ui/react-label": ^2.1.17
   "@radix-ui/react-navigation-menu": ^1.4.1
@@ -137,37 +160,40 @@ catalog:
   "@radix-ui/react-tooltip": ^1.4.1
 
   # --- Forms ---
-  "@hookform/resolvers": ^5.9.1
-  react-hook-form: ^7.90.0
+  "@hookform/resolvers": ^7.0.2
+  react-hook-form: ^7.91.0
   react-day-picker: ^10.0.2
   cmdk: ^1.1.1
   sonner: ^2.0.8
 
   # --- Date utilities ---
   date-fns: ^4.4.0
-  date-fns-tz: ^3.2.0
-  cronstrue: ^3.32.0
 
   # --- Icons ---
-  lucide-react: ^1.56.0
+  lucide-react: ^1.68.0
 
   # --- Tooling ---
   # oxlint (Rust) replaces ESLint + typescript-eslint. Type-aware rules run via
   # oxlint-tsgolint, which has no TypeScript version cap — this is what lets the
   # repo run TypeScript 7.
-  oxlint: ^1.88.0
-  oxlint-tsgolint: ^7.0.2004
+  oxlint: ^1.91.0
+  oxlint-tsgolint: ^7.0.2005
   prettier: ^3.9.10
   # Workspace/monorepo linter (`pnpm lint:ws`; runs in CI). Pinned exactly so
   # local runs and CI agree; Renovate bumps it.
   sherif: 1.13.0
+  # Unused files/dependencies/exports (`pnpm check:deps`; runs in CI).
+  knip: 6.44.1
+  # Agent skills CLI (`pnpm skills:install` / `pnpm skills:update`; skills-lock.json).
+  skills: 1.7.6
   typescript: ^7.0.2
-  turbo: ^2.11.8
-  "@turbo/gen": ^2.11.8
-  dotenv-cli: ^11.0.0
+  turbo: ^2.11.10
+  "@turbo/gen": ^2.11.10
+  dotenv-cli: ^11.1.0
   lefthook: ^2.2.2
-  minimatch: ^10.2.6
   tsx: ^4.23.15
+  # Marker import that fails the build if server code reaches a client bundle.
+  server-only: ^0.0.1
   jiti: ^2.7.0
 
   # --- Prettier plugins ---
@@ -179,97 +205,18 @@ catalog:
   # Dockerfile / eas.json) — bump it together with those, not to the latest major.
   "@types/node": ^24.19.2
   "@types/nodemailer": ^8.0.2
-  "@types/pg": ^8.23.1
-  "@types/jsonwebtoken": ^9.0.10
-  "@types/better-sqlite3": ^9.6.0
-  "@types/estree": ^1.0.9
-  "@types/json-schema": ^7.0.15
   "@types/babel__core": ^7.20.5
 
   # --- Babel (Expo) ---
-  # NOTE: stays on Babel 7.x — Expo SDK 57 / Metro / babel-preset-expo require it.
+  # NOTE: stays on Babel 7.x — Expo SDK 58 / Metro / babel-preset-expo require it.
   "@babel/core": ^7.29.7
-  "@babel/preset-env": ^7.29.7
-  "@babel/runtime": ^7.29.10
 
   # --- Dev utilities ---
   tw-animate-css: ^1.4.0
 
 catalogs:
   react19:
-    "@types/react": ^19.2.18
-    "@types/react-dom": ^19.2.7
+    "@types/react": ^19.3.0
+    "@types/react-dom": ^19.3.0
 
 nodeLinker: hoisted
-
-minimumReleaseAgeExclude:
-  - "@expo/cli@57.0.29"
-  - "@expo/router-server@57.0.26"
-  - "@expo/ui@57.0.23"
-  - expo-constants@57.0.21
-  - expo-linking@57.0.12
-  - expo-modules-core@57.0.22
-  - expo-router@57.0.26
-  - expo@57.0.28
-  - "@oxlint/binding-android-arm-eabi@1.88.0"
-  - "@oxlint/binding-android-arm64@1.88.0"
-  - "@oxlint/binding-darwin-arm64@1.88.0"
-  - "@oxlint/binding-darwin-x64@1.88.0"
-  - "@oxlint/binding-freebsd-x64@1.88.0"
-  - "@oxlint/binding-linux-arm-gnueabihf@1.88.0"
-  - "@oxlint/binding-linux-arm-musleabihf@1.88.0"
-  - "@oxlint/binding-linux-arm64-gnu@1.88.0"
-  - "@oxlint/binding-linux-arm64-musl@1.88.0"
-  - "@oxlint/binding-linux-ppc64-gnu@1.88.0"
-  - "@oxlint/binding-linux-riscv64-gnu@1.88.0"
-  - "@oxlint/binding-linux-riscv64-musl@1.88.0"
-  - "@oxlint/binding-linux-s390x-gnu@1.88.0"
-  - "@oxlint/binding-linux-x64-gnu@1.88.0"
-  - "@oxlint/binding-linux-x64-musl@1.88.0"
-  - "@oxlint/binding-openharmony-arm64@1.88.0"
-  - "@oxlint/binding-win32-arm64-msvc@1.88.0"
-  - "@oxlint/binding-win32-ia32-msvc@1.88.0"
-  - "@oxlint/binding-win32-x64-msvc@1.88.0"
-  - "@radix-ui/react-accordion@1.3.1"
-  - "@radix-ui/react-alert-dialog@1.2.1"
-  - "@radix-ui/react-avatar@1.3.1"
-  - "@radix-ui/react-checkbox@1.4.1"
-  - "@radix-ui/react-collapsible@1.2.1"
-  - "@radix-ui/react-dialog@1.3.1"
-  - "@radix-ui/react-dismissable-layer@1.2.1"
-  - "@radix-ui/react-dropdown-menu@2.2.1"
-  - "@radix-ui/react-focus-scope@1.3.1"
-  - "@radix-ui/react-menu@2.2.1"
-  - "@radix-ui/react-navigation-menu@1.4.1"
-  - "@radix-ui/react-popover@1.3.1"
-  - "@radix-ui/react-radio-group@1.5.1"
-  - "@radix-ui/react-roving-focus@1.2.1"
-  - "@radix-ui/react-select@2.4.1"
-  - "@radix-ui/react-switch@1.4.1"
-  - "@radix-ui/react-tabs@1.2.1"
-  - "@radix-ui/react-toggle-group@1.2.1"
-  - "@radix-ui/react-toggle@1.2.1"
-  - "@radix-ui/react-tooltip@1.4.1"
-  - "@turbo/darwin-64@2.11.8"
-  - "@turbo/darwin-arm64@2.11.8"
-  - "@turbo/gen@2.11.8"
-  - "@turbo/linux-64@2.11.8"
-  - "@turbo/linux-arm64@2.11.8"
-  - "@turbo/windows-64@2.11.8"
-  - "@turbo/windows-arm64@2.11.8"
-  - lefthook-android-arm64@2.2.2
-  - lefthook-darwin-arm64@2.2.2
-  - lefthook-darwin-x64@2.2.2
-  - lefthook-freebsd-arm64@2.2.2
-  - lefthook-freebsd-x64@2.2.2
-  - lefthook-linux-arm64@2.2.2
-  - lefthook-linux-x64@2.2.2
-  - lefthook-openbsd-arm64@2.2.2
-  - lefthook-openbsd-x64@2.2.2
-  - lefthook-windows-arm64@2.2.2
-  - lefthook-windows-x64@2.2.2
-  - lefthook@2.2.2
-  - lucide-react@1.56.0
-  - oxlint@1.88.0
-  - postcss@8.5.30
-  - turbo@2.11.8

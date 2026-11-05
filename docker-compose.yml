@@ -1,31 +1,73 @@
+# Local development services. `pnpm setup` starts them (waiting for their
+# healthchecks), migrates + seeds Postgres and provisions Bugsink.
+#
+#   Postgres  localhost:5832           app database
+#   Mailpit   http://localhost:8025    catches every email the app sends (SMTP :1025)
+#   Bugsink   http://localhost:8000    error tracking (Sentry-compatible), admin@example.com / admin
+#
+# Every credential here is a LOCAL-DEV-ONLY value. Images are pinned to exact
+# versions; Renovate keeps them current.
+name: example-app
+
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18.6
     container_name: example-app-postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: example
       POSTGRES_PASSWORD: example
       POSTGRES_DB: example
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Postgres 18+ images keep data in a versioned subdirectory of this path.
+      - postgres_data:/var/lib/postgresql
     ports:
       - "5832:5432"
-    networks:
-      - example-app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U example -d example"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
 
-  mailhog:
-    container_name: example-app-mailhog
-    image: mailhog/mailhog:v1.0.1
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    container_name: example-app-mailpit
+    restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - example-app
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  # Bugsink: self-hosted, Sentry-SDK-compatible error tracking. The apps
+  # already use the Sentry SDKs, so pointing their DSNs here is all it takes;
+  # `pnpm setup` creates the projects and writes the DSNs into .env.
+  bugsink:
+    image: bugsink/bugsink:2.6.2
+    container_name: example-app-bugsink
+    restart: unless-stopped
+    environment:
+      SECRET_KEY: local-development-only-bugsink-secret-key-never-use-in-production
+      CREATE_SUPERUSER: admin@example.com:admin
+      BASE_URL: http://localhost:8000
+      PORT: "8000"
+      SITE_TITLE: Example App (local)
+      # Issue alert emails land in Mailpit.
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
+      EMAIL_USE_TLS: "false"
+      DEFAULT_FROM_EMAIL: Bugsink <bugsink@example.com>
+    volumes:
+      - bugsink_data:/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      mailpit:
+        condition: service_healthy
 
 volumes:
   postgres_data:
-
-networks:
-  example-app:
-    driver: bridge
+  bugsink_data:
