@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { appRouter, createTRPCContext } from "@example-app/api";
-import { matchAllowedOrigin, parseOriginList } from "@example-app/shared";
+import { log, matchAllowedOrigin, parseOriginList } from "@example-app/shared";
 
 import { auth } from "~/auth/server";
 import { env } from "~/env";
@@ -66,7 +66,7 @@ const handler = async (req: NextRequest) => {
         headers: req.headers,
       }),
     onError({ error, path }) {
-      console.error(`>>> tRPC Error on '${path}'`, error);
+      log.error(`>>> tRPC Error on '${path}'`, error);
     },
   });
 

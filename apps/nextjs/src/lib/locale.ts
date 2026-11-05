@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 
+import { log } from "@example-app/shared";
+
 export const locales = ["en", "es"] as const;
 export type Locale = (typeof locales)[number];
 
@@ -17,7 +19,7 @@ export async function getUserLocale(): Promise<Locale> {
 
     return defaultLocale;
   } catch (error) {
-    console.error("Error getting user locale:", error);
+    log.error("Error getting user locale:", error);
     return defaultLocale;
   }
 }

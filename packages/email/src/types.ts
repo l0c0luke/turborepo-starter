@@ -21,7 +21,7 @@ export type SendEmailOptions = z.infer<typeof SendEmailSchema>;
 
 export const MagicLinkEmailSchema = z.object({
   email: z.string(),
-  url: z.string().url(),
+  url: z.url(),
   productName: z.string().default("Example App"),
 });
 

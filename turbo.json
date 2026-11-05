@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "ui": "stream",
+  "globalDependencies": ["tooling/typescript/*.json"],
   "tasks": {
     "topo": {
       "dependsOn": ["^topo"]
@@ -13,10 +14,6 @@
       "dependsOn": ["^dev"],
       "cache": false,
       "persistent": false
-    },
-    "format": {
-      "outputs": [".cache/.prettiercache"],
-      "outputLogs": "new-only"
     },
     "typecheck": {
       "dependsOn": ["^topo", "^build"],
@@ -49,6 +46,15 @@
     "ui-add": {
       "cache": false,
       "interactive": true
+    },
+    "//#typecheck:root": {
+      "inputs": [
+        "scripts/**",
+        "turbo/**",
+        "tsconfig.json",
+        "tooling/typescript/base.json"
+      ],
+      "outputs": []
     }
   },
   "globalEnv": [
@@ -78,8 +84,9 @@
     "APPLE_KEY_ID",
     "APPLE_PRIVATE_KEY",
     "APPLE_PRIVATE_KEY_PATH",
-    "ANALYZE",
-    "SKIP_ENV_VALIDATION"
+    "SKIP_ENV_VALIDATION",
+    "SENTRY_URL",
+    "GOOGLE_IOS_URL_SCHEME"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

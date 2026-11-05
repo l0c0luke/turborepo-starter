@@ -138,10 +138,8 @@ export function DateTimePickerModal({
               display="spinner"
               minimumDate={minimumDate}
               maximumDate={maximumDate}
-              onChange={(_, selectedDate) => {
-                if (selectedDate) {
-                  setTempValue(selectedDate);
-                }
+              onValueChange={(_, selectedDate) => {
+                setTempValue(selectedDate);
               }}
               style={{
                 backgroundColor: colors.background.primary,
@@ -217,31 +215,25 @@ export function DateTimePickerModal({
       display="default"
       minimumDate={minimumDate}
       maximumDate={maximumDate}
-      onChange={(event, selectedDate) => {
-        if (event.type === "dismissed") {
-          onCancel();
-          return;
-        }
-
-        if (selectedDate) {
-          if (mode === "datetime" && androidStep === "date") {
-            // For datetime mode, show time picker next
-            setTempValue(selectedDate);
-            setAndroidStep("time");
-          } else {
-            // Final selection
-            const finalDate =
-              mode === "datetime" && androidStep === "time"
-                ? new Date(
-                    tempValue.getFullYear(),
-                    tempValue.getMonth(),
-                    tempValue.getDate(),
-                    selectedDate.getHours(),
-                    selectedDate.getMinutes(),
-                  )
-                : selectedDate;
-            onConfirm(finalDate);
-          }
+      onDismiss={onCancel}
+      onValueChange={(_, selectedDate) => {
+        if (mode === "datetime" && androidStep === "date") {
+          // For datetime mode, show time picker next
+          setTempValue(selectedDate);
+          setAndroidStep("time");
+        } else {
+          // Final selection
+          const finalDate =
+            mode === "datetime" && androidStep === "time"
+              ? new Date(
+                  tempValue.getFullYear(),
+                  tempValue.getMonth(),
+                  tempValue.getDate(),
+                  selectedDate.getHours(),
+                  selectedDate.getMinutes(),
+                )
+              : selectedDate;
+          onConfirm(finalDate);
         }
       }}
       textColor={colors.text.primary}

@@ -1,4 +1,9 @@
 {
-  "compilerOptions": {},
-  "extends": "expo/tsconfig.base"
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tooling/typescript/base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["scripts", "turbo"],
+  "exclude": ["node_modules", "turbo/generators/templates"]
 }

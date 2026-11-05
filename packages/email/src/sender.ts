@@ -1,5 +1,7 @@
 import * as nodemailer from "nodemailer";
 
+import { log } from "@example-app/shared";
+
 import type { EmailConfig, SendEmailOptions } from "./types";
 import { EmailConfigSchema, SendEmailSchema } from "./types";
 
@@ -42,7 +44,7 @@ export class EmailSender {
       })) as { messageId: string };
 
       if (process.env.NODE_ENV !== "production") {
-        console.log(`Email sent successfully: ${info.messageId}`, {
+        log.info(`Email sent successfully: ${info.messageId}`, {
           subject: validatedOptions.subject,
           to: Array.isArray(validatedOptions.to)
             ? validatedOptions.to.join(", ")
@@ -50,7 +52,7 @@ export class EmailSender {
         });
       }
     } catch (error) {
-      console.error("Failed to send email", {
+      log.error("Failed to send email", {
         error: error instanceof Error ? error.message : String(error),
         subject: validatedOptions.subject,
         to: validatedOptions.to,
@@ -71,7 +73,7 @@ export class EmailSender {
       await this.transporter.verify();
       return true;
     } catch (error) {
-      console.error("Email connection verification failed:", error);
+      log.error("Email connection verification failed:", error);
       return false;
     }
   }

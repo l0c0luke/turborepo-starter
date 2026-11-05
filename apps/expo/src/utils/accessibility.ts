@@ -121,7 +121,7 @@ export function selectableA11y(
   },
 ): A11yProps {
   let positionInfo = "";
-  if (options?.index !== undefined && options?.total !== undefined) {
+  if (options?.index !== undefined && options.total !== undefined) {
     positionInfo = `, ${options.index + 1} of ${options.total}`;
   }
 
@@ -167,7 +167,7 @@ export function listItemA11y(
   },
 ): A11yProps {
   let positionInfo = "";
-  if (options?.index !== undefined && options?.total !== undefined) {
+  if (options?.index !== undefined && options.total !== undefined) {
     positionInfo = `, item ${options.index + 1} of ${options.total}`;
   }
 
@@ -253,7 +253,7 @@ export function tabA11y(
   },
 ): A11yProps {
   let positionInfo = "";
-  if (options?.index !== undefined && options?.total !== undefined) {
+  if (options?.index !== undefined && options.total !== undefined) {
     positionInfo = `, tab ${options.index + 1} of ${options.total}`;
   }
 

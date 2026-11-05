@@ -66,18 +66,11 @@ export function SelectionGroup<T extends string = string>({
 
   const isSelected = (optionValue: T) => selectedValues.includes(optionValue);
 
-  const getPadding = () => {
-    switch (size) {
-      case "small":
-        return { paddingVertical: spacing[1], paddingHorizontal: spacing[2] };
-      case "large":
-        return { paddingVertical: spacing[4], paddingHorizontal: spacing[5] };
-      default:
-        return { paddingVertical: spacing[2], paddingHorizontal: spacing[4] };
-    }
-  };
-
-  const padding = getPadding();
+  const padding = {
+    small: { paddingVertical: spacing[1], paddingHorizontal: spacing[2] },
+    medium: { paddingVertical: spacing[2], paddingHorizontal: spacing[4] },
+    large: { paddingVertical: spacing[4], paddingHorizontal: spacing[5] },
+  }[size];
 
   return (
     <View

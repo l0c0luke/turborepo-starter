@@ -7,6 +7,7 @@ import { emailOTP, magicLink } from "better-auth/plugins";
 import * as schema from "@example-app/db";
 import { db } from "@example-app/db/client";
 import { EmailSender, MagicLinkService, OTPService } from "@example-app/email";
+import { log } from "@example-app/shared";
 
 import { authEnv } from "../env";
 
@@ -115,12 +116,12 @@ export function initAuth(options: {
                 url,
                 productName: "Example App",
               });
-              console.log(`Magic link sent to ${email}`);
+              log.info(`Magic link sent to ${email}`);
             } else if (!isProduction()) {
               // Dev-only fallback when no email service is configured (e.g.
-              // before MailHog/SMTP is set up). Magic-link URLs are sign-in
+              // before Mailpit/SMTP is set up). Magic-link URLs are sign-in
               // credentials — they must never reach production logs.
-              console.warn(
+              log.warn(
                 `Email service not configured. Magic link for ${email}: ${url}`,
               );
             } else {
@@ -129,7 +130,7 @@ export function initAuth(options: {
               );
             }
           } catch (error) {
-            console.error("Failed to send magic link:", error);
+            log.error("Failed to send magic link:", error);
             throw error;
           }
         },
@@ -143,12 +144,12 @@ export function initAuth(options: {
                 otp,
                 productName: "Example App",
               });
-              console.log(`OTP (${type}) sent to ${email}`);
+              log.info(`OTP (${type}) sent to ${email}`);
             } else if (!isProduction()) {
               // Dev-only fallback when no email service is configured (e.g.
-              // before MailHog/SMTP is set up). OTPs are credentials — they
+              // before Mailpit/SMTP is set up). OTPs are credentials — they
               // must never reach production logs.
-              console.warn(
+              log.warn(
                 `Email service not configured. OTP for ${email}: ${otp}`,
               );
             } else {
@@ -157,7 +158,7 @@ export function initAuth(options: {
               );
             }
           } catch (error) {
-            console.error("Failed to send OTP:", error);
+            log.error("Failed to send OTP:", error);
             throw error;
           }
         },
