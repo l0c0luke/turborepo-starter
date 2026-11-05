@@ -4,7 +4,7 @@ import type { PlopTypes } from "@turbo/gen";
 interface PackageJson {
   name: string;
   scripts: Record<string, string>;
-  dependencies: Record<string, string>;
+  dependencies?: Record<string, string>;
   devDependencies: Record<string, string>;
 }
 
@@ -50,6 +50,17 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         template: "export const name = '{{ name }}';",
       },
       {
+        // Shared preset: coverage thresholds, no `.only`.
+        type: "add",
+        path: "packages/{{ name }}/vitest.config.ts",
+        template: [
+          'import { createVitestConfig } from "@example-app/vitest-config";',
+          "",
+          "export default createVitestConfig();",
+          "",
+        ].join("\n"),
+      },
+      {
         // Testing is policy: every package ships with at least one test.
         type: "add",
         path: "packages/{{ name }}/src/index.test.ts",
@@ -81,7 +92,10 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
               if (!tags.latest) {
                 throw new Error(`Could not resolve a version for ${dep}`);
               }
-              pkg.dependencies[dep] = `^${tags.latest}`;
+              pkg.dependencies = {
+                ...pkg.dependencies,
+                [dep]: `^${tags.latest}`,
+              };
             }
             return JSON.stringify(pkg, null, 2);
           }

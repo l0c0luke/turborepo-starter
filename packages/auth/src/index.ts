@@ -116,7 +116,7 @@ export function initAuth(options: {
                 url,
                 productName: "Example App",
               });
-              log.info(`Magic link sent to ${email}`);
+              log.info("Magic link sent");
             } else if (!isProduction()) {
               // Dev-only fallback when no email service is configured (e.g.
               // before Mailpit/SMTP is set up). Magic-link URLs are sign-in
@@ -144,7 +144,7 @@ export function initAuth(options: {
                 otp,
                 productName: "Example App",
               });
-              log.info(`OTP (${type}) sent to ${email}`);
+              log.info(`OTP (${type}) sent`);
             } else if (!isProduction()) {
               // Dev-only fallback when no email service is configured (e.g.
               // before Mailpit/SMTP is set up). OTPs are credentials — they

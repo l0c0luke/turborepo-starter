@@ -54,8 +54,10 @@ export class EmailSender {
     } catch (error) {
       log.error("Failed to send email", {
         error: error instanceof Error ? error.message : String(error),
-        subject: validatedOptions.subject,
-        to: validatedOptions.to,
+        // No subject/recipients: this goes to Bugsink and may carry PII.
+        recipientCount: Array.isArray(validatedOptions.to)
+          ? validatedOptions.to.length
+          : 1,
         emailConfig: {
           host: this.config.smtpHost,
           port: Number(this.config.smtpPort),
