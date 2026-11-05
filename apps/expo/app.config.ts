@@ -1,5 +1,12 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+// Google sign-in is optional. Its config plugin validates the iOS URL scheme
+// (the reversed iOS client ID, "com.googleusercontent.apps.…"), so it is only
+// added once GOOGLE_IOS_URL_SCHEME is set — placeholder values would make
+// `expo config` / `expo start` / prebuild fail. (Config files may read
+// process.env; app code must use `~/env`.)
+const googleIosUrlScheme = process.env.GOOGLE_IOS_URL_SCHEME;
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Example App",
@@ -50,13 +57,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         backgroundColor: "#3B82F6",
       },
     ],
-    [
-      "@react-native-google-signin/google-signin",
-      {
-        iosUrlScheme: "your-google-ios-url-scheme",
-        iosClientId: "your-google-ios-client-id",
-        androidClientId: "your-google-android-client-id",
-      },
-    ],
+    ...(googleIosUrlScheme
+      ? [
+          [
+            "@react-native-google-signin/google-signin",
+            { iosUrlScheme: googleIosUrlScheme },
+          ] satisfies [string, Record<string, string>],
+        ]
+      : []),
   ],
 });

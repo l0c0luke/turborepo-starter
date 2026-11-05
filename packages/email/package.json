@@ -9,13 +9,12 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf .turbo node_modules",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc --watch",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "minimatch": "catalog:",
+    "@example-app/shared": "workspace:*",
     "nodemailer": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -28,7 +27,6 @@
     "@types/node": "catalog:",
     "@types/nodemailer": "catalog:",
     "@types/react": "catalog:react19",
-    "prettier": "catalog:",
     "typescript": "catalog:"
   },
   "prettier": "@example-app/prettier-config"

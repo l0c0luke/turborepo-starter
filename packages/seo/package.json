@@ -22,7 +22,6 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc --watch",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -33,7 +32,6 @@
     "@example-app/tsconfig": "workspace:*",
     "@types/react": "catalog:react19",
     "next": "catalog:",
-    "prettier": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:"
   },

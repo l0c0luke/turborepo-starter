@@ -14,18 +14,19 @@
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "minimatch": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@example-app/prettier-config": "workspace:*",
     "@example-app/tsconfig": "workspace:*",
-    "prettier": "catalog:",
-    "typescript": "catalog:"
+    "@example-app/vitest-config": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "prettier": "@example-app/prettier-config"
 }
