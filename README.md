@@ -29,7 +29,7 @@ A production-ready monorepo **skeleton** for building full-stack applications wi
 
 This monorepo contains everything you need to start building a full-stack application:
 
-- **Mobile App**: Expo SDK 57 with SDK-aligned React Native and React 19
+- **Mobile App**: Expo SDK 58 with SDK-aligned React Native and React 19
 - **Web App**: Next.js 16 with React 19
 - **Shared Packages**: Database, API, Authentication, Validation, and more
 
@@ -37,15 +37,17 @@ This monorepo contains everything you need to start building a full-stack applic
 
 | Category           | Technology                                             |
 | ------------------ | ------------------------------------------------------ |
-| **Mobile**         | Expo SDK 57, React Native 0.86, React 19, NativeWind 5 |
+| **Mobile**         | Expo SDK 58, React Native 0.88, React 19, NativeWind 5 |
 | **Web**            | Next.js 16.4, React 19, Tailwind CSS 4, shadcn/ui      |
 | **Authentication** | Better-Auth 1.7 (OTP; optional Google, Apple Sign In)  |
-| **Database**       | Drizzle ORM (0.45), PostgreSQL                         |
+| **Database**       | Drizzle ORM (0.45), PostgreSQL 18                      |
 | **API**            | tRPC v11 (end-to-end type safety)                      |
 | **Validation**     | Zod v4                                                 |
 | **Monorepo**       | Turborepo 2.11, PNPM 11                                |
-| **Tooling**        | TypeScript 7, oxlint 1.88, Prettier, Vitest 5          |
+| **Tooling**        | TypeScript 7, oxlint 1.91, Prettier, Vitest 5, knip    |
 | **Runtime**        | Node.js 24 LTS (`.nvmrc`; engines `>=24.11.0`)         |
+| **Errors**         | Sentry SDKs → Bugsink (self-hosted, local in Docker)   |
+| **Analytics**      | Google Analytics 4 (`@example-app/analytics`)          |
 
 ## Features
 
@@ -69,7 +71,7 @@ This monorepo contains everything you need to start building a full-stack applic
 
 - Node.js 24 LTS (`nvm use` reads `.nvmrc`; engines require `>=24.11.0`)
 - PNPM 11 (`corepack enable`)
-- Docker (for PostgreSQL and MailHog)
+- Docker (for PostgreSQL, Mailpit and Bugsink)
 
 ### Installation
 
@@ -81,8 +83,9 @@ cd example-app
 # Install dependencies
 pnpm install
 
-# One-command bootstrap:
-#   creates .env, starts Postgres + MailHog, pushes the schema, seeds a dev admin
+# One-command bootstrap (idempotent):
+#   creates .env, starts Postgres + Mailpit + Bugsink, applies migrations,
+#   seeds a dev admin, provisions Bugsink and writes its DSNs into .env
 pnpm setup
 
 # Start development servers
@@ -90,16 +93,19 @@ pnpm dev
 ```
 
 Then open <http://localhost:3000> and sign in as **admin@example.com** — the
-magic-link / OTP email lands in MailHog at <http://localhost:8025>, and the
-seeded admin can reach the users admin at `/admin`.
+magic-link / OTP email lands in Mailpit at <http://localhost:8025>, and the
+seeded admin can reach the users admin at `/admin`. Errors from both apps land
+in Bugsink at <http://localhost:8000> (`admin@example.com` / `admin`) — setup
+already sent a test event so you can see it working.
 
-> Prefer to do it by hand? `cp .env.example .env`, `docker compose up -d`,
-> `pnpm db:push`, then `pnpm -F @example-app/db seed`.
+> Prefer to do it by hand? `cp .env.example .env`, `docker compose up -d --wait`,
+> `pnpm db:migrate`, then `pnpm db:seed`.
 
 ### Quick Access
 
 - **Web App**: <http://localhost:3000>
-- **MailHog** (email testing): <http://localhost:8025>
+- **Mailpit** (email testing): <http://localhost:8025>
+- **Bugsink** (error tracking): <http://localhost:8000>
 - **Drizzle Studio**: `pnpm db:studio`
 
 ## Project Structure
@@ -150,32 +156,37 @@ NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 EXPO_PUBLIC_BASE_URL="http://localhost:3000"
 ```
 
-Optional credentials are also documented in `.env.example` for Google Sign In and Apple Sign In (each enabled only when its credentials are set — see [Authentication](#authentication)), SMTP, `TRUSTED_ORIGINS`, Sentry and Google Analytics.
+Optional credentials are also documented in `.env.example` for Google Sign In and Apple Sign In (each enabled only when its credentials are set — see [Authentication](#authentication)), SMTP, `TRUSTED_ORIGINS`, error tracking (Bugsink DSNs — filled in by `pnpm setup`) and Google Analytics (standard in every project; set the measurement ID per app).
 
 ### Available Scripts
 
 ```bash
 # Setup
-pnpm setup            # .env + Docker + db push + seed (one-time bootstrap)
+pnpm setup            # .env + services + migrations + seed + Bugsink (idempotent)
 
 # Development
 pnpm dev              # Start all development servers
 pnpm dev:next         # Start Next.js development server only
 
 # Database
-pnpm db:push          # Push schema straight to the database (prototyping only)
-pnpm db:generate      # Generate SQL migrations from schema changes
-pnpm db:migrate       # Apply pending migrations (use this on deploy)
+pnpm db:generate      # Generate a SQL migration from schema changes (commit packages/db/drizzle/)
+pnpm db:migrate       # Apply pending migrations (also on deploy)
+pnpm db:seed          # Re-seed dev data
 pnpm db:studio        # Open Drizzle Studio
-pnpm -F @example-app/db seed   # Re-seed dev data
+pnpm db:push          # Throwaway prototyping only — CI requires migrations
 
-# Code Quality
-pnpm lint             # Run oxlint (type-aware)
-pnpm lint:ws          # Workspace lint with sherif (dependency versions/order; also runs in CI)
-pnpm lint:fix         # Fix oxlint issues automatically
-pnpm format:fix       # Fix Prettier formatting
-pnpm typecheck        # Run TypeScript type checking
-pnpm test             # Run Vitest
+# Quality gates (CI runs the same scripts — see AGENTS.md → Quality gates)
+pnpm check            # Everything below in one go — run before you push
+pnpm lint             # oxlint, type-aware; warnings fail
+pnpm lint:ws          # sherif workspace lint
+pnpm format           # Prettier check (format:fix to write)
+pnpm typecheck        # TypeScript, every package + root scripts
+pnpm test             # Vitest + coverage thresholds (API tests use the dev Postgres)
+pnpm check:deps       # knip: unused files/deps, undeclared deps
+pnpm check:conventions # repo rules from AGENTS.md (pnpm-only, tests, skeletons, i18n, skills)
+pnpm check:expo       # Expo SDK version alignment
+pnpm check:bundle     # per-route JS budget (apps/nextjs/bundle-budget.json; CI)
+pnpm check:audit      # no high/critical advisories (CI)
 
 # Mobile
 pnpm ios              # Run iOS app
@@ -183,6 +194,10 @@ pnpm android          # Run Android app
 
 # Building
 pnpm build            # Build all packages and apps
+pnpm -F @example-app/nextjs analyze   # Interactive Turbopack bundle analyzer
+
+# Agent skills
+pnpm skills:update    # Refresh third-party skills in .agents/skills (skills-lock.json)
 ```
 
 ## Package Architecture
@@ -235,7 +250,7 @@ Design tokens are also available in `apps/expo/src/styles/` for programmatic acc
 (both approaches coexist):
 
 ```typescript
-import { colors, commonStyles, spacing, typography } from "@/styles";
+import { colors, commonStyles, spacing, typography } from "~/styles";
 ```
 
 **Important**: Prefer Tailwind classes via `className`. Use design tokens for dynamic styles only.
@@ -297,7 +312,7 @@ Configured in `packages/auth/src/index.ts`:
 - **Rate limiting** (Better Auth enables it in production) stores counters in
   Postgres — the `rate_limit` table in `packages/db/src/auth-schema.ts` — so
   limits are shared across instances and survive restarts. Include the table
-  in your migrations (`pnpm db:generate`) or `pnpm db:push` locally. Behind a
+  in the committed baseline migration (`packages/db/drizzle/`). Behind a
   proxy/load balancer, make sure the client IP header it sets is one Better
   Auth reads (`advanced.ipAddress.ipAddressHeaders`).
 - **Trusted origins / CORS.** Better Auth trusts `NEXT_PUBLIC_BASE_URL` and the
@@ -312,12 +327,12 @@ Configured in `packages/auth/src/index.ts`:
 ### Schema Management
 
 - Schema files: `packages/db/src/schema.ts` and `packages/db/src/auth-schema.ts`
-- Prototype changes: `pnpm db:push` (syncs the schema directly, no history)
-- Generate migrations: `pnpm db:generate`
-- Apply migrations: `pnpm db:migrate`
+- Generate migrations: `pnpm db:generate` · apply: `pnpm db:migrate`
 - View data: `pnpm db:studio`
+- Throwaway prototyping only: `pnpm db:push` (no history; CI requires migrations)
 
-**Migrations workflow** (use this for anything beyond local prototyping): after
+**Migrations workflow** (the default — the repo ships a baseline migration,
+`pnpm setup` applies it, and CI fails if the schema and migrations drift): after
 changing the schema, run `pnpm db:generate` to emit a SQL migration into
 `packages/db/drizzle/` and commit that folder alongside your schema change.
 On deploy, run `pnpm db:migrate` (or invoke `packages/db/src/migrate.ts`
@@ -423,8 +438,9 @@ docker build -f apps/nextjs/Dockerfile -t example-app-web .
 docker run -p 3000:3000 --env-file .env example-app-web
 ```
 
-Health probe: `GET /api/health`. Error tracking via Sentry is wired but inert
-until you set a DSN (`NEXT_PUBLIC_SENTRY_DSN` / `EXPO_PUBLIC_SENTRY_DSN`).
+Health probe: `GET /api/health`. Error tracking uses the Sentry SDKs pointed at
+Bugsink (`NEXT_PUBLIC_SENTRY_DSN` / `EXPO_PUBLIC_SENTRY_DSN`; `pnpm setup` fills
+them in locally) and stays inert when no DSN is set.
 `renovate.json` keeps dependencies current.
 
 ### Mobile (Expo)
@@ -444,9 +460,9 @@ See [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for a comprehensive pre-launch ch
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow the code quality standards above
-4. Run `pnpm lint:fix && pnpm format:fix && pnpm typecheck` before committing
-5. Submit a pull request
+3. Follow [AGENTS.md](AGENTS.md) — it applies to humans as well as agents
+4. Run `pnpm check` (the pre-push hook does too) and use Conventional Commits
+5. Submit a pull request — the template's checklist mirrors the CI gates
 
 ## License
 
