@@ -10,11 +10,19 @@
       "Bash(pnpm typecheck:*)",
       "Bash(pnpm lint:*)",
       "Bash(pnpm format:*)",
+      "Bash(pnpm check:*)",
       "Bash(pnpm db:push:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm db:migrate:*)",
+      "Bash(pnpm db:seed:*)",
       "Bash(pnpm db:studio:*)",
       "Bash(pnpm auth:generate:*)",
+      "Bash(pnpm skills:install)",
       "Bash(pnpm -F:*)",
       "Bash(pnpm --filter:*)",
+      "Bash(pnpm why:*)",
+      "Bash(pnpm outdated:*)",
+      "Bash(pnpm audit:*)",
       "Bash(turbo run:*)",
       "Bash(docker compose up:*)",
       "Bash(docker compose down:*)",
@@ -23,6 +31,17 @@
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"
+    ],
+    "deny": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(bun:*)",
+      "Bash(bunx:*)",
+      "Bash(git commit --no-verify:*)",
+      "Bash(git commit -n:*)",
+      "Bash(git push --no-verify:*)",
+      "Bash(LEFTHOOK=0:*)"
     ]
   }
 }

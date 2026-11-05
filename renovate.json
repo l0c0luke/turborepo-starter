@@ -1,12 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":dependencyDashboard", ":semanticCommits"],
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests"
+  ],
   "labels": ["dependencies"],
   "schedule": ["before 6am on monday"],
   "prConcurrentLimit": 10,
   "packageRules": [
     {
-      "description": "Group the Expo SDK — these are version-locked and must be bumped together with `expo install --fix`",
+      "description": "Group the Expo SDK \u2014 version-locked; bump together with `pnpm -F @example-app/expo exec expo install --fix`. CI `check:expo` fails on drift",
       "matchPackageNames": [
         "expo",
         "expo-*",
@@ -48,6 +53,42 @@
       "description": "Flag major updates for individual review",
       "matchUpdateTypes": ["major"],
       "labels": ["dependencies", "major"]
+    },
+    {
+      "description": "Better Auth and its CLI must stay on the same version",
+      "matchPackageNames": ["better-auth", "@better-auth/*", "auth"],
+      "groupName": "better-auth"
+    },
+    {
+      "description": "vitest and its coverage provider are exact peers",
+      "matchPackageNames": ["vitest", "@vitest/*", "vite"],
+      "groupName": "vitest"
+    },
+    {
+      "description": "NativeWind v5 RC and its engine must be bumped as an exact pair (see the NativeWind install guide)",
+      "matchPackageNames": ["nativewind", "react-native-css"],
+      "groupName": "nativewind"
+    },
+    {
+      "description": "lightningcss is pinned for NativeWind v5 (pnpm-workspace.yaml overrides) \u2014 bump only alongside a NativeWind upgrade",
+      "matchPackageNames": ["lightningcss"],
+      "enabled": false
+    },
+    {
+      "description": "Local dev services in docker-compose.yml (and the CI Postgres service)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["postgres", "axllent/mailpit", "bugsink/bugsink"],
+      "groupName": "local dev services"
     }
-  ]
+  ],
+  "minimumReleaseAge": "3 days",
+  "postUpdateOptions": ["pnpmDedupe"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["dependencies", "security"],
+    "minimumReleaseAge": null
+  }
 }

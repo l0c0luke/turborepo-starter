@@ -1,0 +1,32 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": [".agents/**"],
+  "ignoreBinaries": ["with-env", "next"],
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"]
+    },
+    "apps/expo": {
+      "entry": [
+        "src/components/index.ts",
+        "src/components/ui/index.ts",
+        "src/hooks/index.ts",
+        "src/constants/index.ts",
+        "src/types/index.ts",
+        "src/styles/index.ts",
+        "src/utils/accessibility.ts"
+      ]
+    },
+    "apps/nextjs": {
+      "entry": ["src/_components/ui/*.tsx", "src/hooks/*.ts"]
+    }
+  },
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "nsExports": "off",
+    "nsTypes": "off",
+    "enumMembers": "off",
+    "duplicates": "off"
+  }
+}

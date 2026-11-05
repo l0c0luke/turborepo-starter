@@ -1,4 +1,7 @@
-# Git hooks (https://lefthook.dev). Installed via the `prepare` script.
+# Git hooks (https://lefthook.dev), installed by the `prepare` script.
+# Agents and humans alike: never bypass these with --no-verify — fix the
+# failure instead. CI runs the same checks (AGENTS.md → Quality gates).
+
 pre-commit:
   parallel: true
   commands:
@@ -6,12 +9,22 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,md,yml,yaml,css}"
       run: pnpm exec prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
-
-# Heavier checks run on push (turbo caches them, so they're fast after the first run).
-pre-push:
-  parallel: true
-  commands:
-    typecheck:
-      run: pnpm typecheck
     lint:
-      run: pnpm lint
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
+      exclude:
+        - ".agents/**"
+        - ".claude/**"
+      run: pnpm exec oxlint --type-aware --deny-warnings {staged_files}
+
+commit-msg:
+  commands:
+    conventional:
+      run: node scripts/check-commit-msg.ts {1}
+
+# The full local gate (lint, format, types, tests, deps, conventions, Expo
+# alignment). Turbo caches most of it, so repeat pushes are fast. API tests
+# need Postgres: `pnpm setup` (or `docker compose up -d`) first.
+pre-push:
+  commands:
+    check:
+      run: pnpm check
