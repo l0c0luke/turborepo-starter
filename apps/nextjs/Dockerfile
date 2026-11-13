@@ -14,7 +14,7 @@
 
 # Node 24 LTS, pinned by exact version AND digest (Renovate updates both).
 # Keep in step with .nvmrc / engines / apps/expo/eas.json.
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
+FROM node:24.22.3-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 AS base
 ENV PNPM_HOME="/pnpm"
 # pnpm 11 puts global bins in $PNPM_HOME/bin (and refuses `--global` commands
 # when that isn't on PATH).
