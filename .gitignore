@@ -51,3 +51,13 @@ dist/
 
 # turbo
 .turbo
+
+# terraform (AGENTS.md → Infrastructure) — state lives in the remote backend.
+# Root modules (infra/envs/*) commit .terraform.lock.hcl; reusable modules don't.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+infra/modules/**/.terraform.lock.hcl

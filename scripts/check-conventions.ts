@@ -83,6 +83,30 @@ for (const file of commandFiles) {
   }
 }
 
+// --- One version per dependency (AGENTS.md → Conventions → Package manager) --
+if (!/^catalogMode:\s*strict\s*$/m.test(read("pnpm-workspace.yaml"))) {
+  fail("catalog", "pnpm-workspace.yaml must set `catalogMode: strict`");
+}
+for (const file of files.filter((f) => /(^|\/)package\.json$/.test(f))) {
+  const manifest = JSON.parse(read(file)) as Record<string, unknown>;
+  // peerDependencies are ranges we accept, not versions we install.
+  for (const field of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+  ]) {
+    const deps = (manifest[field] ?? {}) as Record<string, string>;
+    for (const [name, spec] of Object.entries(deps)) {
+      if (!/^(catalog|workspace):/.test(spec)) {
+        fail(
+          "catalog",
+          `${file} ${field}.${name} is "${spec}" — use \`catalog:\` (pnpm add puts it in the catalog)`,
+        );
+      }
+    }
+  }
+}
+
 // --- Mobile app stays in apps/expo (AGENTS.md → Layout) ----------------------
 if (!exists("apps/expo/package.json") || !exists("apps/expo/app.config.ts")) {
   fail("expo-location", "the mobile app must live in apps/expo");
@@ -147,7 +171,12 @@ for (const [, path] of agentsMd.matchAll(
 }
 
 // --- Agent skills (AGENTS.md → Agent skills) ----------------------------------
-const FIRST_PARTY_SKILLS = ["project-init", "add-feature", "testing"];
+const FIRST_PARTY_SKILLS = [
+  "project-init",
+  "add-feature",
+  "testing",
+  "infrastructure",
+];
 const lock = JSON.parse(read("skills-lock.json")) as {
   skills: Record<string, unknown>;
 };
@@ -318,6 +347,125 @@ for (const [locale, keys] of keysByLocale) {
   }
 }
 
+// --- Infrastructure is Terraform (AGENTS.md → Infrastructure) ----------------
+// Tool runs (fmt/validate/test/tflint/trivy) live in scripts/check-infra.ts.
+const isTerraform = (file: string) => /\.(tf|tftest\.hcl)$/.test(file);
+const otherIac: [RegExp, string][] = [
+  [/(^|\/)cdk\.json$/, "AWS CDK"],
+  [/(^|\/)cdktf\.json$/, "CDK for Terraform"],
+  [/(^|\/)Pulumi(\.[\w-]+)?\.ya?ml$/, "Pulumi"],
+  [/(^|\/)serverless\.(ya?ml|ts|js|json)$/, "Serverless Framework"],
+  [/(^|\/)samconfig\.toml$/, "AWS SAM"],
+  [/\.bicep$/, "Azure Bicep"],
+];
+for (const file of files) {
+  if (
+    /(^|\/)\.terraform\//.test(file) ||
+    /\.tfstate(\.|$)|\.tfplan$/.test(file)
+  ) {
+    fail(
+      "terraform",
+      `${file}: Terraform state/plans/.terraform must never be committed`,
+    );
+  }
+  if (isTerraform(file) && !/^infra\/(envs|modules)\/[^/]+\//.test(file)) {
+    fail(
+      "terraform",
+      `${file}: Terraform lives in infra/envs/<env>/ or infra/modules/<name>/`,
+    );
+  }
+  for (const [pattern, tool] of otherIac) {
+    if (pattern.test(file)) {
+      fail(
+        "terraform",
+        `${file}: ${tool} — cloud infrastructure is Terraform only`,
+      );
+    }
+  }
+  if (
+    /\.(ya?ml|json)$/.test(file) &&
+    file !== "pnpm-lock.yaml" &&
+    !file.startsWith(".agents/") &&
+    /AWSTemplateFormatVersion|Transform:\s*AWS::Serverless/.test(read(file))
+  ) {
+    fail(
+      "terraform",
+      `${file}: CloudFormation/SAM — cloud infrastructure is Terraform only`,
+    );
+  }
+}
+// Creating cloud resources from automation bypasses Terraform (and its state).
+const imperativeInfra =
+  /\b(?:(?:aws|gcloud|az|doctl|hcloud|linode-cli|vultr-cli)\b[^#\n]*?\b(?:create|delete)|aws\s+cloudformation|sam\s+deploy|cdk\s+(?:deploy|destroy)|pulumi\s+(?:up|destroy)|(?:serverless|sls)\s+(?:deploy|remove)|az\s+deployment|gcloud\s+deployment-manager)\b/;
+for (const file of commandFiles) {
+  read(file)
+    .split("\n")
+    .forEach((line, index) => {
+      if (
+        !line.trim().startsWith("#") &&
+        imperativeInfra.test(line) &&
+        !ignored(line, "terraform")
+      ) {
+        fail(
+          "terraform",
+          `${file}:${index + 1} creates/deletes cloud resources outside Terraform`,
+        );
+      }
+    });
+}
+const terraformDirs = new Set(
+  files.filter(isTerraform).map((file) => dirname(file)),
+);
+if (terraformDirs.size > 0 && !exists("infra/.terraform-version")) {
+  fail(
+    "terraform",
+    "infra/.terraform-version must pin the Terraform version (CI installs it)",
+  );
+}
+for (const dir of terraformDirs) {
+  const hcl = files
+    .filter((file) => file.startsWith(`${dir}/`) && file.endsWith(".tf"))
+    .map((file) => read(file))
+    .join("\n");
+  if (
+    /\b(access_key|secret_key|token|password|client_secret)\s*=\s*"[^"$]/.test(
+      hcl,
+    )
+  ) {
+    fail(
+      "terraform",
+      `${dir}: literal credential in Terraform — use variables marked sensitive (TF_VAR_* / secrets manager)`,
+    );
+  }
+  if (/^infra\/envs\/[^/]+$/.test(dir)) {
+    const backend = /backend\s+"(\w+)"/.exec(hcl)?.[1];
+    if ((!backend || backend === "local") && !/\bcloud\s*\{/.test(hcl)) {
+      fail(
+        "terraform",
+        `${dir}: root module needs a remote backend (state never lives on a laptop)`,
+      );
+    }
+    if (!exists(`${dir}/.terraform.lock.hcl`)) {
+      fail(
+        "terraform",
+        `${dir}/.terraform.lock.hcl must be committed (terraform init, then commit it)`,
+      );
+    }
+  }
+  if (
+    /^infra\/modules\/[^/]+$/.test(dir) &&
+    !files.some(
+      (file) =>
+        file.startsWith(`${dir}/tests/`) && file.endsWith(".tftest.hcl"),
+    )
+  ) {
+    fail(
+      "testing",
+      `${dir} needs tests/*.tftest.hcl (terraform-test skill; mock providers)`,
+    );
+  }
+}
+
 // --- Report -------------------------------------------------------------------
 if (failures.length > 0) {
   console.error(`✗ ${failures.length} convention violation(s):\n`);
@@ -328,5 +476,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "✓ Repo conventions hold (pnpm-only, expo location, agent docs, skills, testing, instant feedback, i18n).",
+  "✓ Repo conventions hold (pnpm-only, catalog, expo location, agent docs, skills, testing, instant feedback, i18n, terraform).",
 );

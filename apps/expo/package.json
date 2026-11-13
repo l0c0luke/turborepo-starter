@@ -59,6 +59,7 @@
     "@example-app/tsconfig": "workspace:*",
     "@types/babel__core": "catalog:",
     "@types/react": "catalog:react19",
+    "babel-preset-expo": "catalog:",
     "dotenv-cli": "catalog:",
     "typescript": "catalog:"
   },

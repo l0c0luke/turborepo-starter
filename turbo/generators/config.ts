@@ -1,12 +1,9 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import type { PlopTypes } from "@turbo/gen";
 
-interface PackageJson {
-  name: string;
-  scripts: Record<string, string>;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-}
+/** Runs pnpm with arguments passed as-is (no shell, so input can't inject). */
+const pnpm = (...args: string[]) =>
+  execFileSync("pnpm", args, { stdio: "inherit" });
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("init", {
@@ -28,9 +25,15 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     actions: [
       (answers) => {
         if ("name" in answers && typeof answers.name === "string") {
-          if (answers.name.startsWith("@example-app/")) {
-            answers.name = answers.name.replace("@example-app/", "");
+          const name = answers.name.replace(/^@example-app\//, "");
+          // The name becomes a directory under packages/ and a pnpm filter;
+          // reject anything that could escape packages/ before files are written.
+          if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
+            throw new Error(
+              `Package name must be lowercase letters, digits and dashes: ${name}`,
+            );
           }
+          answers.name = name;
         }
         return "Config sanitized";
       },
@@ -50,6 +53,17 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         template: "export const name = '{{ name }}';",
       },
       {
+        // Shared preset: coverage thresholds, no `.only`.
+        type: "add",
+        path: "packages/{{ name }}/vitest.config.ts",
+        template: [
+          'import { createVitestConfig } from "@example-app/vitest-config";',
+          "",
+          "export default createVitestConfig();",
+          "",
+        ].join("\n"),
+      },
+      {
         // Testing is policy: every package ships with at least one test.
         type: "add",
         path: "packages/{{ name }}/src/index.test.ts",
@@ -66,43 +80,31 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           "",
         ].join("\n"),
       },
-      {
-        type: "modify",
-        path: "packages/{{ name }}/package.json",
-        async transform(content, answers) {
-          const deps: unknown = (answers as { deps?: unknown }).deps;
-          if (typeof deps === "string") {
-            const pkg = JSON.parse(content) as PackageJson;
-            for (const dep of deps.split(" ").filter(Boolean)) {
-              const res = await fetch(
-                `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
-              );
-              const tags = (await res.json()) as { latest?: string };
-              if (!tags.latest) {
-                throw new Error(`Could not resolve a version for ${dep}`);
-              }
-              pkg.dependencies[dep] = `^${tags.latest}`;
-            }
-            return JSON.stringify(pkg, null, 2);
-          }
-          return content;
-        },
-      },
-      async (answers) => {
-        /**
-         * Install deps and format everything
-         */
-        if ("name" in answers && typeof answers.name === "string") {
-          // execSync("pnpm dlx sherif@latest --fix", {
-          //   stdio: "inherit",
-          // });
-          execSync("pnpm i", { stdio: "inherit" });
-          execSync(
-            `pnpm prettier --write packages/${answers.name}/** --list-different`,
-          );
-          return "Package scaffolded";
+      (answers) => {
+        if (!("name" in answers) || typeof answers.name !== "string") {
+          return "Package not scaffolded";
         }
-        return "Package not scaffolded";
+        const pkg = `@example-app/${answers.name}`;
+        const deps =
+          "deps" in answers && typeof answers.deps === "string"
+            ? answers.deps.split(/\s+/).filter(Boolean)
+            : [];
+        const flag = deps.find((dep) => dep.startsWith("-"));
+        if (flag) throw new Error(`Not a package name: ${flag}`);
+        // `catalogMode: strict` (pnpm-workspace.yaml) makes `pnpm add` reuse
+        // the catalog version, or add the latest to the catalog, and write
+        // `catalog:` — so versions stay in one place.
+        if (deps.length > 0) pnpm("--filter", pkg, "add", ...deps);
+        else pnpm("install");
+        pnpm(
+          "exec",
+          "prettier",
+          "--write",
+          `packages/${answers.name}`,
+          "pnpm-workspace.yaml",
+          "--list-different",
+        );
+        return "Package scaffolded";
       },
     ],
   });

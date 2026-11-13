@@ -16,5 +16,10 @@ ever disagree, AGENTS.md wins (and should be fixed here).
 - **Skeletons + instant feedback**: data routes/screens render skeletons;
   mutations are optimistic (or show per-item pending state) and toast on error.
 - Schema changes ship with a migration (`pnpm db:generate`).
+- Versions only in the `pnpm-workspace.yaml` catalog (`pnpm add` writes
+  `catalog:`); never hand-write a version into a `package.json`.
+- Cloud provider resources are **Terraform in `infra/`** only — no console
+  click-ops, no CDK/Pulumi/CloudFormation; OIDC in CI, never keys.
 - Skills in `.agents/skills/`: `add-feature`, `testing`, `security-audit`,
-  `next-bundle-optimizer`, `project-init`, plus React/Expo best-practice skills.
+  `next-bundle-optimizer`, `infrastructure`, `project-init`, plus React/Expo
+  and Terraform best-practice skills.

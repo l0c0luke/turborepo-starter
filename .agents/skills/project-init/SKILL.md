@@ -27,6 +27,7 @@ Ask for (use an ask-the-user tool if available; otherwise ask in chat):
 | One-line description | "A social fitness tracker" | Yes |
 | **GA4 measurement ID** | `G-ABC123XYZ` | Yes — every project ships with GA (if they don't have one yet, leave a clearly marked TODO and put it first on the post-init checklist) |
 | Production domain | `mycoolapp.com` | No |
+| **Hosting** | Coolify on a server you already have · Vercel · a cloud provider (AWS, GCP, Azure, Cloudflare, Hetzner, DigitalOcean…) | Yes — a cloud provider means Terraform (Phase 3) |
 | Auth providers | Google, Apple, both, email-only | Yes |
 | Core features | detailed list | Yes |
 | Key entities | "workouts, exercises, goals" | No |
@@ -43,8 +44,13 @@ Ask for (use an ask-the-user tool if available; otherwise ask in chat):
 1. Find every occurrence and replace it:
 
    ```bash
+   # Everything except the lockfiles and agent skills…
    git grep -lE "example-app|Example App|com\.example\.app" -- . \
-     ':!pnpm-lock.yaml' ':!.agents/skills/*' ':!skills-lock.json'
+     ':!pnpm-lock.yaml' ':!skills-lock.json' ':!.agents/skills/*'
+   # …plus the skills we own (third-party skills are never edited; this
+   # skill keeps the placeholders it documents).
+   git grep -lE "example-app|Example App|com\.example\.app" -- \
+     .agents/skills/add-feature .agents/skills/testing .agents/skills/infrastructure
    ```
 
    This covers package manifests and imports, `next.config.js`
@@ -55,14 +61,14 @@ Ask for (use an ask-the-user tool if available; otherwise ask in chat):
    `apps/expo/src/utils/auth.ts` (scheme + storage prefix),
    `packages/auth/src/index.ts` (`trustedOrigins`), env defaults, and every doc
    (`README.md`, `AGENTS.md`, `DEPLOY.md`, `LAUNCH_CHECKLIST.md`,
-   `.github/copilot-instructions.md`, the skills under `.agents/skills/` that
-   we own: `project-init`, `add-feature`, `testing`).
+   `.github/copilot-instructions.md`, and the skills we own: `add-feature`,
+   `testing`, `infrastructure`).
 2. Leave `example.com` email addresses alone unless the user gives a domain
    (they're dev/seed data), and never edit third-party skills.
 3. Change the dev Postgres credentials in `docker-compose.yml`, the CI
    Postgres service (`.github/workflows/ci.yml`) and `POSTGRES_URL` in
    `.env.example` together (user/db = slug; any dev password).
-4. **Verify**: re-run the `git grep` — it must print nothing. Then
+4. **Verify**: re-run both `git grep`s — they must print nothing. Then
    `pnpm install` (regenerates the lockfile for the new scope).
 
 ## Phase 3 — Always-on services
@@ -83,6 +89,17 @@ Ask for (use an ask-the-user tool if available; otherwise ask in chat):
   `apps/expo/src/app/index.tsx`), and on mobile its dependency + config plugin
   (`app.config.ts`) + util (`utils/auth.ts` / `utils/appleAuth.ts`). Let knip
   (`pnpm check:deps`) confirm nothing is left behind.
+
+- **Infrastructure** (only if the hosting answer involves a cloud provider
+  account, including a cloud VM for Coolify): follow the **infrastructure**
+  skill. Scaffold `infra/.terraform-version`, `infra/.tflint.hcl` with the
+  provider's ruleset, `infra/envs/bootstrap` (state bucket + CI OIDC role),
+  `infra/envs/staging` and `infra/envs/production`, plus a module with tests
+  for each building block. Add `.github/workflows/infra.yml` (plan on PR,
+  apply on merge behind a `production` Environment, weekly drift plan) and
+  make sure `pnpm check:infra` passes. Write no resources that can't be
+  applied yet. Leave the account-specific values (account IDs, regions) as
+  clearly marked variables, and put the bootstrap apply on the checklist.
 
 ## Phase 4 — Scaffold the first features
 
@@ -120,6 +137,7 @@ Give the user a summary of files changed/created and these manual steps:
 - [ ] Google / Apple sign-in credentials (if kept)
 - [ ] Production Postgres, `AUTH_SECRET` (`openssl rand -base64 32`), SMTP provider
 - [ ] Make `ci-ok` a required status check (GitHub ruleset or merge queue)
+- [ ] Cloud provider only: apply `infra/envs/bootstrap` once, migrate its state, create the `production` GitHub Environment with reviewers, then let CI apply the envs
 - [ ] Work through `LAUNCH_CHECKLIST.md` (incl. a full security-audit run before launch)
 
 Then: `pnpm dev`, open http://localhost:3000 and sign in as

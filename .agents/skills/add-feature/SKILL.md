@@ -150,7 +150,14 @@ the **security-audit** skill in guidance mode: authorization on every
 procedure, ownership checks (no IDOR), input validation, nothing sensitive
 logged or returned.
 
-## 7. Finish
+## 7. Cloud resources
+
+If the feature needs anything in a cloud account (a bucket for uploads, a
+queue, an email domain, a DNS record), add it with Terraform following the
+**infrastructure** skill (module + test, wired into each `infra/envs/*`).
+Never create it in a console. Pass its outputs to the app as validated env vars.
+
+## 8. Finish
 
 ```bash
 pnpm check        # lint, format, types, tests + coverage, deps, conventions, Expo
@@ -165,4 +172,5 @@ Checklist:
 - [ ] Mobile screen: skeleton while pending, empty + error states
 - [ ] Strings in every locale; analytics events via `trackEvent`
 - [ ] Security pass done; bundle budget holds
+- [ ] Cloud resources (if any) in Terraform with tests; `pnpm check:infra` green
 - [ ] `pnpm check` green
