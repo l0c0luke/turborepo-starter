@@ -25,9 +25,15 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     actions: [
       (answers) => {
         if ("name" in answers && typeof answers.name === "string") {
-          if (answers.name.startsWith("@example-app/")) {
-            answers.name = answers.name.replace("@example-app/", "");
+          const name = answers.name.replace(/^@example-app\//, "");
+          // The name becomes a directory under packages/ and a pnpm filter;
+          // reject anything that could escape packages/ before files are written.
+          if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
+            throw new Error(
+              `Package name must be lowercase letters, digits and dashes: ${name}`,
+            );
           }
+          answers.name = name;
         }
         return "Config sanitized";
       },

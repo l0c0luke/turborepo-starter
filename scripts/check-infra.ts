@@ -25,6 +25,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const infra = join(root, "infra");
 const inCi = process.env.CI === "true";
 
+// In a git pathspec `*` also matches `/`, so this finds infra/envs/*/… and
+// infra/modules/*/… files too.
 const tfFiles = execFileSync(
   "git",
   ["ls-files", "--cached", "--others", "--exclude-standard", "infra/*.tf"],

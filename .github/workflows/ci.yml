@@ -180,6 +180,7 @@ jobs:
         id: tf
         shell: bash
         run: |
+          # Git pathspec `*` matches `/` too: this finds infra/envs/*/*.tf etc.
           if git ls-files -- 'infra/*.tf' | grep -q .; then
             echo "present=true" >> "$GITHUB_OUTPUT"
             echo "version=$(tr -d '[:space:]' < infra/.terraform-version)" >> "$GITHUB_OUTPUT"
