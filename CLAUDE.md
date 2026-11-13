@@ -15,5 +15,6 @@ read it first. Rules change there, once.
 - Project skills are in `.agents/skills/` (symlinked into `.claude/skills/`):
   `add-feature` for any feature work, `testing` for tests, `security-audit`
   for auth/API/data changes, `next-bundle-optimizer` when the bundle budget
-  fails, `project-init` to start a new app from this skeleton.
+  fails, `infrastructure` (+ `terraform-style-guide`, `terraform-test`) for
+  any cloud resource, `project-init` to start a new app from this skeleton.
 - The mobile app lives strictly at `apps/expo` — never move it.

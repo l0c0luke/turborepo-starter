@@ -15,6 +15,11 @@ pre-commit:
         - ".agents/**"
         - ".claude/**"
       run: pnpm exec oxlint --type-aware --deny-warnings {staged_files}
+    terraform-fmt:
+      glob: "*.{tf,tfvars,tftest.hcl}"
+      # CI enforces formatting either way; this just fixes it before commit.
+      run: if command -v terraform >/dev/null 2>&1; then terraform fmt {staged_files}; else echo "terraform not installed — formatting is checked in CI"; fi
+      stage_fixed: true
 
 commit-msg:
   commands:

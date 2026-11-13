@@ -11,7 +11,7 @@
   "prConcurrentLimit": 10,
   "packageRules": [
     {
-      "description": "Group the Expo SDK \u2014 version-locked; bump together with `pnpm -F @example-app/expo exec expo install --fix`. CI `check:expo` fails on drift",
+      "description": "Group the Expo SDK — version-locked; bump together with `pnpm -F @example-app/expo exec expo install --fix`. CI `check:expo` fails on drift",
       "matchPackageNames": [
         "expo",
         "expo-*",
@@ -70,7 +70,7 @@
       "groupName": "nativewind"
     },
     {
-      "description": "lightningcss is pinned for NativeWind v5 (pnpm-workspace.yaml overrides) \u2014 bump only alongside a NativeWind upgrade",
+      "description": "lightningcss is pinned for NativeWind v5 (pnpm-workspace.yaml overrides) — bump only alongside a NativeWind upgrade",
       "matchPackageNames": ["lightningcss"],
       "enabled": false
     },
@@ -79,6 +79,11 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["postgres", "axllent/mailpit", "bugsink/bugsink"],
       "groupName": "local dev services"
+    },
+    {
+      "description": "Terraform: providers, modules and the CLI version (infra/.terraform-version) in one PR; lock files (.terraform.lock.hcl) refresh with it",
+      "matchManagers": ["terraform", "terraform-version"],
+      "groupName": "terraform"
     }
   ],
   "minimumReleaseAge": "3 days",

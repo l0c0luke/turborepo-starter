@@ -30,6 +30,15 @@ Use this checklist before deploying to production. Each section covers a critica
 - [ ] Configure connection pooling (PgBouncer or provider-managed)
 - [ ] Run `pnpm -F @example-app/db seed` if seed data is needed (do NOT seed production with the dev admin)
 
+## Infrastructure (cloud provider only)
+
+- [ ] Every cloud resource is in Terraform under `infra/` — nothing created by hand in a console (compare the account against `terraform state list`)
+- [ ] Remote state bucket is versioned, encrypted and private; state locking is on
+- [ ] CI deploys through OIDC with a least-privilege role; no long-lived cloud keys exist in GitHub secrets or anywhere else
+- [ ] Production applies go through CI behind a GitHub Environment with required reviewers
+- [ ] `pnpm check:infra` passes (no HIGH/CRITICAL trivy findings) and the weekly drift plan is clean
+- [ ] Backups / point-in-time recovery for managed databases and buckets are defined in Terraform
+
 ## Mobile (Expo / EAS)
 
 - [ ] Update `app.config.ts` with production bundle identifier

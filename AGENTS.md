@@ -57,7 +57,8 @@ packages/
   shared/     # framework-agnostic: log, captureException, errorTrackingOptions, queryDefaults, parseError
   analytics/  # GA4 provider + trackEvent · seo/ # metadata + JSON-LD helpers
 tooling/      # typescript (strict base), vitest (shared preset), prettier, github (CI setup action)
-scripts/      # setup.ts, check-conventions.ts, check-bundle.ts, bugsink-provision.py
+scripts/      # setup.ts, check-conventions.ts, check-bundle.ts, check-infra.ts, bugsink-provision.py
+infra/        # Terraform — only once the project uses a cloud provider: envs/<env>, modules/<name> (+ tests)
 .agents/skills/  # agent skills (see "Agent skills"); .claude/skills/* symlink here
 ```
 
@@ -78,6 +79,7 @@ the pre-push hook runs it too. Never bypass hooks (`--no-verify`).
 | Peer dependencies                                                 | `pnpm check:peers`              | check, CI                        |
 | Repo conventions (rules in this file)                             | `pnpm check:conventions`        | check, CI                        |
 | Expo SDK version alignment                                        | `pnpm check:expo`               | check, CI                        |
+| Terraform: fmt, validate, `terraform test`, tflint, trivy         | `pnpm check:infra`              | check, CI (once `infra/` exists) |
 | Migrations apply + match the schema                               | `pnpm db:migrate` / drift check | CI                               |
 | Production build                                                  | `pnpm build`                    | CI                               |
 | Bundle budget per route                                           | `pnpm check:bundle`             | CI                               |
@@ -89,10 +91,15 @@ the pre-push hook runs it too. Never bypass hooks (`--no-verify`).
 ## Conventions
 
 - **Package manager**: **always `pnpm`** — never `npm`, `yarn`, `bun` or raw
-  `npx` (use `pnpm dlx` / `pnpm exec`). Dependency versions live in the
-  `pnpm-workspace.yaml` catalog; packages reference `catalog:`. _Enforced:
-  `check:conventions` (scripts, workflows, Dockerfiles, lockfiles), Claude
-  `settings.json` deny rules, sherif._
+  `npx` (use `pnpm dlx` / `pnpm exec`). _Enforced: `check:conventions`
+  (scripts, workflows, Dockerfiles, lockfiles), Claude `settings.json` deny
+  rules._
+- **One version per dependency, in the catalog**: versions live only in the
+  `pnpm-workspace.yaml` catalog; packages reference `catalog:` (or
+  `workspace:`). `catalogMode: strict` makes `pnpm add <pkg>` do this for you
+  — it reuses the catalog version or adds the latest to the catalog. Don't
+  hand-write versions into a `package.json`. _Enforced: `check:conventions`
+  (catalog), pnpm, sherif._
 - **Dependencies are declared where they're used** — no relying on hoisting
   (phantom deps), no unused deps. _Enforced: knip._
 - **Mobile app stays in `apps/expo`** — never move it to the root or outside
@@ -118,6 +125,18 @@ the pre-push hook runs it too. Never bypass hooks (`--no-verify`).
   hardcode colors/spacing; screens use the custom `NavigationBar`.
 - **Analytics**: product events go through `trackEvent` from
   `@example-app/analytics` — snake_case/GA4 names, no PII in params.
+- **Infrastructure is Terraform**: if the project deploys to a cloud provider
+  (AWS, GCP, Azure, Cloudflare, Hetzner, DigitalOcean, …), every resource in
+  that account — including the VM a self-hosted PaaS runs on — is Terraform in
+  `infra/` (`envs/<env>` root modules with a remote state backend and a
+  committed `.terraform.lock.hcl`; `modules/<name>` with `terraform test`s).
+  No console click-ops, no CLI `create`/`delete` scripts, no CDK, Pulumi,
+  CloudFormation/SAM, Serverless or Bicep. CI authenticates with OIDC (no
+  long-lived keys, no credentials in `.tf`/`*.tfvars`); changes are planned
+  on the PR and applied from CI. See the **infrastructure** skill.
+  _Enforced: `check:conventions` (terraform — layout, backends, lock files,
+  other IaC tools, literal credentials, module tests), `check:infra` (fmt,
+  validate, test, tflint, trivy)._
 - **Fix once**: before writing something, look for code that already does it
   and reuse or extend it; fold duplicated logic into one shared piece.
 - **Commits**: Conventional Commits (`feat(api): …`). _Enforced: commit-msg hook._
@@ -171,6 +190,9 @@ Tests are how this repo knows it works; untested code is unfinished.
   (`apps/nextjs/bundle-budget.json`). If `check:bundle` fails, run the
   **next-bundle-optimizer** skill and fix what it finds; raise a budget only
   with a reason in the PR.
+- **Infrastructure changes** (`infra/`) → `pnpm check:infra` (trivy fails
+  on HIGH/CRITICAL misconfigurations) plus a **security-audit** review of IAM,
+  network exposure and data storage.
 - Secrets never go in code or committed files (gitleaks scans all history).
 
 ## Agent skills
@@ -192,6 +214,9 @@ Skills live in `.agents/skills/` (read natively by Codex, Copilot and others;
 | `expo-data-fetching`          | Mobile data loading, loading/empty/error states                          |
 | `expo-design-system`          | Mobile tokens, components, design-system drift                           |
 | `expo-upgrade`                | Expo SDK upgrades (`pnpm check:expo` failing)                            |
+| `infrastructure`              | Any cloud resource: `infra/` layout, state, OIDC, plan/apply, the gate   |
+| `terraform-style-guide`       | Writing or reviewing Terraform (HCL)                                     |
+| `terraform-test`              | Writing `.tftest.hcl` tests for Terraform modules                        |
 
 ## Reference patterns (copy these)
 
@@ -217,6 +242,7 @@ pnpm test             # vitest + coverage (needs Postgres: pnpm setup)
 pnpm db:generate      # migration from schema changes (commit packages/db/drizzle/)
 pnpm db:migrate       # apply migrations · pnpm db:seed · pnpm db:studio
 pnpm check:bundle     # bundle budget (CI) · pnpm -F @example-app/nextjs analyze — interactive
+pnpm check:infra      # Terraform gate (no-op until infra/ exists)
 pnpm skills:update    # refresh third-party agent skills (skills-lock.json)
 ```
 
@@ -225,4 +251,6 @@ pnpm skills:update    # refresh third-party agent skills (skills-lock.json)
 `output: "standalone"` Next.js → `apps/nextjs/Dockerfile` (built from the repo
 root; pass `NEXT_PUBLIC_*` values as **build args** — they're inlined at build
 time). Health probe: `GET /api/health`. Run `pnpm db:migrate` on deploy. See
-`DEPLOY.md` and `LAUNCH_CHECKLIST.md`. Dependencies stay current via Renovate.
+`DEPLOY.md` and `LAUNCH_CHECKLIST.md`. Cloud resources are Terraform in
+`infra/` (see Infrastructure above and `DEPLOY.md` → Infrastructure).
+Dependencies stay current via Renovate.

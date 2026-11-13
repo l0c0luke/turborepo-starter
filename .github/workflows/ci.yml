@@ -164,11 +164,60 @@ jobs:
         run: |
           "$RUNNER_TEMP/gitleaks" git --redact --verbose --no-banner .
 
+  infra:
+    name: infra (terraform)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Pinned releases (+ checksum for trivy, installed directly rather than
+      # via trivy-action, whose tags were hijacked in 2026). Bump together.
+      TFLINT_VERSION: "v0.66.0"
+      TRIVY_VERSION: "0.76.2"
+      TRIVY_SHA256: "bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf"
+    steps:
+      - uses: actions/checkout@v7
+      - name: Detect Terraform under infra/
+        id: tf
+        shell: bash
+        run: |
+          if git ls-files -- 'infra/*.tf' | grep -q .; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "version=$(tr -d '[:space:]' < infra/.terraform-version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Terraform under infra/ — nothing to check (AGENTS.md → Infrastructure)."
+          fi
+
+      - if: steps.tf.outputs.present == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+      - if: steps.tf.outputs.present == 'true'
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ steps.tf.outputs.version }}
+          terraform_wrapper: false
+      - if: steps.tf.outputs.present == 'true'
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+      - if: steps.tf.outputs.present == 'true'
+        name: Install trivy
+        shell: bash
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/trivy.tar.gz" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/trivy.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP" trivy
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - if: steps.tf.outputs.present == 'true'
+        name: fmt, validate, test, tflint, trivy (scripts/check-infra.ts)
+        run: node scripts/check-infra.ts
+
   # Single required check for branch protection / rulesets / merge queues.
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [static, typecheck, test, build, docker, audit, secret-scan]
+    needs: [static, typecheck, test, build, docker, audit, secret-scan, infra]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -107,6 +107,36 @@ period, 3 retries). If your orchestrator restarts unhealthy containers and you
 don't want a database outage to cause restart loops, point its liveness probe
 at a path that doesn't touch the database and keep `/api/health` for readiness.
 
+## Infrastructure (Terraform)
+
+Pure PaaS hosting (Vercel, or Coolify on a server someone else manages) needs
+no infrastructure code. **As soon as the project uses a cloud provider
+account** — AWS, GCP, Azure, Cloudflare, Hetzner, DigitalOcean, … — every
+resource in it is Terraform in `infra/`, including the server Coolify runs on,
+managed Postgres, object storage, DNS, CDN, IAM and secrets. No console
+click-ops and no other IaC tools (AGENTS.md → Infrastructure; the
+`infrastructure` agent skill has the full procedure).
+
+- **Layout**: `infra/envs/<env>/` root modules (remote state backend +
+  committed `.terraform.lock.hcl`), `infra/modules/<name>/` reusable modules
+  with `tests/*.tftest.hcl`, and `infra/.terraform-version` pinning the CLI.
+- **State**: remote only (S3 with `use_lockfile`, GCS, azurerm or HCP
+  Terraform). Bootstrap the state bucket and CI role once from
+  `infra/envs/bootstrap`, then migrate its own state into that bucket.
+- **Credentials**: CI uses OIDC federation (no long-lived keys); people use
+  SSO. Secrets come from `sensitive` variables (`TF_VAR_*` environment
+  secrets) or the provider's secrets manager, never from committed files.
+- **Flow**: `terraform plan` on every PR that touches `infra/**`; `apply` from
+  CI on merge to `main`, behind a GitHub Environment with required reviewers
+  for production; a weekly drift plan.
+- **Gate**: `pnpm check:infra` (in `pnpm check` and the CI `infra` job) runs
+  `terraform fmt -check`, `validate`, `terraform test`, `tflint` and
+  `trivy config` (HIGH/CRITICAL fail). Install `terraform` (or `tfenv`),
+  `tflint` and `trivy` locally; without them the local run warns and skips,
+  while CI installs pinned versions.
+- **App wiring**: Terraform outputs (bucket names, URLs) become the app's env
+  vars on the deploy platform, validated in `apps/nextjs/src/env.ts`.
+
 ## Mobile (Expo)
 
 Use EAS Build (`apps/expo/eas.json` — pins the same Node 24 and pnpm versions
@@ -147,5 +177,6 @@ DSN is set.
 to keep the catalog current (it waits 3 days after a release and pins GitHub
 Actions to digests). Expo SDK packages are grouped and should be bumped
 together with `pnpm -F @example-app/expo exec expo install --fix` — CI's
-`check:expo` fails on drift. Agent skills are not covered by Renovate: run
-`pnpm skills:update` periodically.
+`check:expo` fails on drift. Terraform providers, modules and
+`infra/.terraform-version` are grouped into one `terraform` PR. Agent skills
+are not covered by Renovate: run `pnpm skills:update` periodically.

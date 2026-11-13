@@ -5,6 +5,12 @@ packages:
 
 autoInstallPeers: false
 
+# Versions live in the catalog below, only. `pnpm add <pkg>` reuses the
+# catalog version (or adds the latest to the catalog) and writes `catalog:`;
+# a version outside the catalog range is an error. Enforced for existing
+# manifests by `pnpm check:conventions` (catalog).
+catalogMode: strict
+
 # Peer issues fail CI (`pnpm check:peers`). Only list a peer here with a reason.
 peerDependencyRules:
   ignoreMissing:
