@@ -16,7 +16,9 @@ import { AntDesign, FontAwesome } from "@expo/vector-icons";
 
 import { log } from "@example-app/shared";
 
+import { HelpModal } from "~/components/ui/HelpModal";
 import { Skeleton } from "~/components/ui/Skeleton";
+import { screenHelp } from "~/help";
 import {
   buttons,
   buttonText,
@@ -29,6 +31,7 @@ import {
   spacing,
   typography,
 } from "~/styles";
+import { buttonA11y } from "~/utils/accessibility";
 import { completeAppleSignIn, isAppleAuthAvailable } from "~/utils/appleAuth";
 import {
   authClient,
@@ -45,6 +48,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
+  const [showHelp, setShowHelp] = useState(false);
   const otpRefs = useRef<TextInputInstance[]>([]);
   // Apple is offered only when enabled for this build AND the device supports
   // it (iOS 13+); Google only when its client ID is configured.
@@ -304,6 +308,22 @@ export default function LoginPage() {
                 ? "Enter the verification code from your email"
                 : "Sign in to your account"}
             </Text>
+            {/* Contextual help (no NavigationBar on this screen). */}
+            <Pressable
+              onPress={() => setShowHelp(true)}
+              {...buttonA11y("Help signing in")}
+            >
+              <Text
+                style={[typography.caption, { color: colors.primary[600] }]}
+              >
+                Need help signing in?
+              </Text>
+            </Pressable>
+            <HelpModal
+              visible={showHelp}
+              onClose={() => setShowHelp(false)}
+              help={screenHelp.signIn}
+            />
           </View>
 
           {!otpSent && (

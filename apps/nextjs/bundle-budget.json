@@ -3,7 +3,7 @@
   "defaultKb": 430,
   "routes": {
     "/": 420,
-    "/admin": 430,
+    "/admin": 435,
     "/login": 440,
     "/_not-found": 420,
     "/_global-error": 280

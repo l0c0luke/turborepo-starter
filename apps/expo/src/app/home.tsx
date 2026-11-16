@@ -5,6 +5,7 @@ import { router } from "expo-router";
 
 import { NavigationBar } from "~/components/NavigationBar";
 import { Skeleton } from "~/components/ui/Skeleton";
+import { screenHelp } from "~/help";
 import { containers } from "~/styles";
 import { authClient } from "~/utils/auth";
 
@@ -27,7 +28,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={containers.safeArea} edges={["bottom"]}>
-      <NavigationBar title="Home" showBack={false} />
+      <NavigationBar title="Home" help={screenHelp.home} showBack={false} />
       <View className="flex-1 p-4">
         <View className="rounded-2xl border border-gray-200 bg-white p-5">
           <Text className="text-xl font-semibold text-gray-900">Welcome</Text>

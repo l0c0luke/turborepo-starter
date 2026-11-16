@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { useEffect } from "react";
 import {
   ArrowDown,
@@ -40,11 +40,14 @@ export function DataTableSearch({
   onChange,
   placeholder,
   isUpdating,
+  ref,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   isUpdating: boolean;
+  /** Lets a page command focus the box. */
+  ref?: Ref<HTMLInputElement>;
 }) {
   const t = useTranslations("dataTable");
   const Icon = isUpdating ? LoaderCircle : Search;
@@ -58,6 +61,7 @@ export function DataTableSearch({
         )}
       />
       <Input
+        ref={ref}
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}

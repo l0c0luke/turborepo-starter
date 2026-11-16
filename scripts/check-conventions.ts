@@ -258,7 +258,7 @@ for (const file of files) {
   }
 }
 
-// --- Instant feedback (AGENTS.md → UX: skeletons + instant feedback) ----------
+// --- Instant feedback (AGENTS.md → UX) ----------------------------------------
 for (const file of files.filter((f) => f.endsWith(".tsx"))) {
   const raw = read(file);
   const source = code(raw);
@@ -468,6 +468,104 @@ for (const [locale, keys] of keysByLocale) {
   }
 }
 
+const declaredLocales = [
+  ...(
+    /export const locales = \[([^\]]*)\]/.exec(
+      read("apps/nextjs/src/i18n/languages.ts"),
+    )?.[1] ?? ""
+  ).matchAll(/"([^"]+)"/g),
+].map((match) => match[1] ?? "");
+const localeFiles = locales.map((file) => file.replace(/\.json$/, ""));
+const sameSet = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((item) => b.includes(item));
+if (!sameSet(declaredLocales, localeFiles)) {
+  fail(
+    "i18n",
+    `apps/nextjs/src/i18n/languages.ts declares [${declaredLocales.join(", ")}] but ${localeDir} has [${localeFiles.join(", ")}]`,
+  );
+}
+
+// --- Command palette + contextual help (AGENTS.md → UX) ----------------------
+// Web: ⌘K and help are mounted, and every page is registered with help.
+const webSources = files.filter(
+  (f) =>
+    /^apps\/nextjs\/src\/.*\.tsx$/.test(f) && !f.includes("/_components/ui/"),
+);
+for (const [needle, what] of [
+  [
+    "<CommandCenterProvider",
+    "a <CommandCenterProvider> around the app (ConditionalLayout)",
+  ],
+  ["<CommandPaletteButton", "a visible <CommandPaletteButton> (navbar)"],
+  ["<HelpButton", "a <HelpButton> for the current page"],
+] as const) {
+  if (!webSources.some((file) => code(read(file)).includes(needle))) {
+    fail("command-palette", `the web app must render ${what}`);
+  }
+}
+const routesFile = "apps/nextjs/src/navigation/routes.ts";
+const registry = [
+  ...code(read(routesFile)).matchAll(
+    /\{\s*key:\s*"([^"]+)",\s*href:\s*"([^"]+)"/g,
+  ),
+].map((match) => ({ key: match[1] ?? "", href: match[2] ?? "" }));
+for (const file of files.filter((f) =>
+  /^apps\/nextjs\/src\/app\/(.*\/)?page\.tsx$/.test(f),
+)) {
+  // app/(group)/users/[id]/page.tsx → /users/[id]
+  const href =
+    `/${dirname(file).replace(/^apps\/nextjs\/src\/app\/?/, "")}`
+      .split("/")
+      .filter(
+        (segment) => !/^\(.*\)$/.test(segment) && !segment.startsWith("@"),
+      )
+      .join("/")
+      .replace(/\/+$/, "") || "/";
+  if (!registry.some((route) => route.href === href)) {
+    fail(
+      "contextual-help",
+      `${file}: ${href} isn't in ${routesFile} — register it so it's in ⌘K and has help`,
+    );
+  }
+}
+const enMessages = flatten(JSON.parse(read(`${localeDir}/en.json`)));
+for (const { key } of registry) {
+  for (const required of [
+    `routes.${key}.title`,
+    `routes.${key}.description`,
+    `routes.${key}.keywords`,
+    `help.pages.${key}.title`,
+    `help.pages.${key}.intro`,
+  ]) {
+    if (!enMessages.includes(required)) {
+      fail("contextual-help", `${localeDir}/en.json is missing ${required}`);
+    }
+  }
+  if (!enMessages.some((m) => m.startsWith(`help.pages.${key}.tips.`))) {
+    fail(
+      "contextual-help",
+      `${localeDir}/en.json needs at least one help.pages.${key}.tips.* entry`,
+    );
+  }
+}
+// Mobile: every screen offers help (NavigationBar help=… or a HelpModal).
+for (const file of files.filter(
+  (f) =>
+    /^apps\/expo\/src\/app\/.*\.tsx$/.test(f) &&
+    !/\/(_layout|\+[^/]*)\.tsx$/.test(f),
+)) {
+  const raw = read(file);
+  if (
+    !/\bhelp=\{screenHelp\./.test(code(raw)) &&
+    !ignored(raw, "contextual-help")
+  ) {
+    fail(
+      "contextual-help",
+      `${file}: pass help={screenHelp.<screen>} (apps/expo/src/help.ts) to <NavigationBar> or a <HelpModal>`,
+    );
+  }
+}
+
 // --- Infrastructure is Terraform (AGENTS.md → Infrastructure) ----------------
 // Tool runs (fmt/validate/test/tflint/trivy) live in scripts/check-infra.ts.
 const isTerraform = (file: string) => /\.(tf|tftest\.hcl)$/.test(file);
@@ -597,5 +695,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "✓ Repo conventions hold (pnpm-only, catalog, expo location, agent docs, skills, testing, instant feedback, data tables, i18n, terraform).",
+  "✓ Repo conventions hold (pnpm-only, catalog, expo location, agent docs, skills, testing, instant feedback, data tables, command palette, contextual help, i18n, terraform).",
 );

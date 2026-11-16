@@ -1,7 +1,8 @@
 /**
  * Navigation Bar Component
  *
- * Reusable navigation bar with back button, title, and hamburger menu
+ * Reusable navigation bar with back button, title, contextual help ("?")
+ * and hamburger menu. Every screen passes its `help` from `~/help`.
  */
 
 import { useState } from "react";
@@ -10,22 +11,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 
+import type { ScreenHelp } from "~/help";
+import { HelpModal } from "~/components/ui/HelpModal";
 import { colors, spacing, typography } from "~/styles";
 import { buttonA11y } from "~/utils/accessibility";
 import { authClient } from "~/utils/auth";
 
 interface NavigationBarProps {
   title: string;
+  /** What this screen is for and how to use it (`screenHelp.<screen>`). */
+  help: ScreenHelp;
   showBack?: boolean;
   showMenu?: boolean;
 }
 
 export function NavigationBar({
   title,
+  help,
   showBack = true,
   showMenu = true,
 }: NavigationBarProps) {
   const [showMenuModal, setShowMenuModal] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleBack = () => {
     router.back();
@@ -67,8 +74,9 @@ export function NavigationBar({
           minHeight: 56,
         }}
       >
-        {/* Left Side - Back Button or Spacer */}
-        <View style={{ width: 40 }}>
+        {/* Left Side - Back Button or Spacer (as wide as the right side, so
+            the title stays centred) */}
+        <View style={{ width: 80 }}>
           {showBack && (
             <Pressable
               onPress={handleBack}
@@ -107,8 +115,29 @@ export function NavigationBar({
           {title}
         </Text>
 
-        {/* Right Side - Menu Button */}
-        <View style={{ width: 40 }}>
+        {/* Right Side - Help + Menu Buttons */}
+        <View
+          style={{
+            width: 80,
+            flexDirection: "row",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Pressable
+            onPress={() => setShowHelp(true)}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            {...buttonA11y("Help", {
+              hint: "Explains what you can do on this screen",
+            })}
+          >
+            <Feather name="help-circle" size={22} color={colors.text.primary} />
+          </Pressable>
           {showMenu && (
             <Pressable
               onPress={() => setShowMenuModal(true)}
@@ -128,6 +157,12 @@ export function NavigationBar({
           )}
         </View>
       </View>
+
+      <HelpModal
+        visible={showHelp}
+        onClose={() => setShowHelp(false)}
+        help={help}
+      />
 
       {/* Menu Modal */}
       <Modal
