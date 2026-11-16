@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import type { AnyColumn } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { asc, eq } from "drizzle-orm";
 
@@ -17,7 +18,7 @@ const SORT_COLUMNS = {
   createdAt: user.createdAt,
   name: user.name,
   email: user.email,
-} satisfies Record<NonNullable<ListUsersInput["sort"]>, unknown>;
+} satisfies Record<NonNullable<ListUsersInput["sort"]>, AnyColumn>;
 
 /**
  * Admin router — the reference example of a protected, role-gated feature.
