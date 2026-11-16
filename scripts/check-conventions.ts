@@ -284,9 +284,26 @@ for (const file of files.filter((f) => f.endsWith(".tsx"))) {
     }
   }
 
-  // Mobile: a screen that loads data renders a Skeleton while pending.
+  // Web: a component that loads without Suspense renders a Skeleton while
+  // pending (useSuspenseQuery is covered by the page's Suspense fallback).
   if (
-    file.startsWith("apps/expo/src/app/") &&
+    file.startsWith("apps/nextjs/src/") &&
+    !file.startsWith("apps/nextjs/src/_components/ui/") &&
+    /\b(useQuery|useInfiniteQuery)\(/.test(source) &&
+    !source.includes("Skeleton") &&
+    !ignored(raw, "query-skeleton")
+  ) {
+    fail(
+      "query-skeleton",
+      `${file} loads data but never renders a <Skeleton> while pending`,
+    );
+  }
+
+  // Mobile: a screen or component that loads data renders a Skeleton while
+  // pending.
+  if (
+    file.startsWith("apps/expo/src/") &&
+    !file.startsWith("apps/expo/src/components/ui/") &&
     /\b(useQuery|useSuspenseQuery|useInfiniteQuery|useSession)\(/.test(
       source,
     ) &&
@@ -313,6 +330,110 @@ for (const file of files.filter((f) => f.endsWith(".tsx"))) {
         `${file}: useMutation without onError feedback`,
       );
     }
+  }
+}
+
+// --- Data tables are server-side (AGENTS.md → UX → Data tables) --------------
+/** The balanced `(…)` starting at index `open`. */
+const balanced = (source: string, open: number): string => {
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === "(") depth++;
+    else if (source[i] === ")" && --depth === 0) {
+      return source.slice(open, i + 1);
+    }
+  }
+  return source.slice(open);
+};
+/** Methods chained after the call opened at `open`: `x(…).where(…).limit(…)` → where, limit. */
+const chainAfter = (source: string, open: number): string[] => {
+  const names: string[] = [];
+  let at = open + balanced(source, open).length;
+  for (;;) {
+    const next = /^\s*\.\s*(\$?\w+)\s*\(/.exec(source.slice(at));
+    if (!next?.[1]) return names;
+    names.push(next[1]);
+    const paren = at + next[0].length - 1;
+    at = paren + balanced(source, paren).length;
+  }
+};
+// API: no procedure reads an unbounded set of rows.
+for (const file of files.filter(
+  (f) =>
+    /^packages\/api\/src\/router\/[^/]+\.ts$/.test(f) &&
+    !f.endsWith(".test.ts"),
+)) {
+  const raw = read(file);
+  if (ignored(raw, "server-pagination")) continue;
+  const source = code(raw);
+  const hint =
+    "page it with listQuerySchema + paginate() (packages/api/src/pagination.ts)";
+  for (const match of source.matchAll(/\.findMany\(/g)) {
+    const args = balanced(source, match.index + match[0].length - 1);
+    if (!/\blimit\b/.test(args)) {
+      fail(
+        "server-pagination",
+        `${file}: findMany() without a limit — ${hint}`,
+      );
+    }
+  }
+  for (const match of source.matchAll(/\.select(Distinct)?\(/g)) {
+    const chain = chainAfter(source, match.index + match[0].length - 1);
+    if (chain.includes("from") && !chain.includes("limit")) {
+      fail(
+        "server-pagination",
+        `${file}: select().from() without .limit() — ${hint}`,
+      );
+    }
+  }
+}
+for (const file of files.filter((f) =>
+  /^apps\/(nextjs|expo)\/src\/.*\.tsx?$/.test(f),
+)) {
+  const raw = read(file);
+  const source = code(raw);
+  // Both apps: never page, filter or sort a fetched table in the browser.
+  if (
+    /\bget(Filtered|Sorted|Pagination|Faceted)RowModel\b/.test(source) &&
+    !ignored(raw, "data-table")
+  ) {
+    fail(
+      "data-table",
+      `${file}: client-side table paging/filtering/sorting — the server does it (listQuerySchema + useListParams)`,
+    );
+  }
+  // Web: a table of fetched rows is a server-side table.
+  if (
+    file.startsWith("apps/nextjs/src/") &&
+    !/^apps\/nextjs\/src\/_components\/(ui|data-table)\//.test(file) &&
+    source.includes("~/_components/ui/table") &&
+    /\buse(Suspense)?(Infinite)?Query\(/.test(source) &&
+    !ignored(raw, "data-table")
+  ) {
+    for (const [needle, what] of [
+      ["useListParams", "useListParams (URL-backed page/search/sort)"],
+      ["DataTablePagination", "<DataTablePagination>"],
+    ] as const) {
+      if (!source.includes(needle)) {
+        fail(
+          "data-table",
+          `${file} renders a table of fetched rows without ${what} — see AdminContent`,
+        );
+      }
+    }
+  }
+  // Mobile: a list of fetched rows loads page by page.
+  if (
+    file.startsWith("apps/expo/src/") &&
+    /<(FlatList|FlashList|SectionList|LegendList)\b/.test(source) &&
+    /\.queryOptions\(/.test(source) &&
+    !/\binfiniteQueryOptions\(|\buseInfiniteQuery\(/.test(source) &&
+    !ignored(raw, "list-pagination")
+  ) {
+    fail(
+      "list-pagination",
+      `${file}: a list of fetched rows must page with useInfiniteQuery(trpc.….infiniteQueryOptions(…))`,
+    );
   }
 }
 
@@ -476,5 +597,5 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  "✓ Repo conventions hold (pnpm-only, catalog, expo location, agent docs, skills, testing, instant feedback, i18n, terraform).",
+  "✓ Repo conventions hold (pnpm-only, catalog, expo location, agent docs, skills, testing, instant feedback, data tables, i18n, terraform).",
 );

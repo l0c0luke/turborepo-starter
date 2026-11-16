@@ -1,11 +1,23 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
+import type { ListUsersInput } from "@example-app/validators";
 import { user } from "@example-app/db/schema";
-import { deleteUserSchema, setUserAdminSchema } from "@example-app/validators";
+import {
+  deleteUserSchema,
+  listUsersSchema,
+  setUserAdminSchema,
+} from "@example-app/validators";
 
+import { paginate, searchAny, sortBy } from "../pagination";
 import { adminProcedure } from "../trpc";
+
+const SORT_COLUMNS = {
+  createdAt: user.createdAt,
+  name: user.name,
+  email: user.email,
+} satisfies Record<NonNullable<ListUsersInput["sort"]>, unknown>;
 
 /**
  * Admin router — the reference example of a protected, role-gated feature.
@@ -15,17 +27,27 @@ import { adminProcedure } from "../trpc";
  * own protected routers.
  */
 export const adminRouter = {
-  listUsers: adminProcedure.query(({ ctx }) => {
-    return ctx.db.query.user.findMany({
-      orderBy: desc(user.createdAt),
-      columns: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        isAdmin: true,
-        createdAt: true,
-      },
+  /** One page of users, searched by name/email and sorted on the server. */
+  listUsers: adminProcedure.input(listUsersSchema).query(({ ctx, input }) => {
+    const where = searchAny(input.search, [user.name, user.email]);
+    return paginate(input, {
+      rows: (limit, offset) =>
+        ctx.db.query.user.findMany({
+          where,
+          // The id tiebreaker keeps pages stable when sort values are equal.
+          orderBy: [sortBy(SORT_COLUMNS[input.sort], input.dir), asc(user.id)],
+          limit,
+          offset,
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            isAdmin: true,
+            createdAt: true,
+          },
+        }),
+      count: () => ctx.db.$count(user, where),
     });
   }),
 
