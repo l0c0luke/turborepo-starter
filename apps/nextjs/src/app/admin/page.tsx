@@ -11,7 +11,13 @@ import { AdminSkeleton } from "~/_components/admin/AdminSkeleton";
 import { getSession } from "~/auth/server";
 import { HydrateClient, prefetch, trpc } from "~/trpc/server";
 
-export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
+export default async function AdminPage({
+  searchParams,
+}: {
+  // Explicit rather than Next's generated PageProps, which only exists after
+  // a build (CI typechecks without one).
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
 
   // Redirect to login if not authenticated
