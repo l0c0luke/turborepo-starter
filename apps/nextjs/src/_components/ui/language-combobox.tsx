@@ -18,13 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/_components/ui/popover";
+import { languages } from "~/i18n/languages";
 import { cn } from "~/lib/utils";
-
-const SUPPORTED_LANGUAGES = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "es", name: "Español", flag: "🇪🇸" },
-  { code: "fr", name: "Français", flag: "🇫🇷" },
-];
 
 interface LanguageComboboxProps {
   value?: string;
@@ -40,9 +35,7 @@ export function LanguageCombobox({
   const [open, setOpen] = React.useState(false);
   const t = useTranslations("languages");
 
-  const selectedLanguage = SUPPORTED_LANGUAGES.find(
-    (lang) => lang.code === value,
-  );
+  const selectedLanguage = languages.find((lang) => lang.code === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,7 +66,7 @@ export function LanguageCombobox({
           <CommandList>
             <CommandEmpty>No language found.</CommandEmpty>
             <CommandGroup>
-              {SUPPORTED_LANGUAGES.map((language) => (
+              {languages.map((language) => (
                 <CommandItem
                   key={language.code}
                   value={`${language.code} ${language.name} ${t(language.code)}`}

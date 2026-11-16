@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   noop,
   useMutation,
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 
 import { listUsersSchema } from "@example-app/validators";
 
+import { usePageCommands } from "~/_components/command-center/CommandCenter";
 import {
   DataTablePagination,
   DataTableSearch,
@@ -58,6 +60,29 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
     trpc.admin.listUsers.queryOptions(table.query),
   );
   const users = data.items;
+  // ⌘K "On this page" commands (AGENTS.md → UX → Command palette).
+  const searchInput = useRef<HTMLInputElement>(null);
+  usePageCommands([
+    {
+      id: "admin_search_users",
+      label: t("commandSearch"),
+      keywords: "find filter",
+      run: () => searchInput.current?.focus(),
+    },
+    {
+      id: "admin_sort_name",
+      label: t("commandSortName"),
+      keywords: "order alphabetical",
+      run: () => table.setSort("name", "asc"),
+    },
+    {
+      id: "admin_sort_newest",
+      label: t("commandSortNewest"),
+      keywords: "order recent joined",
+      run: () => table.setSort("createdAt", "desc"),
+    },
+  ]);
+
   // Hovering "next"/"previous" warms that page so the click is instant.
   const prefetchPage = (page: number) =>
     queryClient
@@ -107,6 +132,7 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
       </div>
 
       <DataTableSearch
+        ref={searchInput}
         value={table.searchText}
         onChange={table.setSearchText}
         placeholder={t("searchPlaceholder")}

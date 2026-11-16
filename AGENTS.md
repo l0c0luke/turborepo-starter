@@ -47,7 +47,7 @@ skill renames them.
 ```
 apps/
   expo/       # React Native app (MUST stay in apps/expo): src/app screens, src/components/ui, src/styles tokens, src/env.ts
-  nextjs/     # Next.js app: src/app routes, src/_components/ui (shadcn), src/trpc, src/auth, src/env.ts
+  nextjs/     # Next.js app: src/app routes, src/navigation/routes.ts (page registry), src/_components/ui (shadcn), src/trpc, src/auth, src/env.ts
 packages/
   api/        # tRPC routers (src/router/*.ts, each with a *.test.ts) + root.ts + trpc.ts
   auth/       # Better Auth config (additionalFields: isAdmin)
@@ -141,7 +141,7 @@ the pre-push hook runs it too. Never bypass hooks (`--no-verify`).
   and reuse or extend it; fold duplicated logic into one shared piece.
 - **Commits**: Conventional Commits (`feat(api): …`). _Enforced: commit-msg hook._
 
-## UX: skeletons + instant feedback
+## UX: skeletons, instant feedback, ⌘K and help
 
 Users must never wait on a blank screen, a lone spinner, or a button that does
 nothing visible.
@@ -179,6 +179,24 @@ nothing visible.
   _Enforced: `check:conventions` (server-pagination — every `findMany` /
   `select().from()` in a router has a `limit`; data-table; list-pagination),
   `admin.test.ts`._
+- **⌘K command palette (web)**: every signed-in page has one, opened with
+  ⌘K / Ctrl+K or the navbar search button. It lists every page the user can
+  reach, the current page's actions, people (server-side search for admins),
+  help topics and preferences (theme, language, sign out). Register a page's
+  own actions with `usePageCommands([...])` (the admin page's "Search users"
+  / sort commands are the pattern). It lives in
+  `apps/nextjs/src/_components/command-center/` and is lazy-loaded (warmed on
+  idle) so it costs no initial JS. _Enforced: `check:conventions`
+  (command-palette)._
+- **Contextual help**: every page explains, in the user's words, what it's
+  for and how to use what's on it. Web: every `page.tsx` is registered in
+  `apps/nextjs/src/navigation/routes.ts` and has `routes.<key>` (palette
+  title, description, keywords) and `help.pages.<key>` (title, intro, tips)
+  in every locale; the navbar "?" button or the `?` key opens it. Mobile:
+  every screen passes `help={screenHelp.<screen>}` (`apps/expo/src/help.ts`)
+  to `<NavigationBar>`, or renders a `<HelpModal>` if it has no bar. Update
+  the help whenever a page gains or changes a feature. _Enforced:
+  `check:conventions` (contextual-help)._
 - **Caching**: both apps share stale-while-revalidate defaults
   (`queryDefaults` in `@example-app/shared`) so revisits render instantly.
 - In dev, tRPC adds a random 100–500 ms delay so missing loading states are

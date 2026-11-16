@@ -43,7 +43,10 @@
     "userUpdated": "User updated",
     "userDeleted": "User deleted",
     "actionFailed": "Something went wrong. Please try again.",
-    "searchPlaceholder": "Search by name or email…"
+    "searchPlaceholder": "Search by name or email…",
+    "commandSearch": "Search users",
+    "commandSortName": "Sort users by name",
+    "commandSortNewest": "Show newest users first"
   },
   "auth": {
     "signIn": "Sign In",
@@ -73,5 +76,78 @@
     "previous": "Previous page",
     "next": "Next page",
     "noResults": "No results for “{search}”."
+  },
+  "routes": {
+    "home": {
+      "title": "Home",
+      "description": "Your start page after signing in",
+      "keywords": "start welcome dashboard landing"
+    },
+    "admin": {
+      "title": "Users",
+      "description": "Search, promote and remove the people using the app",
+      "keywords": "admin users people accounts roles permissions manage delete"
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in with a code or link sent to your email",
+      "keywords": "login sign in email code magic link"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "description": "What you can do here",
+    "button": "Help",
+    "shortcuts": "Keyboard shortcuts",
+    "shortcutPalette": "Search pages, people and actions",
+    "shortcutHelp": "Open help for the page you're on",
+    "searchEverything": "Search everything",
+    "pages": {
+      "home": {
+        "title": "Home",
+        "intro": "This is your start page once you're signed in. Everything the app can do is one search away.",
+        "tips": {
+          "palette": "Press ⌘K (Ctrl+K on Windows and Linux) to jump to any page, find a person, or change a setting without leaving the keyboard.",
+          "admin": "Admins manage everyone's accounts from the Users page.",
+          "preferences": "Your avatar menu (top right) switches language, toggles dark mode and signs you out."
+        }
+      },
+      "admin": {
+        "title": "Users",
+        "intro": "Everyone with an account is listed here. Search, sort and page through them; changes apply immediately.",
+        "tips": {
+          "search": "Search matches names and email addresses. Results come from the server, so they cover every user, not just this page.",
+          "sort": "Click the Name or Joined column header to sort; click again to reverse it.",
+          "admin": "The switch on each row grants or removes admin access. You can't change or delete your own account here.",
+          "delete": "Deleting a user is permanent: their sessions and data are removed.",
+          "share": "The page, search and sort are part of the address, so you can bookmark a view or send it to someone."
+        }
+      },
+      "login": {
+        "title": "Signing in",
+        "intro": "There's no password to remember: you sign in with your email.",
+        "tips": {
+          "code": "Enter your email and we'll send a 6-digit code. Type it here to sign in.",
+          "link": "The email also contains a sign-in link — opening it on this device signs you in directly.",
+          "missing": "No email after a minute? Check your spam folder, then request a new code."
+        }
+      }
+    }
+  },
+  "commandPalette": {
+    "title": "Command palette",
+    "placeholder": "Search pages, people and actions…",
+    "empty": "Nothing matches that. Try a page name, a person's name or email, or a setting.",
+    "button": "Search",
+    "pages": "Pages",
+    "thisPage": "On this page",
+    "users": "People",
+    "help": "Help",
+    "preferences": "Preferences",
+    "helpFor": "Help: {page}",
+    "toggleTheme": "Toggle dark mode",
+    "language": "Language: {name}",
+    "signOut": "Sign out",
+    "viewUser": "Open {name} in Users"
   }
 }

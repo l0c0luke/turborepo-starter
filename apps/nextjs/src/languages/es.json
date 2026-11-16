@@ -43,7 +43,10 @@
     "userUpdated": "Usuario actualizado",
     "userDeleted": "Usuario eliminado",
     "actionFailed": "Algo salió mal. Inténtalo de nuevo.",
-    "searchPlaceholder": "Buscar por nombre o correo…"
+    "searchPlaceholder": "Buscar por nombre o correo…",
+    "commandSearch": "Buscar usuarios",
+    "commandSortName": "Ordenar usuarios por nombre",
+    "commandSortNewest": "Ver primero los usuarios más nuevos"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -73,5 +76,78 @@
     "previous": "Página anterior",
     "next": "Página siguiente",
     "noResults": "No hay resultados para “{search}”."
+  },
+  "routes": {
+    "home": {
+      "title": "Inicio",
+      "description": "Tu página de inicio tras iniciar sesión",
+      "keywords": "inicio bienvenida panel"
+    },
+    "admin": {
+      "title": "Usuarios",
+      "description": "Busca, promueve y elimina a las personas que usan la app",
+      "keywords": "admin usuarios personas cuentas roles permisos gestionar eliminar"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "description": "Inicia sesión con un código o enlace enviado a tu correo",
+      "keywords": "login iniciar sesión correo código enlace"
+    }
+  },
+  "help": {
+    "title": "Ayuda",
+    "description": "Qué puedes hacer aquí",
+    "button": "Ayuda",
+    "shortcuts": "Atajos de teclado",
+    "shortcutPalette": "Buscar páginas, personas y acciones",
+    "shortcutHelp": "Abrir la ayuda de la página actual",
+    "searchEverything": "Buscar en todo",
+    "pages": {
+      "home": {
+        "title": "Inicio",
+        "intro": "Esta es tu página de inicio una vez que inicias sesión. Todo lo que hace la app está a una búsqueda de distancia.",
+        "tips": {
+          "palette": "Pulsa ⌘K (Ctrl+K en Windows y Linux) para ir a cualquier página, encontrar a una persona o cambiar un ajuste sin soltar el teclado.",
+          "admin": "Los administradores gestionan las cuentas de todos desde la página Usuarios.",
+          "preferences": "El menú de tu avatar (arriba a la derecha) cambia el idioma, activa el modo oscuro y cierra la sesión."
+        }
+      },
+      "admin": {
+        "title": "Usuarios",
+        "intro": "Aquí aparecen todas las personas con cuenta. Busca, ordena y pasa páginas; los cambios se aplican al momento.",
+        "tips": {
+          "search": "La búsqueda encuentra nombres y correos. Los resultados vienen del servidor, así que incluyen a todos los usuarios, no solo esta página.",
+          "sort": "Haz clic en la cabecera Nombre o Registro para ordenar; otra vez para invertir el orden.",
+          "admin": "El interruptor de cada fila da o quita acceso de administrador. Aquí no puedes cambiar ni eliminar tu propia cuenta.",
+          "delete": "Eliminar un usuario es permanente: se borran sus sesiones y sus datos.",
+          "share": "La página, la búsqueda y el orden forman parte de la dirección, así que puedes guardar una vista o enviarla a alguien."
+        }
+      },
+      "login": {
+        "title": "Iniciar sesión",
+        "intro": "No hay contraseña que recordar: inicias sesión con tu correo.",
+        "tips": {
+          "code": "Escribe tu correo y te enviaremos un código de 6 dígitos. Introdúcelo aquí para entrar.",
+          "link": "El correo también incluye un enlace de acceso: al abrirlo en este dispositivo entras directamente.",
+          "missing": "¿No llega el correo en un minuto? Revisa la carpeta de spam y pide un código nuevo."
+        }
+      }
+    }
+  },
+  "commandPalette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Busca páginas, personas y acciones…",
+    "empty": "No hay coincidencias. Prueba con el nombre de una página, el nombre o correo de una persona, o un ajuste.",
+    "button": "Buscar",
+    "pages": "Páginas",
+    "thisPage": "En esta página",
+    "users": "Personas",
+    "help": "Ayuda",
+    "preferences": "Preferencias",
+    "helpFor": "Ayuda: {page}",
+    "toggleTheme": "Cambiar modo oscuro",
+    "language": "Idioma: {name}",
+    "signOut": "Cerrar sesión",
+    "viewUser": "Abrir a {name} en Usuarios"
   }
 }

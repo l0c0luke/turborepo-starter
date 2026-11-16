@@ -96,6 +96,8 @@ export function useListParams<TQuery extends ListQuery>(
     setSearchText,
     setPage: (page: number) => navigate({ page }),
     setPageSize: (pageSize: number) => navigate({ pageSize, page: 1 }),
+    setSort: (column: TQuery["sort"], dir: ListQuery["dir"]) =>
+      navigate({ sort: column, dir, page: 1 }),
     toggleSort: (column: TQuery["sort"]) =>
       navigate({
         sort: column,

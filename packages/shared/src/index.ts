@@ -7,6 +7,7 @@
 export { parseError } from "./parse-error";
 export { matchAllowedOrigin, parseOriginList } from "./origins";
 export { queryDefaults } from "./query";
+export { findRoute, matchesRoute } from "./routes";
 export {
   captureException,
   errorTrackingOptions,

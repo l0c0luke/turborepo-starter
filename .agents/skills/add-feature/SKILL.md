@@ -135,6 +135,14 @@ apps/nextjs/src/_components/workouts/WorkoutsSkeleton.tsx  # ~/_components/ui/sk
   `table.isUpdating`, and in `page.tsx`
   `prefetch(trpc.workout.list.queryOptions(listInputFromSearchParams(listWorkoutsSchema, await searchParams)))`.
   The skeleton wraps its rows in `DataTableSkeleton`.
+- **Register the page for ⌘K and help** in `src/navigation/routes.ts`
+  (`{ key: "workouts", href: "/workouts", icon, access: "user" }`) and add,
+  in every locale, `routes.workouts` (`title`, `description`, `keywords` —
+  what people would type to find it) and `help.pages.workouts` (`title`,
+  `intro`, `tips` — what the page is for and how to use each thing on it,
+  in the user's words). Give the page's main actions to the palette with
+  `usePageCommands([...])` (see `AdminContent`). `check:conventions`
+  (contextual-help) fails an unregistered page or missing messages.
 - Gate the route in `src/proxy.ts` (matcher) and re-check the session in the
   page (see `app/admin/page.tsx`).
 - **Mutations give instant feedback** — copy the optimistic pattern in
@@ -159,7 +167,8 @@ apps/nextjs/src/_components/workouts/WorkoutsSkeleton.tsx  # ~/_components/ui/sk
 ## 5. Mobile screen (`apps/expo`)
 
 `apps/expo/src/app/workouts.tsx`, registered in `src/app/_layout.tsx`, with
-the custom `NavigationBar`:
+the custom `NavigationBar` and its help — add `screenHelp.workouts` to
+`src/help.ts` and pass `<NavigationBar title="Workouts" help={screenHelp.workouts} />`:
 
 ```tsx
 const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -212,6 +221,7 @@ Checklist:
 - [ ] Migration generated and committed
 - [ ] Validators + tests; router + `*.test.ts` (auth, ownership, validation, happy path)
 - [ ] Web route: `loading.tsx` + Suspense skeleton; optimistic mutations with rollback + toasts
+- [ ] Page in `navigation/routes.ts` with `routes.*` + `help.pages.*` messages; page actions via `usePageCommands`; mobile `screenHelp` entry
 - [ ] Lists/tables: `listQuerySchema` + `paginate()` on the server; web `useListParams` + data-table parts; mobile `useInfiniteQuery`
 - [ ] Mobile screen: skeleton while pending, empty + error states
 - [ ] Strings in every locale; analytics events via `trackEvent`

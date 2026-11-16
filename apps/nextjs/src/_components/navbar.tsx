@@ -7,8 +7,10 @@ import { Globe, LogOut, Shield } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
-import { log } from "@example-app/shared";
-
+import {
+  CommandPaletteButton,
+  HelpButton,
+} from "~/_components/command-center/CommandCenter";
 import { Avatar, AvatarFallback, AvatarImage } from "~/_components/ui/avatar";
 import { Button } from "~/_components/ui/button";
 import {
@@ -23,7 +25,9 @@ import {
 } from "~/_components/ui/dropdown-menu";
 import { Switch } from "~/_components/ui/switch";
 import { authClient } from "~/auth/client";
+import { useSignOut } from "~/auth/use-sign-out";
 import { useLocaleSwitch } from "~/hooks/useLocaleSwitch";
+import { languages } from "~/i18n/languages";
 
 export function Navbar() {
   const t = useTranslations("navigation");
@@ -31,6 +35,7 @@ export function Navbar() {
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { switchLocale } = useLocaleSwitch();
+  const handleLogout = useSignOut();
 
   // Get current locale from cookie - only on client side
   const [currentLocale, setCurrentLocale] = useState("en");
@@ -69,12 +74,6 @@ export function Navbar() {
     switchLocale(locale);
   };
 
-  // Language options (add a locale here + a matching file in src/languages/)
-  const languages = [
-    { code: "en", name: "English", flag: "🇺🇸" },
-    { code: "es", name: "Español", flag: "🇪🇸" },
-  ];
-
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
@@ -83,24 +82,6 @@ export function Navbar() {
   // Toggle dark mode using next-themes
   const handleToggleDark = () => {
     setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  // Handle logout with proper redirect
-  const handleLogout = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            // Redirect to login page after successful logout
-            window.location.href = "/login";
-          },
-        },
-      });
-    } catch (error) {
-      log.error("Logout failed:", error);
-      // Even if logout fails, redirect to login to be safe
-      window.location.href = "/login";
-    }
   };
 
   // Don't render if we're still loading session or not mounted
@@ -121,84 +102,88 @@ export function Navbar() {
             <span className="text-xl font-bold">Example App</span>
           </div>
         </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar>
-                <AvatarImage
-                  src={session.user.image ?? undefined}
-                  alt={session.user.name || session.user.email}
-                  className="bg-muted"
-                />
-                <AvatarFallback className="bg-muted text-foreground">
-                  {(session.user.name || session.user.email || "U")
-                    .slice(0, 2)
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <div className="text-muted-foreground px-2 py-2 text-xs font-semibold">
-              {session.user.name || session.user.email}
-            </div>
-            {session.user.isAdmin && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 hover:cursor-pointer"
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>{t("admin")}</span>
-                  </Link>
-                </DropdownMenuItem>
-              </>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                <span>{t("language")}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                {languages.map((language) => (
-                  <DropdownMenuItem
-                    key={language.code}
-                    onClick={() => handleLocaleSwitch(language.code)}
-                    className="flex items-center gap-2 hover:cursor-pointer"
-                  >
-                    <span className="text-lg">{language.flag}</span>
-                    <span>{language.name}</span>
-                    {language.code === currentLocale && (
-                      <span className="text-primary ml-auto">✓</span>
-                    )}
+        <div className="flex items-center gap-2">
+          <CommandPaletteButton />
+          <HelpButton />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar>
+                  <AvatarImage
+                    src={session.user.image ?? undefined}
+                    alt={session.user.name || session.user.email}
+                    className="bg-muted"
+                  />
+                  <AvatarFallback className="bg-muted text-foreground">
+                    {(session.user.name || session.user.email || "U")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <div className="text-muted-foreground px-2 py-2 text-xs font-semibold">
+                {session.user.name || session.user.email}
+              </div>
+              {session.user.isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 hover:cursor-pointer"
+                    >
+                      <Shield className="h-4 w-4" />
+                      <span>{t("admin")}</span>
+                    </Link>
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <span className="flex w-full items-center justify-between">
-                {t("darkMode")}
-                <Switch
-                  className="ml-2 hover:cursor-pointer"
-                  checked={theme === "dark"}
-                  onCheckedChange={handleToggleDark}
-                />
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleLogout}
-              className="text-destructive flex items-center gap-2 hover:cursor-pointer"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>{t("logout")}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                </>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  <span>{t("language")}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  {languages.map((language) => (
+                    <DropdownMenuItem
+                      key={language.code}
+                      onClick={() => handleLocaleSwitch(language.code)}
+                      className="flex items-center gap-2 hover:cursor-pointer"
+                    >
+                      <span className="text-lg">{language.flag}</span>
+                      <span>{language.name}</span>
+                      {language.code === currentLocale && (
+                        <span className="text-primary ml-auto">✓</span>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <span className="flex w-full items-center justify-between">
+                  {t("darkMode")}
+                  <Switch
+                    className="ml-2 hover:cursor-pointer"
+                    checked={theme === "dark"}
+                    onCheckedChange={handleToggleDark}
+                  />
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-destructive flex items-center gap-2 hover:cursor-pointer"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>{t("logout")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </nav>
     </div>
   );

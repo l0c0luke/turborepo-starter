@@ -183,7 +183,7 @@ pnpm format           # Prettier check (format:fix to write)
 pnpm typecheck        # TypeScript, every package + root scripts
 pnpm test             # Vitest + coverage thresholds (API tests use the dev Postgres)
 pnpm check:deps       # knip: unused files/deps, undeclared deps
-pnpm check:conventions # repo rules from AGENTS.md (pnpm-only, catalog, tests, skeletons, server-side tables, i18n, skills, terraform)
+pnpm check:conventions # repo rules from AGENTS.md (pnpm-only, catalog, tests, skeletons, server-side tables, ⌘K + contextual help, i18n, skills, terraform)
 pnpm check:expo       # Expo SDK version alignment
 pnpm check:bundle     # per-route JS budget (apps/nextjs/bundle-budget.json; CI)
 pnpm check:audit      # no high/critical advisories (CI)

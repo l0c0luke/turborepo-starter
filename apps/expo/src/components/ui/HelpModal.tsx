@@ -1,20 +1,23 @@
 /**
- * HelpModal Component
- *
- * A simple help/info modal for the app.
+ * HelpModal — contextual help for the screen on display. Content comes from
+ * `~/help` (`screenHelp.<screen>`); `NavigationBar` opens it from its "?"
+ * button, or a screen without a navigation bar renders it directly.
  */
 
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import type { ScreenHelp } from "~/help";
 import { buttons, cards, colors, spacing, typography } from "~/styles";
+import { buttonA11y } from "~/utils/accessibility";
 
 interface HelpModalProps {
   visible: boolean;
   onClose: () => void;
+  help: ScreenHelp;
 }
 
-export function HelpModal({ visible, onClose }: HelpModalProps) {
+export function HelpModal({ visible, onClose, help }: HelpModalProps) {
   return (
     <Modal
       visible={visible}
@@ -34,90 +37,38 @@ export function HelpModal({ visible, onClose }: HelpModalProps) {
             borderBottomColor: colors.border.light,
           }}
         >
-          <Text style={typography.h2}>Help</Text>
-          <Pressable onPress={onClose}>
+          <Text style={typography.h2}>{help.title}</Text>
+          <Pressable onPress={onClose} {...buttonA11y("Close help")}>
             <Ionicons name="close" size={24} color={colors.text.primary} />
           </Pressable>
         </View>
 
-        {/* Content */}
         <ScrollView
-          contentContainerStyle={{ padding: spacing[4] }}
+          contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[cards.base, { marginBottom: spacing[4] }]}>
+          <Text style={typography.body}>{help.intro}</Text>
+          {help.tips.map((tip) => (
             <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: spacing[3],
-              }}
+              key={tip}
+              style={[cards.base, { flexDirection: "row", gap: spacing[3] }]}
             >
-              <Ionicons
-                name="information-circle"
-                size={24}
-                color={colors.primary[500]}
-              />
-              <Text style={[typography.h3, { marginLeft: spacing[2] }]}>
-                About This App
-              </Text>
+              <Ionicons name="bulb" size={20} color={colors.primary[500]} />
+              <Text style={[typography.body, { flex: 1 }]}>{tip}</Text>
             </View>
-            <Text style={typography.body}>
-              This is a starter template for building full-stack applications.
-              Customize this help section with information about your app!
-            </Text>
-          </View>
-
-          <View style={[cards.base, { marginBottom: spacing[4] }]}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: spacing[3],
-              }}
-            >
-              <Ionicons name="rocket" size={24} color={colors.success[500]} />
-              <Text style={[typography.h3, { marginLeft: spacing[2] }]}>
-                Getting Started
-              </Text>
-            </View>
-            <Text style={typography.body}>
-              Start by exploring the dashboard. You can access settings from the
-              menu to update your profile.
-            </Text>
-          </View>
-
-          <View style={cards.base}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: spacing[3],
-              }}
-            >
-              <Ionicons
-                name="help-circle"
-                size={24}
-                color={colors.warning[500]}
-              />
-              <Text style={[typography.h3, { marginLeft: spacing[2] }]}>
-                Need Help?
-              </Text>
-            </View>
-            <Text style={typography.body}>
-              If you need assistance, check the documentation or reach out to
-              support.
-            </Text>
-          </View>
+          ))}
         </ScrollView>
 
-        {/* Close Button */}
         <View style={{ padding: spacing[4] }}>
           <Pressable style={buttons.primary} onPress={onClose}>
             <Text
-              style={{ color: "white", fontWeight: "600", textAlign: "center" }}
+              style={{
+                color: colors.text.inverse,
+                fontWeight: "600",
+                textAlign: "center",
+              }}
             >
-              Got it!
+              Got it
             </Text>
           </Pressable>
         </View>
