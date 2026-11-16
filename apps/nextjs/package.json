@@ -20,6 +20,7 @@
     "@example-app/db": "workspace:*",
     "@example-app/seo": "workspace:*",
     "@example-app/shared": "workspace:*",
+    "@example-app/validators": "workspace:*",
     "@hookform/resolvers": "catalog:",
     "@radix-ui/react-accordion": "catalog:",
     "@radix-ui/react-alert-dialog": "catalog:",

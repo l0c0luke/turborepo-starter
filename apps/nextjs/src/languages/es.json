@@ -42,7 +42,8 @@
     "deleteDescription": "Esto elimina permanentemente a {name} y no se puede deshacer.",
     "userUpdated": "Usuario actualizado",
     "userDeleted": "Usuario eliminado",
-    "actionFailed": "Algo salió mal. Inténtalo de nuevo."
+    "actionFailed": "Algo salió mal. Inténtalo de nuevo.",
+    "searchPlaceholder": "Buscar por nombre o correo…"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -63,5 +64,14 @@
     "enterEmailAddress": "Ingresa tu correo electrónico",
     "sendingLink": "Enviando enlace...",
     "sendSignInLink": "Enviar enlace de inicio de sesión"
+  },
+  "dataTable": {
+    "search": "Buscar…",
+    "rowsPerPage": "Filas por página",
+    "range": "{from}–{to} de {total}",
+    "pageOf": "Página {page} de {pageCount}",
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "noResults": "No hay resultados para “{search}”."
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  noop,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
@@ -9,6 +10,15 @@ import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { listUsersSchema } from "@example-app/validators";
+
+import {
+  DataTablePagination,
+  DataTableSearch,
+  SortableHead,
+} from "~/_components/data-table/DataTable";
+import { useListParams } from "~/_components/data-table/use-list-params";
+import { useOptimisticPages } from "~/_components/data-table/use-optimistic-pages";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,54 +42,55 @@ import {
   TableHeader,
   TableRow,
 } from "~/_components/ui/table";
+import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
 
 export function AdminContent({ currentUserId }: { currentUserId: string }) {
   const t = useTranslations("admin");
   const tc = useTranslations("common");
+  const tdt = useTranslations("dataTable");
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: users } = useSuspenseQuery(trpc.admin.listUsers.queryOptions());
+  // Server-side table: page, search and sort live in the URL and run in SQL.
+  const table = useListParams(listUsersSchema);
+  const { data } = useSuspenseQuery(
+    trpc.admin.listUsers.queryOptions(table.query),
+  );
+  const users = data.items;
+  // Hovering "next"/"previous" warms that page so the click is instant.
+  const prefetchPage = (page: number) =>
+    queryClient
+      .query(trpc.admin.listUsers.queryOptions({ ...table.query, page }))
+      .catch(noop);
 
-  // Instant feedback (the pattern to copy for every mutation): update the
-  // cached list optimistically in onMutate so the UI changes on click, roll
+  // Instant feedback (the pattern to copy for every mutation): update every
+  // cached page optimistically in onMutate so the UI changes on click, roll
   // back + toast on error, and revalidate against the server once settled.
-  const listKey = trpc.admin.listUsers.queryKey();
-  type UserList = typeof users;
-
-  const optimisticallyUpdate = async (update: (list: UserList) => UserList) => {
-    await queryClient.cancelQueries({ queryKey: listKey });
-    const previous = queryClient.getQueryData(listKey);
-    queryClient.setQueryData(listKey, (list) => list && update(list));
-    return { previous };
-  };
-  const rollback = (snapshot?: { previous?: UserList }) => {
-    if (snapshot?.previous)
-      queryClient.setQueryData(listKey, snapshot.previous);
-    toast.error(t("actionFailed"));
-  };
-  const revalidate = () => queryClient.invalidateQueries({ queryKey: listKey });
+  const pages = useOptimisticPages<(typeof users)[number]>(
+    trpc.admin.listUsers.pathFilter(),
+    t("actionFailed"),
+  );
 
   const setUserAdmin = useMutation(
     trpc.admin.setUserAdmin.mutationOptions({
       onMutate: ({ userId, isAdmin }) =>
-        optimisticallyUpdate((list) =>
+        pages.update((list) =>
           list.map((u) => (u.id === userId ? { ...u, isAdmin } : u)),
         ),
-      onError: (_error, _variables, snapshot) => rollback(snapshot),
+      onError: (_error, _variables, snapshot) => pages.rollback(snapshot),
       onSuccess: () => toast.success(t("userUpdated")),
-      onSettled: revalidate,
+      onSettled: pages.revalidate,
     }),
   );
 
   const deleteUser = useMutation(
     trpc.admin.deleteUser.mutationOptions({
       onMutate: ({ userId }) =>
-        optimisticallyUpdate((list) => list.filter((u) => u.id !== userId)),
-      onError: (_error, _variables, snapshot) => rollback(snapshot),
+        pages.update((list) => list.filter((u) => u.id !== userId)),
+      onError: (_error, _variables, snapshot) => pages.rollback(snapshot),
       onSuccess: () => toast.success(t("userDeleted")),
-      onSettled: revalidate,
+      onSettled: pages.revalidate,
     }),
   );
 
@@ -95,13 +106,40 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
-      <div className="bg-background rounded-md border">
+      <DataTableSearch
+        value={table.searchText}
+        onChange={table.setSearchText}
+        placeholder={t("searchPlaceholder")}
+        isUpdating={table.isUpdating}
+      />
+
+      <div
+        aria-busy={table.isUpdating}
+        className={cn(
+          "bg-background rounded-md border transition-opacity",
+          table.isUpdating && "opacity-60",
+        )}
+      >
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("name")}</TableHead>
+              <SortableHead
+                column="name"
+                sort={table.sort}
+                dir={table.dir}
+                onSort={table.toggleSort}
+              >
+                {t("name")}
+              </SortableHead>
               <TableHead>{t("role")}</TableHead>
-              <TableHead>{t("joined")}</TableHead>
+              <SortableHead
+                column="createdAt"
+                sort={table.sort}
+                dir={table.dir}
+                onSort={table.toggleSort}
+              >
+                {t("joined")}
+              </SortableHead>
               <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
@@ -112,7 +150,9 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
                   colSpan={4}
                   className="text-muted-foreground py-8 text-center"
                 >
-                  {t("empty")}
+                  {table.query.search
+                    ? tdt("noResults", { search: table.query.search })
+                    : t("empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -213,6 +253,13 @@ export function AdminContent({ currentUserId }: { currentUserId: string }) {
           </TableBody>
         </Table>
       </div>
+
+      <DataTablePagination
+        page={data}
+        onPageChange={table.setPage}
+        onPageSizeChange={table.setPageSize}
+        onPrefetch={prefetchPage}
+      />
     </div>
   );
 }

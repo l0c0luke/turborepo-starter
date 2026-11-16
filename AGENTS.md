@@ -150,13 +150,35 @@ nothing visible.
   → client `useSuspenseQuery`, plus a sibling `loading.tsx` rendering the same
   skeleton (`apps/nextjs/src/app/admin/`). `apps/nextjs/src/app/loading.tsx`
   covers everything else. _Enforced: `check:conventions` (route-skeleton)._
-- **Mobile data screens**: render `<Skeleton>` (`~/components/ui/Skeleton`)
-  shaped like the content while `isPending`. _Enforced: `check:conventions` (screen-skeleton)._
+- **Web components that load without Suspense** (`useQuery`) render a
+  `<Skeleton>` while pending. _Enforced: `check:conventions` (query-skeleton)._
+- **Mobile screens and components that load data**: render `<Skeleton>`
+  (`~/components/ui/Skeleton`) shaped like the content while `isPending` —
+  never a lone spinner. _Enforced: `check:conventions` (screen-skeleton)._
 - **Mutations**: update the UI immediately — optimistic `onMutate` with
   rollback (the admin switch/delete in
   `apps/nextjs/src/_components/admin/AdminContent.tsx` is the pattern), or at
   least a per-item pending state — and always an `onError` toast. Revalidate
   in `onSettled`. _Enforced: `check:conventions` (mutation-feedback)._
+- **Data tables and lists are server-side**: the database pages, searches
+  and sorts — never fetch a whole table to slice, filter or sort it in the
+  browser (no `getPaginationRowModel` / `getFilteredRowModel` /
+  `getSortedRowModel`). A list procedure takes
+  `listQuerySchema([...sortable columns])` from `@example-app/validators` and
+  returns a `ListPage` built with `paginate()` + `searchAny()` + `sortBy()`
+  (`packages/api/src/pagination.ts`; sort columns map to a whitelist, with an
+  id tiebreaker). Web tables keep page/search/sort in the URL with
+  `useListParams` (the page prefetches the same input from `searchParams`),
+  use `DataTableSearch` (debounced), `SortableHead` and `DataTablePagination`
+  from `apps/nextjs/src/_components/data-table/`, keep the current rows on
+  screen (dimmed) while the next page loads, prefetch the neighbouring page on
+  hover, and update every cached page optimistically with
+  `useOptimisticPages`. Mobile lists use the same procedure with
+  `useInfiniteQuery(trpc.….infiniteQueryOptions(input, { getNextPageParam:
+(page) => page.nextCursor }))`. The admin users table is the pattern.
+  _Enforced: `check:conventions` (server-pagination — every `findMany` /
+  `select().from()` in a router has a `limit`; data-table; list-pagination),
+  `admin.test.ts`._
 - **Caching**: both apps share stale-while-revalidate defaults
   (`queryDefaults` in `@example-app/shared`) so revisits render instantly.
 - In dev, tRPC adds a random 100–500 ms delay so missing loading states are
@@ -223,7 +245,8 @@ Skills live in `.agents/skills/` (read natively by Codex, Copilot and others;
 - **Protected, role-gated feature**: `packages/api/src/router/admin.ts`
   (+ `admin.test.ts`) → `apps/nextjs/src/app/admin/page.tsx` +
   `loading.tsx` → `apps/nextjs/src/_components/admin/AdminContent.tsx`
-  (optimistic mutations) and `AdminSkeleton.tsx`.
+  (server-side table: search, sort, pagination; optimistic mutations) and
+  `AdminSkeleton.tsx`.
 - **Auth loop**: `apps/nextjs/src/app/login/page.tsx` → `apps/nextjs/src/proxy.ts`
   (gating) → `apps/nextjs/src/app/page.tsx`. Mobile: `apps/expo/src/app/index.tsx` → `home.tsx`.
 - **Add a tRPC procedure**: new file in `packages/api/src/router/` + its test,

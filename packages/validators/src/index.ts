@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 
+import { listQuerySchema } from "./list";
+
 /**
  * Shared Zod validators.
  *
@@ -20,3 +22,9 @@ export const deleteUserSchema = z.object({
   userId: z.string().min(1),
 });
 export type DeleteUserInput = z.infer<typeof deleteUserSchema>;
+
+export * from "./list";
+
+/** Input of `admin.listUsers` — sortable by join date (default), name or email. */
+export const listUsersSchema = listQuerySchema(["createdAt", "name", "email"]);
+export type ListUsersInput = z.input<typeof listUsersSchema>;

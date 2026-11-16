@@ -42,7 +42,8 @@
     "deleteDescription": "This permanently deletes {name} and cannot be undone.",
     "userUpdated": "User updated",
     "userDeleted": "User deleted",
-    "actionFailed": "Something went wrong. Please try again."
+    "actionFailed": "Something went wrong. Please try again.",
+    "searchPlaceholder": "Search by name or email…"
   },
   "auth": {
     "signIn": "Sign In",
@@ -63,5 +64,14 @@
     "enterEmailAddress": "Enter your email address",
     "sendingLink": "Sending link...",
     "sendSignInLink": "Send sign-in link"
+  },
+  "dataTable": {
+    "search": "Search…",
+    "rowsPerPage": "Rows per page",
+    "range": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "previous": "Previous page",
+    "next": "Next page",
+    "noResults": "No results for “{search}”."
   }
 }

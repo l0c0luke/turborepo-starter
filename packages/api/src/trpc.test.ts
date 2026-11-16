@@ -20,14 +20,14 @@ describe("procedure guards", () => {
   });
 
   it("adminProcedure: rejects anonymous callers with UNAUTHORIZED", async () => {
-    await expect(callerFor().admin.listUsers()).rejects.toMatchObject({
+    await expect(callerFor().admin.listUsers({})).rejects.toMatchObject({
       code: "UNAUTHORIZED",
     });
   });
 
   it("adminProcedure: rejects signed-in non-admins with FORBIDDEN", async () => {
     const member = await createTestUser();
-    await expect(callerFor(member).admin.listUsers()).rejects.toMatchObject({
+    await expect(callerFor(member).admin.listUsers({})).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
   });

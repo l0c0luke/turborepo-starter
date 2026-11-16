@@ -544,6 +544,9 @@ importers:
       '@example-app/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@example-app/validators':
+        specifier: workspace:*
+        version: link:../../packages/validators
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 7.0.6(@standard-schema/spec@1.1.0)(ajv-formats@3.0.1)(ajv@8.20.0)(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.7)

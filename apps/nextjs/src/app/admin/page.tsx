@@ -1,12 +1,23 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
+import {
+  listInputFromSearchParams,
+  listUsersSchema,
+} from "@example-app/validators";
+
 import { AdminContent } from "~/_components/admin/AdminContent";
 import { AdminSkeleton } from "~/_components/admin/AdminSkeleton";
 import { getSession } from "~/auth/server";
 import { HydrateClient, prefetch, trpc } from "~/trpc/server";
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  // Explicit rather than Next's generated PageProps, which only exists after
+  // a build (CI typechecks without one).
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
 
   // Redirect to login if not authenticated
@@ -19,7 +30,13 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  prefetch(trpc.admin.listUsers.queryOptions());
+  // The same input the client derives from the URL (useListParams), so the
+  // first page is hydrated and the table renders without a request.
+  prefetch(
+    trpc.admin.listUsers.queryOptions(
+      listInputFromSearchParams(listUsersSchema, await searchParams),
+    ),
+  );
 
   return (
     <HydrateClient>

@@ -15,6 +15,10 @@ ever disagree, AGENTS.md wins (and should be fixed here).
   thresholds fail the build.
 - **Skeletons + instant feedback**: data routes/screens render skeletons;
   mutations are optimistic (or show per-item pending state) and toast on error.
+- **Tables and lists are server-side**: list procedures take
+  `listQuerySchema` and return `paginate()` pages; web tables use
+  `useListParams` + `_components/data-table/`; mobile lists use
+  `useInfiniteQuery`. Never page, search or sort fetched rows in the browser.
 - Schema changes ship with a migration (`pnpm db:generate`).
 - Versions only in the `pnpm-workspace.yaml` catalog (`pnpm add` writes
   `catalog:`); never hand-write a version into a `package.json`.
