@@ -11,12 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "~/_components/ui/dropdown-menu";
 import { useLocaleSwitch } from "~/hooks/useLocaleSwitch";
-
-const languages = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "es", name: "Español", flag: "🇪🇸" },
-  { code: "fr", name: "Français", flag: "🇫🇷" },
-];
+import { languages } from "~/i18n/languages";
 
 export function LanguageSelector() {
   const { switchLocale } = useLocaleSwitch();

@@ -24,6 +24,7 @@ import {
 import { Switch } from "~/_components/ui/switch";
 import { authClient } from "~/auth/client";
 import { useLocaleSwitch } from "~/hooks/useLocaleSwitch";
+import { languages } from "~/i18n/languages";
 
 export function Navbar() {
   const t = useTranslations("navigation");
@@ -68,12 +69,6 @@ export function Navbar() {
     setCurrentLocale(locale); // Update immediately for better UX
     switchLocale(locale);
   };
-
-  // Language options (add a locale here + a matching file in src/languages/)
-  const languages = [
-    { code: "en", name: "English", flag: "🇺🇸" },
-    { code: "es", name: "Español", flag: "🇪🇸" },
-  ];
 
   // Prevent hydration mismatch
   useEffect(() => {

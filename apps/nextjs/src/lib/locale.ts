@@ -2,10 +2,8 @@ import { cookies } from "next/headers";
 
 import { log } from "@example-app/shared";
 
-export const locales = ["en", "es"] as const;
-export type Locale = (typeof locales)[number];
-
-const defaultLocale: Locale = "en";
+import type { Locale } from "~/i18n/languages";
+import { defaultLocale, locales } from "~/i18n/languages";
 
 export async function getUserLocale(): Promise<Locale> {
   try {
