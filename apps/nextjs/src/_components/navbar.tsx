@@ -7,8 +7,6 @@ import { Globe, LogOut, Shield } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
-import { log } from "@example-app/shared";
-
 import { Avatar, AvatarFallback, AvatarImage } from "~/_components/ui/avatar";
 import { Button } from "~/_components/ui/button";
 import {
@@ -23,6 +21,7 @@ import {
 } from "~/_components/ui/dropdown-menu";
 import { Switch } from "~/_components/ui/switch";
 import { authClient } from "~/auth/client";
+import { useSignOut } from "~/auth/use-sign-out";
 import { useLocaleSwitch } from "~/hooks/useLocaleSwitch";
 import { languages } from "~/i18n/languages";
 
@@ -32,6 +31,7 @@ export function Navbar() {
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { switchLocale } = useLocaleSwitch();
+  const handleLogout = useSignOut();
 
   // Get current locale from cookie - only on client side
   const [currentLocale, setCurrentLocale] = useState("en");
@@ -78,24 +78,6 @@ export function Navbar() {
   // Toggle dark mode using next-themes
   const handleToggleDark = () => {
     setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  // Handle logout with proper redirect
-  const handleLogout = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            // Redirect to login page after successful logout
-            window.location.href = "/login";
-          },
-        },
-      });
-    } catch (error) {
-      log.error("Logout failed:", error);
-      // Even if logout fails, redirect to login to be safe
-      window.location.href = "/login";
-    }
   };
 
   // Don't render if we're still loading session or not mounted
