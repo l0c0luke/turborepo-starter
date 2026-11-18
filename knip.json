@@ -4,7 +4,8 @@
   "ignoreBinaries": ["with-env", "next"],
   "workspaces": {
     ".": {
-      "entry": ["scripts/*.ts"]
+      "entry": ["scripts/*.ts"],
+      "ignoreDependencies": ["tsrs"]
     },
     "apps/expo": {
       "entry": [

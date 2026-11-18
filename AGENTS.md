@@ -40,7 +40,7 @@ skill renames them.
 - **DB**: Drizzle ORM 0.45 + PostgreSQL 18 · **API**: tRPC 11 · **Validation**: Zod 4 (`zod/v4`)
 - **Errors**: Sentry SDKs → **Bugsink** (self-hosted, Sentry-compatible; local instance in `docker-compose.yml`)
 - **Analytics**: Google Analytics 4 (`@example-app/analytics`) — standard in every project
-- **Tooling**: TypeScript 7 · oxlint (type-aware) · Prettier · Vitest 5 · knip · Turborepo 2 · pnpm 11 · Node 24 LTS
+- **Tooling**: TypeScript 7 · oxlint (type-aware via tsrs) · Prettier · Vitest 5 · knip · Turborepo 2 · pnpm 11 · Node 24 LTS
 
 ## Layout
 

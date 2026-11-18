@@ -381,7 +381,7 @@ export const exampleRouter = createTRPCRouter({
 ### Standards
 
 - **TypeScript**: Strict mode enabled - never use `any`
-- **Linting**: [oxlint](https://oxc.rs) (Rust, type-aware via `oxlint-tsgolint`) configured in `.oxlintrc.json`
+- **Linting**: [oxlint](https://oxc.rs) (Rust, type-aware via [tsrs](https://github.com/oxc-project/tsrs), a Rust port of the TypeScript checker) configured in `.oxlintrc.json`
 - **Formatting**: Prettier with shared config in `tooling/prettier/`
 - **Validation**: Use Zod v4 (`import { z } from "zod/v4"`)
 
