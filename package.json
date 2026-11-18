@@ -52,10 +52,10 @@
     "knip": "catalog:",
     "lefthook": "catalog:",
     "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
     "prettier": "catalog:",
     "sherif": "catalog:",
     "skills": "catalog:",
+    "tsrs": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
   },
