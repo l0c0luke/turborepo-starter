@@ -18,6 +18,16 @@ peerDependencyRules:
     # @expo/metro-config instead, which Expo supplies.
     - "@react-native/metro-config"
 
+# `pnpm check:audit` (CI) fails on high/critical advisories. Waive one only
+# with a reason here, and remove it as soon as a fix is released.
+auditConfig:
+  ignoreGhsas:
+    # picomatch <=4.0.7 ReDoS via crafted extglob *patterns* (no patched
+    # release as of 2026-11-18). Only build/dev tools use picomatch here (knip,
+    # vite, metro, next build), on patterns written by developers; no app code
+    # passes user input to a glob matcher. Remove once picomatch ships a fix.
+    - GHSA-fc5q-39xc-vjpf
+
 allowBuilds:
   "@parcel/watcher": true
   "@sentry/cli": true
