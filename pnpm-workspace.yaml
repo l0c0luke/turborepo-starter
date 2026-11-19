@@ -86,6 +86,12 @@ catalog:
   # Held on 3.x: postgres 4 rewrites the driver and lets the server pick
   # parameter types (Date/boolean/bigint handling changes). Move when
   # drizzle-orm supports it — Renovate opens that PR on its own.
+  # (Not yet as of 2026-11-19: drizzle-orm 0.45.4 is the latest stable and
+  # drizzle-orm#6686 is an open v4 incompatibility.) v4's two security fixes
+  # — a NUL in a connection parameter adding startup parameters, and a
+  # `__proto__` column polluting rows — need untrusted input in connection
+  # settings or column aliases; here those come from POSTGRES_URL and the
+  # Drizzle schema only.
   postgres: ^3.4.9
 
   # --- Email ---
