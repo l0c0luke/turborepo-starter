@@ -37,7 +37,7 @@ allowBuilds:
   sharp: true
 
 overrides:
-  postcss: ^8.5.32
+  postcss: ^8.5.33
   # Keep a single esbuild across the tree; mixed versions break its
   # postinstall binary check (drizzle-kit still pulls the legacy @esbuild-kit).
   esbuild: ^0.28.2
@@ -56,18 +56,27 @@ overrides:
   # one that upstream hasn't fixed yet. Scope each to the vulnerable range
   # ("pkg@<1.2.3": ^1.2.3) so nothing else moves, and delete it once a fresh
   # resolve (rm pnpm-lock.yaml && pnpm install --lockfile-only) audits clean.
+  #
+  # GHSA-3g3m-2fjr-6pw4 (moderate): only @sentry/react-native's bundler
+  # plugins (10.x, pinned by Expo SDK 58) still want glob 13; it only calls
+  # glob(patterns, { absolute, nodir }), unchanged in 14.
+  "glob@>=9.0.0 <14.0.2": ^14.0.6
+  # GHSA-g3hv-75wg-m249 (moderate): only @expo/fingerprint (pinned by Expo SDK
+  # 58) still wants minimatch 10; it only uses new Minimatch().match/.negate/
+  # .pattern, unchanged in 11 (the project fingerprint hash is identical).
+  "minimatch@>=7.0.0 <11.0.1": ^11.0.8
 
 catalog:
   # --- Auth ---
-  "@better-auth/expo": ^1.7.22
-  better-auth: ^1.7.22
+  "@better-auth/expo": ^1.7.25
+  better-auth: ^1.7.25
   # Better Auth CLI (`pnpm auth:generate`) — keep on the same version as better-auth.
-  auth: ^1.7.22
+  auth: ^1.7.25
 
   # --- API ---
-  "@trpc/client": ^11.28.0
-  "@trpc/server": ^11.28.0
-  "@trpc/tanstack-react-query": ^11.28.0
+  "@trpc/client": ^11.28.3
+  "@trpc/server": ^11.28.3
+  "@trpc/tanstack-react-query": ^11.28.3
   "@tanstack/react-query": ^5.107.1
   superjson: ^2.2.6
 
@@ -77,11 +86,17 @@ catalog:
   # Held on 3.x: postgres 4 rewrites the driver and lets the server pick
   # parameter types (Date/boolean/bigint handling changes). Move when
   # drizzle-orm supports it — Renovate opens that PR on its own.
+  # (Not yet as of 2026-11-19: drizzle-orm 0.45.4 is the latest stable and
+  # drizzle-orm#6686 is an open v4 incompatibility.) v4's two security fixes
+  # — a NUL in a connection parameter adding startup parameters, and a
+  # `__proto__` column polluting rows — need untrusted input in connection
+  # settings or column aliases; here those come from POSTGRES_URL and the
+  # Drizzle schema only.
   postgres: ^3.4.9
 
   # --- Email ---
-  react-email: ^6.11.12
-  nodemailer: ^10.5.0
+  react-email: ^6.11.13
+  nodemailer: ^10.6.0
 
   # --- Validation ---
   zod: ^4.6.7
@@ -150,7 +165,7 @@ catalog:
   nativewind: 5.0.0-rc.1
   react-native-css: 3.1.0-rc.1
   "@tailwindcss/postcss": ^4.3.5
-  postcss: ^8.5.32
+  postcss: ^8.5.33
   tailwind-merge: ^3.7.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
@@ -186,7 +201,7 @@ catalog:
   date-fns: ^4.4.0
 
   # --- Icons ---
-  lucide-react: ^1.72.0
+  lucide-react: ^1.73.0
 
   # --- Tooling ---
   # oxlint (Rust) replaces ESLint + typescript-eslint. Type-aware rules run on
